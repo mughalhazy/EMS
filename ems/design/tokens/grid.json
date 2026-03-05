@@ -1,0 +1,17 @@
+{
+  "grid": {
+    "columns": 12,
+    "gutter": {
+      "mobile": "1rem",
+      "tablet": "1.5rem",
+      "desktop": "2rem"
+    },
+    "containerMaxWidth": {
+      "sm": "40rem",
+      "md": "48rem",
+      "lg": "64rem",
+      "xl": "80rem",
+      "2xl": "90rem"
+    }
+  }
+}
