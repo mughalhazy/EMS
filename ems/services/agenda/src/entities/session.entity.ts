@@ -20,6 +20,8 @@ import { SpeakerEntity } from './speaker.entity';
 @Index('idx_sessions_room_id', ['roomId'])
 @Index('idx_sessions_speaker_id', ['speakerId'])
 @Check('CK_sessions_capacity_non_negative', 'capacity >= 0')
+@Check('CK_sessions_remaining_seats_non_negative', 'remaining_seats >= 0')
+@Check('CK_sessions_remaining_seats_within_capacity', 'remaining_seats <= capacity')
 @Check('CK_sessions_time_range', 'end_time > start_time')
 export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -63,6 +65,9 @@ export class SessionEntity {
 
   @Column({ type: 'int' })
   capacity!: number;
+
+  @Column({ type: 'int', name: 'remaining_seats' })
+  remainingSeats!: number;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;

@@ -11,7 +11,8 @@ export * from './event.module';
 export * from './event-setting.service';
 export * from './event.service';
 export * from './room.service';
+export * from './session.service';
 export * from './venue.service';
-export * from './speaker-assignment.service';
+export * from './session-capacity.service';
 
 export * from './event-lifecycle.publisher';

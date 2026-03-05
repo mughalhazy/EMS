@@ -10,6 +10,7 @@ import { EventLifecyclePublisher } from './event-lifecycle.publisher';
 import { EventService } from './event.service';
 import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
+import { SessionService } from './session.service';
 import { EventEntity } from './entities/event.entity';
 import { EventSettingEntity } from './entities/event-setting.entity';
 import { RegistrationAnswerEntity } from './entities/registration-answer.entity';
@@ -21,8 +22,7 @@ import { SpeakerEntity } from './entities/speaker.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { VenueController } from './venue.controller';
 import { VenueService } from './venue.service';
-import { SpeakerAssignmentController } from './speaker-assignment.controller';
-import { SpeakerAssignmentService } from './speaker-assignment.service';
+import { SessionCapacityService } from './session-capacity.service';
 
 @Module({
   imports: [
@@ -53,14 +53,8 @@ import { SpeakerAssignmentService } from './speaker-assignment.service';
     EventSettingService,
     VenueService,
     RoomService,
-    SpeakerAssignmentService,
+    SessionService,
   ],
-  exports: [
-    EventService,
-    EventSettingService,
-    VenueService,
-    RoomService,
-    SpeakerAssignmentService,
-  ],
+  exports: [EventService, EventSettingService, VenueService, RoomService, SessionService],
 })
 export class EventModule {}
