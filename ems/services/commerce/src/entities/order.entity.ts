@@ -21,6 +21,11 @@ export interface OrderTotals {
   grandTotal: number;
 }
 
+export interface OrderInventoryReservation {
+  inventoryId: string;
+  quantity: number;
+}
+
 @Entity({ name: 'orders' })
 @Index('idx_orders_tenant_status', ['tenantId', 'status'])
 export class OrderEntity {
@@ -39,6 +44,9 @@ export class OrderEntity {
 
   @Column({ type: 'jsonb' })
   totals!: OrderTotals;
+
+  @Column({ type: 'jsonb', nullable: true })
+  reservation!: OrderInventoryReservation | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
