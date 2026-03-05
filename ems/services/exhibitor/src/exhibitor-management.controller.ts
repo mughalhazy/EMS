@@ -35,6 +35,7 @@ export class ExhibitorManagementController {
       eventId,
       name: payload.name,
       description: payload.description,
+      sponsorshipTier: payload.sponsorshipTier,
       contactInfo: payload.contactInfo,
     });
   }
