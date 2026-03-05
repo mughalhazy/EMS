@@ -3,10 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
+import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderEntity, OrderStatus } from './entities/order.entity';
 import { PaymentEntity, PaymentStatus } from './entities/payment.entity';
 import { OrderService } from './order.service';
 import { StripeCompatibleGateway } from './stripe-compatible.gateway';
+import { TicketFulfillmentService } from './ticket-fulfillment.service';
 
 export interface CreatePaymentInput {
   tenantId: string;
@@ -24,7 +26,9 @@ export class PaymentService {
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly orderService: OrderService,
+    private readonly commerceEventsPublisher: CommerceEventsPublisher,
     private readonly stripeCompatibleGateway: StripeCompatibleGateway,
+    private readonly ticketFulfillmentService: TicketFulfillmentService,
     private readonly auditService: AuditService,
   ) {}
 
@@ -60,8 +64,9 @@ export class PaymentService {
       }),
     );
 
-    await this.publishPaymentCompletedIfNeeded(payment);
+    await this.publishPaymentCompletedIfNeeded(null, payment);
     await this.syncOrderStatusFromPayment(payment);
+    await this.ticketFulfillmentService.syncForPayment(payment);
     await this.trackPurchaseOrRefundAudit(null, payment);
 
     return payment;
@@ -83,10 +88,9 @@ export class PaymentService {
     const previousStatus = payment.status;
     payment.status = status;
     const savedPayment = await this.paymentRepository.save(payment);
-    if (previousStatus !== PaymentStatus.SUCCEEDED) {
-      await this.publishPaymentCompletedIfNeeded(savedPayment);
-    }
+    await this.publishPaymentCompletedIfNeeded(previousStatus, savedPayment);
     await this.syncOrderStatusFromPayment(savedPayment);
+    await this.ticketFulfillmentService.syncForPayment(savedPayment);
     await this.trackPurchaseOrRefundAudit(previousStatus, savedPayment);
 
     return savedPayment;
@@ -115,6 +119,17 @@ export class PaymentService {
       default:
         return null;
     }
+  }
+
+  private async publishPaymentCompletedIfNeeded(
+    previousStatus: PaymentStatus | null,
+    payment: PaymentEntity,
+  ): Promise<void> {
+    if (payment.status !== PaymentStatus.SUCCEEDED || previousStatus === PaymentStatus.SUCCEEDED) {
+      return;
+    }
+
+    await this.commerceEventsPublisher.publishPaymentCompleted(payment);
   }
 
   private async trackPurchaseOrRefundAudit(

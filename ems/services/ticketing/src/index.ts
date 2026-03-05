@@ -5,3 +5,4 @@ export * from './entities/pricing-tier.entity';
 export * from './entities/promo-code.entity';
 export * from './entities/ticket.entity';
 export * from './inventory-management.service';
+export * from './ticket-pricing.service';

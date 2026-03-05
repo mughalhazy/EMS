@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Headers,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -28,8 +30,11 @@ export class CheckoutController {
   @HttpCode(HttpStatus.CREATED)
   async createOrder(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: CreateTicketOrderDto,
   ): Promise<OrderEntity> {
+    this.assertIdempotencyKey(idempotencyKey);
+
     const items = payload.items ?? [];
     const subtotal = items.reduce((total, item) => total + item.quantity * item.unitPrice, 0);
     const discount = payload.discount ?? 0;
@@ -53,8 +58,11 @@ export class CheckoutController {
   async checkoutOrder(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('orderId', ParseUUIDPipe) orderId: string,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: CheckoutOrderDto,
   ): Promise<PaymentEntity> {
+    this.assertIdempotencyKey(idempotencyKey);
+
     const order = await this.orderService.findByTenantAndId(tenantId, orderId);
     if (!order) {
       throw new NotFoundException('Order not found in tenant.');
@@ -75,12 +83,21 @@ export class CheckoutController {
   @Post('payments/confirm')
   async confirmPayment(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: ConfirmPaymentDto,
   ): Promise<PaymentEntity> {
+    this.assertIdempotencyKey(idempotencyKey);
+
     return this.paymentService.updatePaymentStatus(
       tenantId,
       payload.providerReference,
       payload.status,
     );
+  }
+
+  private assertIdempotencyKey(idempotencyKey?: string): void {
+    if (!idempotencyKey?.trim()) {
+      throw new BadRequestException('Idempotency-Key header is required.');
+    }
   }
 }
