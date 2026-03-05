@@ -33,6 +33,10 @@ export class AuditService {
     return this.createAuditLog(AuditDomain.TENANT, input);
   }
 
+  async trackEventChange(input: TrackAuditChangeInput): Promise<AuditLogEntity> {
+    return this.createAuditLog(AuditDomain.EVENT, input);
+  }
+
   async listByTenant(tenantId: string, domain?: AuditDomain): Promise<AuditLogEntity[]> {
     const where: FindOptionsWhere<AuditLogEntity> = domain
       ? { tenantId, domain }
