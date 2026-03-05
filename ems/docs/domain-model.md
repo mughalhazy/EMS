@@ -220,7 +220,7 @@ Represents an attendee’s registration intent/record for an event, linked to ti
 - `attendee_id` (FK -> attendee)
 - `ticket_id` (FK -> ticket)
 - `order_id` (FK -> order, nullable until checkout)
-- `status` (`pending|confirmed|cancelled|waitlisted|refunded`)
+- `status` (`pending|approved|confirmed|cancelled`)
 - `registered_at`
 - `checkin_at` (optional)
 - `created_at`, `updated_at`
