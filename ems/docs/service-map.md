@@ -36,12 +36,14 @@ This document defines the backend service boundaries for EMS and the core respon
 |---|---|
 | **order** | Owns cart/order lifecycle, line items, totals, tax/fee calculations, and order state transitions (`draft`, `placed`, `cancelled`, `refunded`). |
 | **payment** | Owns payment intent/authorization/capture/refund workflows, gateway integrations, payment event normalization, and reconciliation handoff. |
+| **fulfillment** | Generates and manages post-payment ticket artifacts (QR/pass/PDF), attaches artifacts to attendee registrations, enforces issuance idempotency, and revokes credentials on refund/cancel events. |
 
 ### Responsibility separation rules
 1. `ticketing` owns availability and price rules, but never captures funds directly.
 2. `order` owns commercial aggregation and checkout orchestration, but delegates fund movement to `payment`.
 3. `registration` materializes participation entitlements only after confirmed order/payment states.
-4. `notification` consumes domain events from other services and must not be a transactional dependency for core writes.
+4. `fulfillment` generates QR/pass artifacts only after `payment` emits successful capture events and attaches them to `attendee` + `registration`.
+5. `notification` consumes domain events from other services and must not be a transactional dependency for core writes.
 
 ### Evolution note
 These services begin as bounded modules within the modular monolith and become first-class deployable services as throughput and team ownership increase.

@@ -181,8 +181,15 @@ At minimum, versioned APIs must exist for:
 - `/events`, `/venues`, `/sessions`, `/tickets`
 - `/registrations`, `/attendees`
 - `/sponsors`, `/exhibitors`
-- `/orders`, `/payments`
+- `/orders`, `/payments`, `/ticket-fulfillments`
 - `/notifications`
+
+
+### Payment success fulfillment contract
+- After a successful payment capture callback, the platform must trigger ticket fulfillment generation (`qr_*`, wallet pass, or PDF) for each confirmed registration in the paid order.
+- Fulfillment creation must be idempotent per registration using `Idempotency-Key` or a deterministic server-side key derived from `paymentId + registrationId`.
+- Fulfillment APIs must expose attachment state to attendee records (`pending|generated|attached|revoked|failed`) and support secure artifact retrieval via short-lived URLs.
+- Any refund/void/cancel event must revoke previously issued fulfillment artifacts and return a terminal revoked state from read APIs.
 
 ### Security and AI-specific API rules
 - Webhooks must use signature verification with timestamp tolerance and replay protection.
