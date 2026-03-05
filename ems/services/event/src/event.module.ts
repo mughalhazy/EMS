@@ -16,6 +16,9 @@ import { RegistrationAnswerEntity } from './entities/registration-answer.entity'
 import { RegistrationQuestionEntity } from './entities/registration-question.entity';
 import { RoomEntity } from './entities/room.entity';
 import { VenueEntity } from './entities/venue.entity';
+import { SessionEntity } from './entities/session.entity';
+import { SpeakerEntity } from './entities/speaker.entity';
+import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { VenueController } from './venue.controller';
 import { VenueService } from './venue.service';
 
@@ -28,6 +31,9 @@ import { VenueService } from './venue.service';
       RoomEntity,
       RegistrationQuestionEntity,
       RegistrationAnswerEntity,
+      SessionEntity,
+      SpeakerEntity,
+      SessionSpeakerEntity,
     ]),
     AuditModule,
   ],

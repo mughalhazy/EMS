@@ -10,6 +10,8 @@ import {
 
 import { RoomEntity } from './room.entity';
 import { RegistrationQuestionEntity } from './registration-question.entity';
+import { SessionEntity } from './session.entity';
+import { SpeakerEntity } from './speaker.entity';
 import { VenueEntity } from './venue.entity';
 
 export enum EventStatus {
@@ -66,6 +68,12 @@ export class EventEntity {
 
   @OneToMany(() => RegistrationQuestionEntity, (registrationQuestion) => registrationQuestion.event)
   registrationQuestions!: RegistrationQuestionEntity[];
+
+  @OneToMany(() => SessionEntity, (session) => session.event)
+  sessions!: SessionEntity[];
+
+  @OneToMany(() => SpeakerEntity, (speaker) => speaker.event)
+  speakers!: SpeakerEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
