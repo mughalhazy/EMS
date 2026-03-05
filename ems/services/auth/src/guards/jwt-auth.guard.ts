@@ -39,6 +39,18 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('User is not active');
     }
 
+    const routeTenantId = request.params?.tenantId as string | undefined;
+    const headerTenantId = request.headers['x-tenant-id'];
+    const scopedHeaderTenantId = Array.isArray(headerTenantId) ? headerTenantId[0] : headerTenantId;
+
+    if (routeTenantId && routeTenantId !== decoded.tid) {
+      throw new UnauthorizedException('Token tenant does not match route tenant');
+    }
+
+    if (scopedHeaderTenantId && scopedHeaderTenantId !== decoded.tid) {
+      throw new UnauthorizedException('Token tenant does not match tenant header');
+    }
+
     const { roles, permissions } = await this.rbacService.getUserRbac(decoded.tid, decoded.sub);
     request.user = {
       userId: user.id,

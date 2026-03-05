@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddEventTemplateColumns1713000000001 implements MigrationInterface {
-  name = 'AddEventTemplateColumns1713000000001';
+export class AddEventTemplateColumns1713000000003 implements MigrationInterface {
+  name = 'AddEventTemplateColumns1713000000003';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
