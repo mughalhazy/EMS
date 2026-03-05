@@ -6,23 +6,32 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { EventEntity } from '../../../event/src/entities/event.entity';
 import { RoomEntity } from '../../../event/src/entities/room.entity';
-import { SpeakerEntity } from './speaker.entity';
+import { SessionSpeakerEntity } from './session-speaker.entity';
+
+export enum SessionStatus {
+  DRAFT = 'draft',
+  SCHEDULED = 'scheduled',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
 
 @Entity({ name: 'sessions' })
 @Index('idx_sessions_tenant_id', ['tenantId'])
 @Index('idx_sessions_event_id', ['eventId'])
 @Index('idx_sessions_room_id', ['roomId'])
-@Index('idx_sessions_speaker_id', ['speakerId'])
+@Index('idx_sessions_event_agenda_order', ['eventId', 'agendaOrder'])
 @Check('CK_sessions_capacity_non_negative', 'capacity >= 0')
 @Check('CK_sessions_remaining_seats_non_negative', 'remaining_seats >= 0')
 @Check('CK_sessions_remaining_seats_within_capacity', 'remaining_seats <= capacity')
 @Check('CK_sessions_time_range', 'end_time > start_time')
+@Check('CK_sessions_agenda_order_positive', 'agenda_order > 0')
 export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -44,18 +53,11 @@ export class SessionEntity {
   @JoinColumn({ name: 'room_id' })
   room!: RoomEntity;
 
-  @Column({ type: 'uuid', name: 'speaker_id' })
-  speakerId!: string;
-
-  @ManyToOne(() => SpeakerEntity, (speaker) => speaker.sessions, {
-    nullable: false,
-    onDelete: 'RESTRICT',
-  })
-  @JoinColumn({ name: 'speaker_id' })
-  speaker!: SpeakerEntity;
-
   @Column({ type: 'varchar', length: 255 })
   title!: string;
+
+  @Column({ type: 'text', nullable: true })
+  description!: string | null;
 
   @Column({ type: 'timestamptz', name: 'start_time' })
   startTime!: Date;
@@ -68,6 +70,15 @@ export class SessionEntity {
 
   @Column({ type: 'int', name: 'remaining_seats' })
   remainingSeats!: number;
+
+  @Column({ type: 'enum', enum: SessionStatus, default: SessionStatus.DRAFT })
+  status!: SessionStatus;
+
+  @Column({ type: 'int', name: 'agenda_order' })
+  agendaOrder!: number;
+
+  @OneToMany(() => SessionSpeakerEntity, (sessionSpeaker) => sessionSpeaker.session)
+  speakerAssignments!: SessionSpeakerEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;

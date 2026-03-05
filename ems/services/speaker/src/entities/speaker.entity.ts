@@ -3,9 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { SessionSpeakerEntity } from '../../../agenda/src/entities/session-speaker.entity';
 
 export enum SpeakerStatus {
   INVITED = 'invited',
@@ -76,6 +79,9 @@ export class SpeakerEntity {
 
   @Column({ type: 'enum', enum: SpeakerStatus, default: SpeakerStatus.INVITED })
   status!: SpeakerStatus;
+
+  @OneToMany(() => SessionSpeakerEntity, (sessionSpeaker) => sessionSpeaker.speaker)
+  sessionAssignments!: SessionSpeakerEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
