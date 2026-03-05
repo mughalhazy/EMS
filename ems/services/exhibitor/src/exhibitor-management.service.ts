@@ -27,6 +27,7 @@ export class ExhibitorManagementService {
     eventId: string;
     name: string;
     description?: string | null;
+    sponsorshipTier?: ExhibitorEntity['sponsorshipTier'];
     contactInfo?: Record<string, unknown> | null;
     actorUserId?: string;
   }): Promise<ExhibitorEntity> {
@@ -50,6 +51,7 @@ export class ExhibitorManagementService {
         eventId: input.eventId,
         name: input.name,
         description: input.description ?? null,
+        sponsorshipTier: input.sponsorshipTier ?? null,
         contactInfo: input.contactInfo ?? null,
       }),
     );
@@ -95,13 +97,25 @@ export class ExhibitorManagementService {
     Object.assign(exhibitor, input);
     const updated = await this.exhibitorRepository.save(exhibitor);
 
+    const after = this.auditExhibitor(updated);
+
     await this.auditService.trackEventChange({
       tenantId,
       actorUserId,
       action: 'exhibitor.updated',
       before,
-      after: this.auditExhibitor(updated),
+      after,
     });
+
+    if (before.sponsorshipTier !== after.sponsorshipTier) {
+      await this.auditService.trackEventChange({
+        tenantId,
+        actorUserId,
+        action: 'sponsor.updated',
+        before: { id: before.id, eventId: before.eventId, sponsorshipTier: before.sponsorshipTier },
+        after: { id: after.id, eventId: after.eventId, sponsorshipTier: after.sponsorshipTier },
+      });
+    }
 
     return updated;
   }
@@ -239,6 +253,7 @@ export class ExhibitorManagementService {
       eventId: exhibitor.eventId,
       name: exhibitor.name,
       description: exhibitor.description,
+      sponsorshipTier: exhibitor.sponsorshipTier,
       contactInfo: exhibitor.contactInfo,
     };
   }
