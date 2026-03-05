@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuditModule } from '../../audit/src/audit.module';
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderItemEntity } from './entities/order-item.entity';
