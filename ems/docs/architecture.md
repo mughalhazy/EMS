@@ -257,3 +257,23 @@ ems/
 ```
 
 This structure supports immediate productivity while preserving clear seams for service extraction.
+
+## 11) QC-01 architecture consistency addendum
+
+### Required architecture assertions
+- EMS is a **multi-tenant SaaS** with tenant context required on all write/read/event interfaces.
+- EMS is **API-first**: UI clients, automation, and partner integrations use the same versioned contracts.
+- EMS is a **modular monolith evolving to event-driven services** through outbox + Kafka contracts.
+- EMS is **AI compatible**: domain events and curated projections are designed for retrieval, assistant tools, and analytics models.
+
+### Canonical domain ownership map
+- **Identity & Access:** `tenant`, `organization`, `user`, `role`.
+- **Event Operations:** `event`, `venue`, `session`, `sponsor`, `exhibitor`.
+- **Commerce & Participation:** `ticket`, `registration`, `attendee`, `order`, `payment`.
+- **Engagement:** `notification`.
+
+### Consistency guardrails
+1. Each canonical entity has exactly one write-owner module at any time.
+2. Cross-module state changes occur via API command contracts or domain events, never shared mutable persistence.
+3. Extracted services must preserve existing API/event schema compatibility for at least one deprecation window.
+4. AI-facing pipelines must consume only governed projections (no direct cross-tenant table scans).

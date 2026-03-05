@@ -208,3 +208,17 @@ EMS enforces strict logical isolation between tenants throughout identity, compu
 | Tenant Isolation | Tenant context enforcement, data predicates, isolation tiers |
 
 This architecture provides a secure baseline for EMS and can be extended with customer-specific controls for regulated or high-assurance environments.
+
+## QC-01 coverage addendum
+
+### Expanded control requirements
+- **Payment security:** tokenize cardholder data, enforce PCI-scoped segmentation, and avoid storing PAN/CVV in EMS domains.
+- **Key management:** all encryption keys are managed via KMS/HSM with rotation policies and access audit.
+- **Secrets management:** runtime secrets must come from managed secret stores, never static repository config.
+- **Supply chain security:** SBOM generation, dependency scanning, and signed build artifacts are required in CI/CD.
+
+### AI security controls
+- Prompt construction applies policy-based redaction for PII and payment-linked attributes.
+- Tenant-scoped retrieval filters are enforced before vector search execution.
+- Model/provider policy enforces residency, retention mode, and blocked tool actions.
+- High-risk AI actions require human approval and full audit traceability.

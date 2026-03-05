@@ -28,3 +28,20 @@ This document defines the backend service boundaries for EMS and the core respon
 - `agenda` owns session scheduling; `speaker` owns speaker identity/profile and assignment constraints.
 - `notification` sends messages triggered by events from domain services but does not own core domain state.
 - `analytics` should consume immutable domain events/read models and avoid becoming a write-path dependency.
+
+## QC-01 separation addendum
+
+### Missing-but-required service responsibilities
+| Service | Primary Responsibility |
+|---|---|
+| **order** | Owns cart/order lifecycle, line items, totals, tax/fee calculations, and order state transitions (`draft`, `placed`, `cancelled`, `refunded`). |
+| **payment** | Owns payment intent/authorization/capture/refund workflows, gateway integrations, payment event normalization, and reconciliation handoff. |
+
+### Responsibility separation rules
+1. `ticketing` owns availability and price rules, but never captures funds directly.
+2. `order` owns commercial aggregation and checkout orchestration, but delegates fund movement to `payment`.
+3. `registration` materializes participation entitlements only after confirmed order/payment states.
+4. `notification` consumes domain events from other services and must not be a transactional dependency for core writes.
+
+### Evolution note
+These services begin as bounded modules within the modular monolith and become first-class deployable services as throughput and team ownership increase.

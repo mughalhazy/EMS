@@ -451,3 +451,29 @@ To operationalize the model cleanly, these additional models are recommended:
 - `notification_delivery_attempt` (provider-level retry log)
 
 These are not part of the mandatory entity list but are typically required for production-grade behavior.
+
+## QC-01 domain correctness addendum
+
+### Required entity checklist
+The following required entities are present in this model and are mandatory for any EMS deployment:
+- `tenant`
+- `organization`
+- `user`
+- `role`
+- `event`
+- `venue`
+- `session`
+- `ticket`
+- `registration`
+- `attendee`
+- `sponsor`
+- `exhibitor`
+- `order`
+- `payment`
+- `notification`
+
+### Critical invariants
+1. `tenant_id` is required on every tenant-owned entity and in all uniqueness constraints where business keys exist.
+2. `order` is the financial container; one order can have multiple payments, but payment totals cannot exceed authorized order total unless an explicit adjustment policy exists.
+3. `registration` must reference exactly one attendee and one event; ticket allocation must remain consistent with ticket inventory rules.
+4. `notification` records are immutable delivery facts (status may transition, content version is append-only).
