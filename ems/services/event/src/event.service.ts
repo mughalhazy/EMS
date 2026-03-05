@@ -23,6 +23,21 @@ export class EventService {
     });
   }
 
+  async findByTenantPaginated(
+    tenantId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<[EventEntity[], number]> {
+    const offset = (page - 1) * pageSize;
+
+    return this.eventRepository.findAndCount({
+      where: { tenantId },
+      order: { startAt: 'ASC' },
+      skip: offset,
+      take: pageSize,
+    });
+  }
+
   async findByTenantAndId(
     tenantId: string,
     eventId: string,
@@ -52,6 +67,20 @@ export class EventService {
     }
 
     event.status = status;
+    return this.eventRepository.save(event);
+  }
+
+  async update(
+    tenantId: string,
+    eventId: string,
+    input: DeepPartial<EventEntity>,
+  ): Promise<EventEntity | null> {
+    const event = await this.findByTenantAndId(tenantId, eventId);
+    if (!event) {
+      return null;
+    }
+
+    Object.assign(event, input);
     return this.eventRepository.save(event);
   }
 
