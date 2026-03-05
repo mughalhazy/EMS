@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
+import { OrderItemEntity } from './entities/order-item.entity';
 import {
   OrderEntity,
   OrderInventoryReservation,
@@ -11,11 +12,18 @@ import {
 } from './entities/order.entity';
 import { RedisLockService } from './redis-lock.service';
 
+export interface CreateOrderItemInput {
+  inventoryId: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface CreateOrderInput {
   tenantId: string;
   status?: OrderStatus;
   totals?: Partial<OrderTotals>;
   reservation?: OrderInventoryReservation;
+  items?: CreateOrderItemInput[];
 }
 
 @Injectable()
@@ -23,6 +31,8 @@ export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
+    @InjectRepository(OrderItemEntity)
+    private readonly orderItemRepository: Repository<OrderItemEntity>,
     @InjectRepository(InventoryEntity)
     private readonly inventoryRepository: Repository<InventoryEntity>,
     private readonly redisLockService: RedisLockService,
@@ -40,7 +50,25 @@ export class OrderService {
       reservation: input.reservation ?? null,
     });
 
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    if (input.items?.length) {
+      const items = input.items.map((item) =>
+        this.orderItemRepository.create({
+          tenantId: input.tenantId,
+          orderId: savedOrder.id,
+          inventoryId: item.inventoryId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.quantity * item.unitPrice,
+        }),
+      );
+
+      await this.orderItemRepository.save(items);
+      savedOrder.items = items;
+    }
+
+    return savedOrder;
   }
 
   async update(
@@ -91,6 +119,7 @@ export class OrderService {
     return this.orderRepository.find({
       where: { tenantId },
       order: { createdAt: 'DESC' },
+      relations: ['items'],
     });
   }
 
@@ -100,6 +129,7 @@ export class OrderService {
   ): Promise<OrderEntity | null> {
     return this.orderRepository.findOne({
       where: { id: orderId, tenantId },
+      relations: ['items'],
     });
   }
 

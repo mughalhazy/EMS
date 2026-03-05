@@ -3,9 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { OrderItemEntity } from './order-item.entity';
 
 export enum OrderStatus {
   DRAFT = 'draft',
@@ -53,4 +56,7 @@ export class OrderEntity {
 
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt!: Date;
+
+  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order)
+  items!: OrderItemEntity[];
 }
