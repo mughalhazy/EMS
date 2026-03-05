@@ -261,7 +261,7 @@ Sponsorship agreement record for an organization at an event.
 - `tenant_id` (FK -> tenant)
 - `event_id` (FK -> event)
 - `organization_id` (FK -> organization)
-- `tier` (`platinum|gold|silver|bronze|custom`)
+- `tier` (`gold|silver|bronze`)
 - `amount`
 - `benefits_json` (structured benefit package)
 - `status` (`prospect|active|fulfilled|cancelled`)
