@@ -35,6 +35,11 @@ export enum SessionStatus {
 @Index('IDX_sessions_event_start_at', ['eventId', 'startAt'])
 @Check('CK_sessions_time_window', 'start_at < end_at')
 @Check('CK_sessions_capacity_non_negative', 'capacity IS NULL OR capacity >= 0')
+@Check('CK_sessions_remaining_seats_non_negative', 'remaining_seats IS NULL OR remaining_seats >= 0')
+@Check(
+  'CK_sessions_remaining_seats_within_capacity',
+  '(capacity IS NULL AND remaining_seats IS NULL) OR (capacity IS NOT NULL AND remaining_seats IS NOT NULL AND remaining_seats <= capacity)',
+)
 export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -79,6 +84,9 @@ export class SessionEntity {
 
   @Column({ type: 'int', nullable: true })
   capacity!: number | null;
+
+  @Column({ type: 'int', name: 'remaining_seats', nullable: true })
+  remainingSeats!: number | null;
 
   @Column({ type: 'enum', enum: SessionStatus, default: SessionStatus.DRAFT })
   status!: SessionStatus;

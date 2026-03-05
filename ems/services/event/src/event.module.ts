@@ -21,6 +21,7 @@ import { SpeakerEntity } from './entities/speaker.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { VenueController } from './venue.controller';
 import { VenueService } from './venue.service';
+import { SessionCapacityService } from './session-capacity.service';
 
 @Module({
   imports: [
@@ -45,7 +46,8 @@ import { VenueService } from './venue.service';
     EventSettingService,
     VenueService,
     RoomService,
+    SessionCapacityService,
   ],
-  exports: [EventService, EventSettingService, VenueService, RoomService],
+  exports: [EventService, EventSettingService, VenueService, RoomService, SessionCapacityService],
 })
 export class EventModule {}
