@@ -8,7 +8,7 @@ This document defines the backend service boundaries for EMS and the core respon
 |---|---|
 | **auth** | Handles identity and access management: login, token issuance/validation, password and MFA flows, role/permission checks, and session lifecycle for staff and API clients. |
 | **tenant** | Manages tenant lifecycle and configuration, including tenant provisioning, plan/features, organization-level settings, branding, and tenant isolation policies used across all services. |
-| **event** | Owns event master data and lifecycle (draft, published, archived), event metadata, dates/timezone, venues linkage, and event-level governance rules. |
+| **event** | Owns event master data and lifecycle (draft, published, live, archived), event metadata, dates/timezone, venues linkage, and event-level governance rules. |
 | **agenda** | Manages program structure: tracks, sessions, room/time slot planning, conflict detection, publishing of schedules, and agenda versioning. |
 | **speaker** | Manages speaker profiles, bios, credentials, speaker onboarding, approvals, and speaker-to-session assignments in collaboration with agenda. |
 | **ticketing** | Owns ticket catalog and commercial setup: ticket types, inventory/quota, pricing tiers, promo/discount logic, sales windows, and availability rules. |
