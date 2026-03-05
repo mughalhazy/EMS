@@ -1,24 +1,30 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuditModule } from '../../audit/src/audit.module';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtTokenService } from './jwt-token.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
 import { RbacService } from './rbac.service';
+import { RolesController } from './roles.controller';
 import { AuthCredentialEntity } from './entities/auth-credential.entity';
 import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
 import { AuthSsoProviderEntity } from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
 import { PermissionEntity } from './entities/permission.entity';
+import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { RoleEntity } from './entities/role.entity';
 import { RolePermissionEntity } from './entities/role-permission.entity';
 import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
-import { UserEntity } from '../../user/src/entities/user.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RbacGuard } from './guards/rbac.guard';
 
 @Module({
   imports: [
+    AuditModule,
     TypeOrmModule.forFeature([
       AuthCredentialEntity,
       AuthTokenEntity,
@@ -31,17 +37,20 @@ import { UserEntity } from '../../user/src/entities/user.entity';
       RolePermissionEntity,
       UserRoleAssignmentEntity,
       UserEntity,
-      RoleEntity,
-      PermissionEntity,
-      RolePermissionEntity,
-      UserRoleAssignmentEntity,
     ]),
   ],
-  providers: [AuthService, RbacService, TenantIsolationMiddleware],
-  exports: [AuthService, RbacService],
+  controllers: [AuthController, RolesController],
+  providers: [AuthService, JwtTokenService, RbacService, JwtAuthGuard, RbacGuard, TenantIsolationMiddleware],
+  exports: [AuthService, JwtTokenService, RbacService, JwtAuthGuard, RbacGuard],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(TenantIsolationMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
+    consumer
+      .apply(TenantIsolationMiddleware)
+      .exclude(
+        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/refresh', method: RequestMethod.POST },
+      )
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

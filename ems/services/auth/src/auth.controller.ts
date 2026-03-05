@@ -1,15 +1,19 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { RbacService } from './rbac.service';
+import { AuditService } from '../../audit/src/audit.service';
 import { AuthService } from './auth.service';
 import { JwtTokenService } from './jwt-token.service';
 import { LoginDto } from './dto/login.dto';
@@ -17,12 +21,15 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { TokenPairDto } from './dto/token-pair.dto';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { UserEntity, UserStatus } from '../../user/src/entities/user.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RbacService } from './rbac.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtTokenService: JwtTokenService,
+    private readonly auditService: AuditService,
     private readonly rbacService: RbacService,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -51,7 +58,16 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.issueSession(user, payload.userAgent, payload.ip);
+    const session = await this.issueSession(user, payload.userAgent, payload.ip);
+    await this.auditService.trackAuthChange({
+      tenantId: user.tenantId,
+      actorUserId: user.id,
+      targetUserId: user.id,
+      action: 'auth.login',
+      metadata: { ip: payload.ip ?? null, userAgent: payload.userAgent ?? null },
+    });
+
+    return session;
   }
 
   @Post('refresh')
@@ -91,6 +107,12 @@ export class AuthController {
 
     storedToken.revokedAt = new Date();
     await this.refreshTokenRepository.save(storedToken);
+    await this.auditService.trackAuthChange({
+      tenantId: user.tenantId,
+      actorUserId: user.id,
+      targetUserId: user.id,
+      action: 'auth.refresh',
+    });
 
     return nextSession;
   }
@@ -114,9 +136,45 @@ export class AuthController {
         storedToken.revokedAt = new Date();
         await this.refreshTokenRepository.save(storedToken);
       }
+
+      await this.auditService.trackAuthChange({
+        tenantId: decoded.tid,
+        actorUserId: decoded.sub,
+        targetUserId: decoded.sub,
+        action: 'auth.logout',
+      });
     } catch {
       return;
     }
+  }
+
+  @Post('password-reset/request/:tenantId/:userId')
+  async issuePasswordReset(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.authService.issuePasswordReset(tenantId, userId);
+  }
+
+  @Post('password-reset/confirm/:tenantId/:userId')
+  async confirmPasswordReset(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() payload: { token: string; newPassword: string },
+  ): Promise<void> {
+    await this.authService.resetPassword(tenantId, userId, payload.token, payload.newPassword);
+    await this.auditService.trackAuthChange({
+      tenantId,
+      actorUserId: userId,
+      targetUserId: userId,
+      action: 'auth.password.reset',
+    });
+  }
+
+  @Get('sso/:tenantId/providers')
+  @UseGuards(JwtAuthGuard)
+  async listSsoProviders(@Param('tenantId', ParseUUIDPipe) tenantId: string) {
+    return this.authService.getTenantSsoProviders(tenantId);
   }
 
   private async issueSession(
