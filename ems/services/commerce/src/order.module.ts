@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditModule } from '../../audit/src/audit.module';
 import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
+import { RegistrationEventsPublisher } from '../../registration/src/registration-events.publisher';
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
@@ -41,6 +42,7 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
     RedisLockService,
     StripeCompatibleGateway,
     CommerceEventsPublisher,
+    RegistrationEventsPublisher,
     TicketFulfillmentService,
   ],
   exports: [OrderService, PaymentService, RedisLockService],
