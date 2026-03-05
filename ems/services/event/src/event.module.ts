@@ -13,6 +13,7 @@ import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
 import { EventSearchIndexService } from './event-search-index.service';
 import { VenueController } from './venue.controller';
+import { EventController } from './event.controller';
 import { VenueService } from './venue.service';
 import { EventService } from './event.service';
 

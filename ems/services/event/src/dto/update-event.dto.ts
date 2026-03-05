@@ -9,4 +9,6 @@ export class UpdateEventDto {
   startAt?: string;
   endAt?: string;
   status?: EventStatus;
+  agenda?: Record<string, unknown> | null;
+  settings?: Record<string, unknown> | null;
 }

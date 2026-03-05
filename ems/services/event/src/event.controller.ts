@@ -49,17 +49,22 @@ export class EventController {
       );
     }
 
-    return this.eventService.create({
-      tenantId,
-      organizationId: payload.organizationId,
-      name: payload.name,
-      code: payload.code,
-      description: payload.description ?? null,
-      timezone: payload.timezone,
-      startAt: new Date(payload.startAt),
-      endAt: new Date(payload.endAt),
-      status: payload.status,
-    });
+    return this.eventService.create(
+      {
+        tenantId,
+        organizationId: payload.organizationId,
+        name: payload.name,
+        code: payload.code,
+        description: payload.description ?? null,
+        timezone: payload.timezone,
+        startAt: new Date(payload.startAt),
+        endAt: new Date(payload.endAt),
+        status: payload.status,
+        agenda: payload.agenda,
+        settings: payload.settings,
+      },
+      payload.templateEventId,
+    );
   }
 
   @Get()
@@ -129,6 +134,8 @@ export class EventController {
       startAt: payload.startAt ? new Date(payload.startAt) : undefined,
       endAt: payload.endAt ? new Date(payload.endAt) : undefined,
       status: payload.status,
+      agenda: payload.agenda,
+      settings: payload.settings,
     });
 
     if (!event) {
