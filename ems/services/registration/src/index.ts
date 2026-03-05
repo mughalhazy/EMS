@@ -1,1 +1,1 @@
-export * from './entities/registrant-profile.entity';
+export { RegistrationEntity, RegistrationStatus } from './entities/registration.entity';
