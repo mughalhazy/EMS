@@ -15,10 +15,11 @@ import {
 } from '@nestjs/common';
 
 import { AuditService } from '../../audit/src/audit.service';
+import { CloneEventDto } from './dto/clone-event.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import { ListEventsQueryDto } from './dto/list-events-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { EventEntity } from './entities/event.entity';
+import { EventEntity, EventStatus } from './entities/event.entity';
 import { EventService } from './event.service';
 
 type PaginatedEventsResponse = {
@@ -65,7 +66,7 @@ export class EventController {
         timezone: payload.timezone,
         startAt: new Date(payload.startAt),
         endAt: new Date(payload.endAt),
-        status: payload.status,
+        status: payload.status ?? EventStatus.DRAFT,
         agenda: payload.agenda,
         settings: payload.settings,
       },
@@ -159,6 +160,94 @@ export class EventController {
       action: 'event.updated',
       metadata: { eventId: event.id },
       before,
+      after: this.serializeEventForAudit(event),
+    });
+
+    return event;
+  }
+
+
+  @Post(':eventId/publish')
+  async publishEvent(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<EventEntity> {
+    const before = await this.eventService.findByTenantAndId(tenantId, eventId);
+    if (!before) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
+    const event = await this.eventService.publish(tenantId, eventId);
+    if (!event) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'event.published',
+      metadata: { eventId },
+      before: this.serializeEventForAudit(before),
+      after: this.serializeEventForAudit(event),
+    });
+
+    return event;
+  }
+
+  @Post(':eventId/unpublish')
+  async unpublishEvent(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<EventEntity> {
+    const before = await this.eventService.findByTenantAndId(tenantId, eventId);
+    if (!before) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
+    const event = await this.eventService.unpublish(tenantId, eventId);
+    if (!event) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'event.unpublished',
+      metadata: { eventId },
+      before: this.serializeEventForAudit(before),
+      after: this.serializeEventForAudit(event),
+    });
+
+    return event;
+  }
+
+  @Post(':eventId/clone')
+  @HttpCode(HttpStatus.CREATED)
+  async cloneEvent(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() payload: CloneEventDto,
+  ): Promise<EventEntity> {
+    const existingEvent = await this.eventService.findByTenantAndCode(tenantId, payload.code);
+    if (existingEvent) {
+      throw new ConflictException(
+        `Event with code '${payload.code}' already exists in tenant.`,
+      );
+    }
+
+    const event = await this.eventService.clone(tenantId, eventId, {
+      code: payload.code,
+      name: payload.name,
+      startAt: payload.startAt ? new Date(payload.startAt) : undefined,
+      endAt: payload.endAt ? new Date(payload.endAt) : undefined,
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'event.cloned',
+      metadata: { sourceEventId: eventId, clonedEventId: event.id },
       after: this.serializeEventForAudit(event),
     });
 

@@ -15,8 +15,7 @@ export enum EventStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
   LIVE = 'live',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
+  ARCHIVED = 'archived',
 }
 
 @Entity({ name: 'events' })

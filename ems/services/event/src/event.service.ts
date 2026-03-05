@@ -13,10 +13,9 @@ export class EventService {
     Record<EventStatus, ReadonlyArray<EventStatus>>
   > = {
     [EventStatus.DRAFT]: [EventStatus.PUBLISHED],
-    [EventStatus.PUBLISHED]: [EventStatus.DRAFT, EventStatus.LIVE, EventStatus.CANCELLED],
-    [EventStatus.LIVE]: [EventStatus.COMPLETED, EventStatus.CANCELLED],
-    [EventStatus.COMPLETED]: [],
-    [EventStatus.CANCELLED]: [],
+    [EventStatus.PUBLISHED]: [EventStatus.DRAFT, EventStatus.LIVE, EventStatus.ARCHIVED],
+    [EventStatus.LIVE]: [EventStatus.ARCHIVED],
+    [EventStatus.ARCHIVED]: [],
   };
 
   constructor(
@@ -103,6 +102,39 @@ export class EventService {
     return this.updateStatus(tenantId, eventId, EventStatus.DRAFT);
   }
 
+
+  async clone(
+    tenantId: string,
+    sourceEventId: string,
+    input: {
+      code: string;
+      name?: string;
+      startAt?: Date;
+      endAt?: Date;
+    },
+  ): Promise<EventEntity | null> {
+    const sourceEvent = await this.findByTenantAndId(tenantId, sourceEventId);
+    if (!sourceEvent) {
+      return null;
+    }
+
+    const clonedEvent = await this.create({
+      tenantId: sourceEvent.tenantId,
+      organizationId: sourceEvent.organizationId,
+      name: input.name ?? `${sourceEvent.name} (Copy)`,
+      code: input.code,
+      description: sourceEvent.description,
+      timezone: sourceEvent.timezone,
+      startAt: input.startAt ?? sourceEvent.startAt,
+      endAt: input.endAt ?? sourceEvent.endAt,
+      status: EventStatus.DRAFT,
+      agenda: sourceEvent.agenda,
+      settings: sourceEvent.settings,
+    });
+
+    return clonedEvent;
+  }
+
   async update(
     tenantId: string,
     eventId: string,
@@ -170,6 +202,7 @@ export class EventService {
     const previousStatus = event.status;
     event.status = nextStatus;
     const updatedEvent = await this.eventRepository.save(event);
+    await this.reindexSearchDocument(updatedEvent.tenantId, updatedEvent.id);
     await this.eventLifecyclePublisher.publish('event.status_changed', updatedEvent, {
       previousStatus,
       status: nextStatus,
