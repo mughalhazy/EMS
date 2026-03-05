@@ -3,9 +3,29 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
 import { EventEntity, EventStatus } from './entities/event.entity';
+import { SessionEntity } from './entities/session.entity';
 import { VenueEntity } from './entities/venue.entity';
 import { EventSearchIndexService } from './event-search-index.service';
 import { EventLifecyclePublisher } from './event-lifecycle.publisher';
+
+export type SessionAgendaView = {
+  id: string;
+  title: string;
+  abstract: string | null;
+  sessionType: string;
+  status: string;
+  startAt: Date;
+  endAt: Date;
+  room: {
+    id: string;
+    name: string;
+  } | null;
+};
+
+export type EventAgendaView = {
+  event: EventEntity;
+  sessions: SessionAgendaView[];
+};
 
 @Injectable()
 export class EventService {
@@ -23,9 +43,47 @@ export class EventService {
     private readonly eventRepository: Repository<EventEntity>,
     @InjectRepository(VenueEntity)
     private readonly venueRepository: Repository<VenueEntity>,
+    @InjectRepository(SessionEntity)
+    private readonly sessionRepository: Repository<SessionEntity>,
     private readonly eventSearchIndexService: EventSearchIndexService,
     private readonly eventLifecyclePublisher: EventLifecyclePublisher,
   ) {}
+
+  async findAgendaView(
+    tenantId: string,
+    eventId: string,
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Promise<EventAgendaView | null> {
+    const event = await this.findByTenantAndId(tenantId, eventId);
+    if (!event) {
+      return null;
+    }
+
+    const sessions = await this.sessionRepository.find({
+      where: { tenantId, eventId },
+      relations: { room: true },
+      order: { startAt: order, endAt: order, createdAt: order },
+    });
+
+    return {
+      event,
+      sessions: sessions.map((session) => ({
+        id: session.id,
+        title: session.title,
+        abstract: session.abstract,
+        sessionType: session.sessionType,
+        status: session.status,
+        startAt: session.startAt,
+        endAt: session.endAt,
+        room: session.room
+          ? {
+              id: session.room.id,
+              name: session.room.name,
+            }
+          : null,
+      })),
+    };
+  }
 
   async create(input: DeepPartial<EventEntity>): Promise<EventEntity> {
     const event = this.eventRepository.create(input);

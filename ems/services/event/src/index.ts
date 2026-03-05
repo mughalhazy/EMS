@@ -16,3 +16,4 @@ export * from './venue.service';
 export * from './session-capacity.service';
 
 export * from './event-lifecycle.publisher';
+export * from './session-lifecycle.publisher';

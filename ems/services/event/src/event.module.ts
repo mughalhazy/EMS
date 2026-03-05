@@ -23,6 +23,7 @@ import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { VenueController } from './venue.controller';
 import { VenueService } from './venue.service';
 import { SessionCapacityService } from './session-capacity.service';
+import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { SessionCapacityService } from './session-capacity.service';
     VenueService,
     RoomService,
     SessionService,
+    SessionLifecyclePublisher,
   ],
   exports: [EventService, EventSettingService, VenueService, RoomService, SessionService],
 })

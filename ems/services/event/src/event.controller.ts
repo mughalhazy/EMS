@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -20,7 +21,11 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { ListEventsQueryDto } from './dto/list-events-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventEntity, EventStatus } from './entities/event.entity';
-import { EventService } from './event.service';
+import { EventAgendaView, EventService } from './event.service';
+
+
+
+type AgendaOrder = 'asc' | 'desc';
 
 type PaginatedEventsResponse = {
   items: EventEntity[];
@@ -97,6 +102,31 @@ export class EventController {
       totalItems,
       totalPages: totalItems === 0 ? 0 : Math.ceil(totalItems / pageSize),
     };
+  }
+
+
+  @Get(':eventId/agenda')
+  async getEventAgenda(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query('order') order?: AgendaOrder,
+  ): Promise<EventAgendaView> {
+    const normalizedOrder = (order ?? 'asc').toLowerCase();
+    if (normalizedOrder !== 'asc' && normalizedOrder !== 'desc') {
+      throw new BadRequestException("'order' must be either 'asc' or 'desc'.");
+    }
+
+    const agendaView = await this.eventService.findAgendaView(
+      tenantId,
+      eventId,
+      normalizedOrder === 'asc' ? 'ASC' : 'DESC',
+    );
+
+    if (!agendaView) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
+    return agendaView;
   }
 
   @Get(':eventId')
