@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderEntity, OrderStatus } from './entities/order.entity';
 import { PaymentEntity, PaymentStatus } from './entities/payment.entity';
 import { OrderService } from './order.service';
@@ -24,6 +25,7 @@ export class PaymentService {
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly orderService: OrderService,
     private readonly stripeCompatibleGateway: StripeCompatibleGateway,
+    private readonly commerceEventsPublisher: CommerceEventsPublisher,
   ) {}
 
   async createForOrder(input: CreatePaymentInput): Promise<PaymentEntity> {
@@ -58,6 +60,7 @@ export class PaymentService {
       }),
     );
 
+    await this.publishPaymentCompletedIfNeeded(payment);
     await this.syncOrderStatusFromPayment(payment);
     return payment;
   }
@@ -75,8 +78,12 @@ export class PaymentService {
       throw new NotFoundException('Payment not found.');
     }
 
+    const previousStatus = payment.status;
     payment.status = status;
     const savedPayment = await this.paymentRepository.save(payment);
+    if (previousStatus !== PaymentStatus.SUCCEEDED) {
+      await this.publishPaymentCompletedIfNeeded(savedPayment);
+    }
     await this.syncOrderStatusFromPayment(savedPayment);
 
     return savedPayment;
@@ -105,5 +112,13 @@ export class PaymentService {
       default:
         return null;
     }
+  }
+
+  private async publishPaymentCompletedIfNeeded(payment: PaymentEntity): Promise<void> {
+    if (payment.status !== PaymentStatus.SUCCEEDED) {
+      return;
+    }
+
+    await this.commerceEventsPublisher.publishPaymentCompleted(payment);
   }
 }
