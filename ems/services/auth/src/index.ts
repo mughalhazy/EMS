@@ -9,10 +9,8 @@ export * from './entities/auth-user-state.entity';
 export * from './tenant-context';
 export * from './middleware/tenant-isolation.middleware';
 
-export * from './auth.controller';
-export * from './jwt-token.service';
 export * from './rbac.service';
-export * from './dto/login.dto';
-export * from './dto/refresh-token.dto';
-export * from './dto/token-pair.dto';
-export * from './entities/refresh-token.entity';
+export * from './entities/permission.entity';
+export * from './entities/role.entity';
+export * from './entities/role-permission.entity';
+export * from './entities/user-role-assignment.entity';

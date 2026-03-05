@@ -6,6 +6,17 @@ This directory contains the RBAC model and core credential security flow for EMS
 
 ## Module API
 
+### `RbacService`
+- `createPermission(input)`: creates a permission code (`resource.action` style supported).
+- `listPermissions()`: returns all permission definitions.
+- `createRole(input)`: creates a tenant role and optionally binds permissions.
+- `listRoles(tenantId)`: lists tenant roles with attached permissions.
+- `setRolePermissions(tenantId, roleId, permissionIds)`: replaces a role's permission set.
+- `assignRoleToUser(input)`: creates/updates an active role assignment for a user.
+- `revokeRoleAssignment(tenantId, assignmentId)`: revokes an assignment without deleting history.
+- `getUserRbac(tenantId, userId)`: resolves effective roles and permissions.
+- `userHasPermission(tenantId, userId, permissionCode)`: convenience permission check.
+
 ## Credential Security Tables
 
 - `auth_credentials`: stores bcrypt password hashes and password change timestamp.

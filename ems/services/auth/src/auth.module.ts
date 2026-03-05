@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtTokenService } from './jwt-token.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
 import { RbacService } from './rbac.service';
 import { AuthCredentialEntity } from './entities/auth-credential.entity';
@@ -13,10 +12,10 @@ import { AuthSsoProviderEntity } from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
 import { PermissionEntity } from './entities/permission.entity';
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
-import { RolePermissionEntity } from './entities/role-permission.entity';
 import { RoleEntity } from './entities/role.entity';
+import { RolePermissionEntity } from './entities/role-permission.entity';
 import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
+import { UserEntity } from '../../user/src/entities/user.entity';
 
 @Module({
   imports: [
@@ -32,11 +31,14 @@ import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity
       RolePermissionEntity,
       UserRoleAssignmentEntity,
       UserEntity,
+      RoleEntity,
+      PermissionEntity,
+      RolePermissionEntity,
+      UserRoleAssignmentEntity,
     ]),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtTokenService, RbacService, TenantIsolationMiddleware],
-  exports: [AuthService, JwtTokenService, RbacService],
+  providers: [AuthService, RbacService, TenantIsolationMiddleware],
+  exports: [AuthService, RbacService],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
