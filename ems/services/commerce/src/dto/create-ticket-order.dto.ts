@@ -1,7 +1,14 @@
+export class CreateTicketOrderAttendeeDto {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
 export class CreateTicketOrderItemDto {
   inventoryId!: string;
   quantity!: number;
   unitPrice!: number;
+  attendees?: CreateTicketOrderAttendeeDto[];
 }
 
 export class CreateTicketOrderDto {

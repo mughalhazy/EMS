@@ -10,6 +10,12 @@ import {
 
 import { OrderEntity } from './order.entity';
 
+export interface OrderItemAttendee {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
 @Entity({ name: 'order_items' })
 @Index('idx_order_items_order_id', ['orderId'])
 @Index('idx_order_items_tenant_order', ['tenantId', 'orderId'])
@@ -34,6 +40,9 @@ export class OrderItemEntity {
 
   @Column({ type: 'numeric', precision: 12, scale: 2, name: 'total_price' })
   totalPrice!: number;
+
+  @Column({ type: 'jsonb', default: () => "'[]'::jsonb" })
+  attendees!: OrderItemAttendee[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;

@@ -34,6 +34,7 @@ export class CheckoutController {
     @Body() payload: CreateTicketOrderDto,
   ): Promise<OrderEntity> {
     this.assertIdempotencyKey(idempotencyKey);
+    this.assertAttendeeCounts(payload);
 
     const items = payload.items ?? [];
     const subtotal = items.reduce((total, item) => total + item.quantity * item.unitPrice, 0);
@@ -98,6 +99,16 @@ export class CheckoutController {
   private assertIdempotencyKey(idempotencyKey?: string): void {
     if (!idempotencyKey?.trim()) {
       throw new BadRequestException('Idempotency-Key header is required.');
+    }
+  }
+
+  private assertAttendeeCounts(payload: CreateTicketOrderDto): void {
+    for (const item of payload.items ?? []) {
+      if (item.attendees && item.attendees.length !== item.quantity) {
+        throw new BadRequestException(
+          'Each order item must include an attendee entry for each ticket quantity.',
+        );
+      }
     }
   }
 }

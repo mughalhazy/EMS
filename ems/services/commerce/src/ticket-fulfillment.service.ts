@@ -40,30 +40,37 @@ export class TicketFulfillmentService {
     });
 
     for (const item of orderItems) {
-      const existing = await this.fulfillmentRepository.findOne({
-        where: { tenantId, orderId, orderItemId: item.id },
-      });
+      const attendees = item.attendees ?? [];
+      const attendeeCount = attendees.length > 0 ? attendees.length : item.quantity;
 
-      if (existing && existing.status !== TicketFulfillmentStatus.REVOKED) {
-        continue;
+      for (let attendeeIndex = 0; attendeeIndex < attendeeCount; attendeeIndex += 1) {
+        const existing = await this.fulfillmentRepository.findOne({
+          where: { tenantId, orderId, orderItemId: item.id, attendeeIndex },
+        });
+
+        if (existing && existing.status !== TicketFulfillmentStatus.REVOKED) {
+          continue;
+        }
+
+        const qrCode = this.generateDeterministicQrCode(paymentId, item.id, attendeeIndex);
+        const fulfillment = this.fulfillmentRepository.create({
+          ...(existing ?? {}),
+          tenantId,
+          orderId,
+          orderItemId: item.id,
+          attendeeIndex,
+          qrCode,
+          status: TicketFulfillmentStatus.GENERATED,
+          metadata: {
+            paymentId,
+            quantity: item.quantity,
+            inventoryId: item.inventoryId,
+            attendee: attendees[attendeeIndex] ?? null,
+          },
+        });
+
+        await this.fulfillmentRepository.save(fulfillment);
       }
-
-      const qrCode = this.generateDeterministicQrCode(paymentId, item.id);
-      const fulfillment = this.fulfillmentRepository.create({
-        ...(existing ?? {}),
-        tenantId,
-        orderId,
-        orderItemId: item.id,
-        qrCode,
-        status: TicketFulfillmentStatus.GENERATED,
-        metadata: {
-          paymentId,
-          quantity: item.quantity,
-          inventoryId: item.inventoryId,
-        },
-      });
-
-      await this.fulfillmentRepository.save(fulfillment);
     }
   }
 
@@ -80,8 +87,15 @@ export class TicketFulfillmentService {
     }
   }
 
-  private generateDeterministicQrCode(paymentId: string, orderItemId: string): string {
-    const digest = createHash('sha256').update(`${paymentId}:${orderItemId}`).digest('hex').slice(0, 24);
+  private generateDeterministicQrCode(
+    paymentId: string,
+    orderItemId: string,
+    attendeeIndex: number,
+  ): string {
+    const digest = createHash('sha256')
+      .update(`${paymentId}:${orderItemId}:${attendeeIndex}`)
+      .digest('hex')
+      .slice(0, 24);
     return `qr_${digest}`;
   }
 }
