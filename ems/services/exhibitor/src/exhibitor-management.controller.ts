@@ -121,6 +121,21 @@ export class ExhibitorManagementController {
     });
   }
 
+  @Patch('exhibitors/:exhibitorId/booths/:boothId')
+  async assignBoothToExhibitor(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
+    @Param('boothId', ParseUUIDPipe) boothId: string,
+  ): Promise<BoothEntity> {
+    return this.exhibitorManagementService.assignExhibitorToBooth({
+      tenantId,
+      eventId,
+      boothId,
+      exhibitorId,
+    });
+  }
+
   @Post('exhibitors/:exhibitorId/leads')
   @HttpCode(HttpStatus.CREATED)
   async captureLead(
