@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -16,14 +17,85 @@ import { CaptureLeadDto } from './dto/capture-lead.dto';
 import { CreateBoothDto } from './dto/create-booth.dto';
 import { CreateExhibitorDto } from './dto/create-exhibitor.dto';
 import { UpdateExhibitorDto } from './dto/update-exhibitor.dto';
+import { CreateSponsorProfileDto } from './dto/create-sponsor-profile.dto';
+import { UpdateSponsorProfileDto } from './dto/update-sponsor-profile.dto';
 import { BoothEntity } from './entities/booth.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
+import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
 import { ExhibitorManagementService } from './exhibitor-management.service';
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId')
 export class ExhibitorManagementController {
   constructor(private readonly exhibitorManagementService: ExhibitorManagementService) {}
+
+
+  @Post('sponsors')
+  @HttpCode(HttpStatus.CREATED)
+  async createSponsorProfile(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() payload: CreateSponsorProfileDto,
+  ): Promise<SponsorProfileEntity> {
+    return this.exhibitorManagementService.createSponsorProfile({
+      tenantId,
+      eventId,
+      name: payload.name,
+      description: payload.description,
+      websiteUrl: payload.websiteUrl,
+      logoUrl: payload.logoUrl,
+      sponsorshipTier: payload.sponsorshipTier,
+      contactInfo: payload.contactInfo,
+      isActive: payload.isActive,
+    });
+  }
+
+  @Get('sponsors')
+  async listSponsorProfiles(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<SponsorProfileEntity[]> {
+    return this.exhibitorManagementService.listSponsorProfiles(tenantId, eventId);
+  }
+
+  @Patch('sponsors/:sponsorProfileId')
+  async updateSponsorProfile(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('sponsorProfileId', ParseUUIDPipe) sponsorProfileId: string,
+    @Body() payload: UpdateSponsorProfileDto,
+  ): Promise<SponsorProfileEntity> {
+    const sponsorProfile = await this.exhibitorManagementService.updateSponsorProfile(
+      tenantId,
+      eventId,
+      sponsorProfileId,
+      payload,
+    );
+
+    if (!sponsorProfile) {
+      throw new NotFoundException('Sponsor profile not found in event.');
+    }
+
+    return sponsorProfile;
+  }
+
+  @Delete('sponsors/:sponsorProfileId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteSponsorProfile(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('sponsorProfileId', ParseUUIDPipe) sponsorProfileId: string,
+  ): Promise<void> {
+    const deleted = await this.exhibitorManagementService.deleteSponsorProfile(
+      tenantId,
+      eventId,
+      sponsorProfileId,
+    );
+
+    if (!deleted) {
+      throw new NotFoundException('Sponsor profile not found in event.');
+    }
+  }
 
   @Post('exhibitors')
   @HttpCode(HttpStatus.CREATED)

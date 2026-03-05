@@ -8,6 +8,7 @@ import { VenueEntity } from '../../event/src/entities/venue.entity';
 import { BoothEntity } from './entities/booth.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
+import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
 import { ExhibitorEventsPublisher } from './exhibitor-events.publisher';
 import { ExhibitorManagementController } from './exhibitor-management.controller';
 import { ExhibitorManagementService } from './exhibitor-management.service';
@@ -22,6 +23,7 @@ import { ExhibitorManagementService } from './exhibitor-management.service';
       ExhibitorEntity,
       ExhibitorLeadCaptureEntity,
       BoothEntity,
+      SponsorProfileEntity,
     ]),
   ],
   controllers: [ExhibitorManagementController],

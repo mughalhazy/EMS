@@ -9,6 +9,7 @@ import { VenueEntity } from '../../event/src/entities/venue.entity';
 import { BoothEntity } from './entities/booth.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
+import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
 import { ExhibitorEventsPublisher } from './exhibitor-events.publisher';
 
 @Injectable()
@@ -26,6 +27,8 @@ export class ExhibitorManagementService {
     private readonly exhibitorLeadCaptureRepository: Repository<ExhibitorLeadCaptureEntity>,
     @InjectRepository(BoothEntity)
     private readonly boothRepository: Repository<BoothEntity>,
+    @InjectRepository(SponsorProfileEntity)
+    private readonly sponsorProfileRepository: Repository<SponsorProfileEntity>,
     private readonly auditService: AuditService,
     private readonly exhibitorEventsPublisher: ExhibitorEventsPublisher,
   ) {}
@@ -37,7 +40,6 @@ export class ExhibitorManagementService {
     description?: string | null;
     sponsorshipTier?: ExhibitorEntity['sponsorshipTier'];
     contactInfo?: Record<string, unknown> | null;
-    sponsorshipTier?: ExhibitorEntity['sponsorshipTier'];
     actorUserId?: string;
   }): Promise<ExhibitorEntity> {
     await this.ensureEventExists(input.tenantId, input.eventId);
@@ -75,6 +77,132 @@ export class ExhibitorManagementService {
     await this.exhibitorEventsPublisher.publishExhibitorCreated(exhibitor);
 
     return exhibitor;
+  }
+
+  async createSponsorProfile(input: {
+    tenantId: string;
+    eventId: string;
+    name: string;
+    description?: string | null;
+    websiteUrl?: string | null;
+    logoUrl?: string | null;
+    sponsorshipTier?: SponsorProfileEntity['sponsorshipTier'];
+    contactInfo?: Record<string, unknown> | null;
+    isActive?: boolean;
+    actorUserId?: string;
+  }): Promise<SponsorProfileEntity> {
+    await this.ensureEventExists(input.tenantId, input.eventId);
+
+    const existing = await this.sponsorProfileRepository.findOne({
+      where: {
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+        name: input.name,
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException(`Sponsor profile '${input.name}' already exists in this event.`);
+    }
+
+    const sponsorProfile = await this.sponsorProfileRepository.save(
+      this.sponsorProfileRepository.create({
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+        name: input.name,
+        description: input.description ?? null,
+        websiteUrl: input.websiteUrl ?? null,
+        logoUrl: input.logoUrl ?? null,
+        sponsorshipTier: input.sponsorshipTier ?? null,
+        contactInfo: input.contactInfo ?? null,
+        isActive: input.isActive ?? true,
+      }),
+    );
+
+    await this.auditService.trackEventChange({
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      action: 'sponsor_profile.created',
+      after: this.auditSponsorProfile(sponsorProfile),
+    });
+
+    return sponsorProfile;
+  }
+
+  async listSponsorProfiles(tenantId: string, eventId: string): Promise<SponsorProfileEntity[]> {
+    return this.sponsorProfileRepository.find({
+      where: { tenantId, eventId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findSponsorProfile(
+    tenantId: string,
+    eventId: string,
+    sponsorProfileId: string,
+  ): Promise<SponsorProfileEntity | null> {
+    return this.sponsorProfileRepository.findOne({
+      where: { id: sponsorProfileId, tenantId, eventId },
+    });
+  }
+
+  async updateSponsorProfile(
+    tenantId: string,
+    eventId: string,
+    sponsorProfileId: string,
+    input: Partial<SponsorProfileEntity>,
+    actorUserId?: string,
+  ): Promise<SponsorProfileEntity | null> {
+    const sponsorProfile = await this.findSponsorProfile(tenantId, eventId, sponsorProfileId);
+    if (!sponsorProfile) {
+      return null;
+    }
+
+    if (input.eventId && input.eventId !== eventId) {
+      throw new ConflictException('Sponsor profile cannot be moved to a different event.');
+    }
+
+    if (input.tenantId && input.tenantId !== tenantId) {
+      throw new ConflictException('Sponsor profile cannot be moved to a different tenant.');
+    }
+
+    const before = this.auditSponsorProfile(sponsorProfile);
+    Object.assign(sponsorProfile, input);
+    const updated = await this.sponsorProfileRepository.save(sponsorProfile);
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      actorUserId,
+      action: 'sponsor_profile.updated',
+      before,
+      after: this.auditSponsorProfile(updated),
+    });
+
+    return updated;
+  }
+
+  async deleteSponsorProfile(
+    tenantId: string,
+    eventId: string,
+    sponsorProfileId: string,
+    actorUserId?: string,
+  ): Promise<boolean> {
+    const sponsorProfile = await this.findSponsorProfile(tenantId, eventId, sponsorProfileId);
+
+    if (!sponsorProfile) {
+      return false;
+    }
+
+    await this.sponsorProfileRepository.delete({ id: sponsorProfileId, tenantId, eventId });
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      actorUserId,
+      action: 'sponsor_profile.deleted',
+      before: this.auditSponsorProfile(sponsorProfile),
+    });
+
+    return true;
   }
 
   async captureLead(input: {
@@ -351,6 +479,21 @@ export class ExhibitorManagementService {
       description: exhibitor.description,
       sponsorshipTier: exhibitor.sponsorshipTier,
       contactInfo: exhibitor.contactInfo,
+    };
+  }
+
+
+  private auditSponsorProfile(sponsorProfile: SponsorProfileEntity): Record<string, unknown> {
+    return {
+      id: sponsorProfile.id,
+      eventId: sponsorProfile.eventId,
+      name: sponsorProfile.name,
+      description: sponsorProfile.description,
+      websiteUrl: sponsorProfile.websiteUrl,
+      logoUrl: sponsorProfile.logoUrl,
+      sponsorshipTier: sponsorProfile.sponsorshipTier,
+      contactInfo: sponsorProfile.contactInfo,
+      isActive: sponsorProfile.isActive,
     };
   }
 
