@@ -66,6 +66,7 @@ The goal is to give enterprises one system to:
 - Handle peak on-sale traffic with virtual waiting room and anti-bot controls.
 - Monitor conversion, inventory velocity, and payment performance.
 - Trigger campaign and communication automations.
+- Generate ticket fulfillment artifacts (QR/pass) immediately after successful payment and attach to attendee profiles/registrations.
 
 ### Phase 4: Pre-Event Operations
 - Manage changes (speaker updates, schedule shifts, capacity adjustments).
