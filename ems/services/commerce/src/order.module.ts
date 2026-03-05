@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuditModule } from '../../audit/src/audit.module';
+import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
@@ -26,6 +27,7 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
       PaymentEntity,
       TicketFulfillmentEntity,
       InventoryEntity,
+      RegistrationQuestionEntity,
       TicketEntity,
       UserEntity,
       RegistrationEntity,

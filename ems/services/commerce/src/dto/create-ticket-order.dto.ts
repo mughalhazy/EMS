@@ -2,6 +2,13 @@ export class CreateTicketOrderAttendeeDto {
   firstName?: string;
   lastName?: string;
   email?: string;
+  isTicketOwner?: boolean;
+  answers?: CreateTicketOrderAttendeeAnswerDto[];
+}
+
+export class CreateTicketOrderAttendeeAnswerDto {
+  questionId!: string;
+  value!: string;
 }
 
 export class CreateTicketOrderItemDto {

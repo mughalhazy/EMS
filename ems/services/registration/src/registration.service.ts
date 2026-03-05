@@ -14,6 +14,10 @@ export interface RegisterForEventInput {
   ticketId: string;
 }
 
+export interface UpdateRegistrationInput {
+  ticketId?: string;
+}
+
 @Injectable()
 export class RegistrationService {
   constructor(
@@ -86,6 +90,50 @@ export class RegistrationService {
 
       return savedRegistration;
     });
+  }
+
+  async list(
+    tenantId: string,
+    filters: {
+      eventId?: string;
+      userId?: string;
+      status?: RegistrationStatus;
+    },
+  ): Promise<RegistrationEntity[]> {
+    return this.registrationRepository.find({
+      where: {
+        tenantId,
+        eventId: filters.eventId,
+        userId: filters.userId,
+        status: filters.status,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  async update(
+    registrationId: string,
+    tenantId: string,
+    updates: UpdateRegistrationInput,
+  ): Promise<RegistrationEntity | null> {
+    const registration = await this.registrationRepository.findOne({
+      where: {
+        id: registrationId,
+        tenantId,
+      },
+    });
+
+    if (!registration) {
+      return null;
+    }
+
+    if (updates.ticketId !== undefined) {
+      registration.ticketId = updates.ticketId;
+    }
+
+    return this.registrationRepository.save(registration);
   }
 
   async cancel(registrationId: string, tenantId: string): Promise<RegistrationEntity | null> {
