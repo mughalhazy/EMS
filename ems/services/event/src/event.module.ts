@@ -10,6 +10,7 @@ import { EventLifecyclePublisher } from './event-lifecycle.publisher';
 import { EventService } from './event.service';
 import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
+import { SessionService } from './session.service';
 import { EventEntity } from './entities/event.entity';
 import { EventSettingEntity } from './entities/event-setting.entity';
 import { RegistrationAnswerEntity } from './entities/registration-answer.entity';
@@ -45,7 +46,8 @@ import { VenueService } from './venue.service';
     EventSettingService,
     VenueService,
     RoomService,
+    SessionService,
   ],
-  exports: [EventService, EventSettingService, VenueService, RoomService],
+  exports: [EventService, EventSettingService, VenueService, RoomService, SessionService],
 })
 export class EventModule {}
