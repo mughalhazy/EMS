@@ -121,31 +121,19 @@ export class ExhibitorManagementController {
     });
   }
 
-  @Get('exhibitors/:exhibitorId/leads')
-  async listLeadsByExhibitor(
+  @Patch('exhibitors/:exhibitorId/booths/:boothId')
+  async assignBoothToExhibitor(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
-  ): Promise<ExhibitorLeadCaptureEntity[]> {
-    return this.exhibitorManagementService.listLeadCapturesByExhibitor(tenantId, eventId, exhibitorId);
-  }
-
-  @Get('exhibitors/:exhibitorId/scans')
-  async listScansByExhibitor(
-    @Param('tenantId', ParseUUIDPipe) tenantId: string,
-    @Param('eventId', ParseUUIDPipe) eventId: string,
-    @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
-  ): Promise<ExhibitorLeadCaptureEntity[]> {
-    return this.exhibitorManagementService.listLeadCapturesByExhibitor(tenantId, eventId, exhibitorId);
-  }
-
-  @Get('attendees/:attendeeId/scans')
-  async listScansByAttendee(
-    @Param('tenantId', ParseUUIDPipe) tenantId: string,
-    @Param('eventId', ParseUUIDPipe) eventId: string,
-    @Param('attendeeId', ParseUUIDPipe) attendeeId: string,
-  ): Promise<ExhibitorLeadCaptureEntity[]> {
-    return this.exhibitorManagementService.listLeadCapturesByAttendee(tenantId, eventId, attendeeId);
+    @Param('boothId', ParseUUIDPipe) boothId: string,
+  ): Promise<BoothEntity> {
+    return this.exhibitorManagementService.assignExhibitorToBooth({
+      tenantId,
+      eventId,
+      boothId,
+      exhibitorId,
+    });
   }
 
   @Post('exhibitors/:exhibitorId/leads')
