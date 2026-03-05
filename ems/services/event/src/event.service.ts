@@ -5,6 +5,7 @@ import { DeepPartial, Repository } from 'typeorm';
 import { EventEntity, EventStatus } from './entities/event.entity';
 import { VenueEntity } from './entities/venue.entity';
 import { EventSearchIndexService } from './event-search-index.service';
+import { EventLifecyclePublisher } from './event-lifecycle.publisher';
 
 @Injectable()
 export class EventService {
@@ -24,12 +25,20 @@ export class EventService {
     @InjectRepository(VenueEntity)
     private readonly venueRepository: Repository<VenueEntity>,
     private readonly eventSearchIndexService: EventSearchIndexService,
+    private readonly eventLifecyclePublisher: EventLifecyclePublisher,
   ) {}
 
   async create(input: DeepPartial<EventEntity>): Promise<EventEntity> {
     const event = this.eventRepository.create(input);
     const savedEvent = await this.eventRepository.save(event);
     await this.reindexSearchDocument(savedEvent.tenantId, savedEvent.id);
+    await this.eventLifecyclePublisher.publish('event.created', savedEvent, {
+      status: savedEvent.status,
+      name: savedEvent.name,
+      code: savedEvent.code,
+      startAt: savedEvent.startAt.toISOString(),
+      endAt: savedEvent.endAt.toISOString(),
+    });
     return savedEvent;
   }
 
@@ -104,9 +113,15 @@ export class EventService {
       return null;
     }
 
+    const previousStatus = event.status;
     Object.assign(event, input);
     const updatedEvent = await this.eventRepository.save(event);
     await this.reindexSearchDocument(updatedEvent.tenantId, updatedEvent.id);
+    await this.eventLifecyclePublisher.publish('event.updated', updatedEvent, {
+      previousStatus,
+      status: updatedEvent.status,
+      updatedFields: Object.keys(input),
+    });
     return updatedEvent;
   }
 
@@ -114,6 +129,11 @@ export class EventService {
     const result = await this.eventRepository.delete({ id: eventId, tenantId });
     if ((result.affected ?? 0) > 0) {
       await this.eventSearchIndexService.deleteEvent(eventId);
+      await this.eventLifecyclePublisher.publish(
+        'event.deleted',
+        { id: eventId, tenantId },
+        { deleted: true },
+      );
     }
     return (result.affected ?? 0) > 0;
   }
@@ -147,7 +167,13 @@ export class EventService {
       );
     }
 
+    const previousStatus = event.status;
     event.status = nextStatus;
-    return this.eventRepository.save(event);
+    const updatedEvent = await this.eventRepository.save(event);
+    await this.eventLifecyclePublisher.publish('event.status_changed', updatedEvent, {
+      previousStatus,
+      status: nextStatus,
+    });
+    return updatedEvent;
   }
 }
