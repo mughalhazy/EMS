@@ -33,6 +33,10 @@ export class RegistrationController {
       eventId: payload.eventId,
       userId: payload.userId,
       ticketId: payload.ticketId,
+      orderId: payload.orderId,
+      orderItemId: payload.orderItemId,
+      attendeeIndex: payload.attendeeIndex,
+      profile: payload.profile,
     });
   }
 

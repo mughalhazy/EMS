@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
+import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
+import { OrderEntity } from '../../commerce/src/entities/order.entity';
 import { EventSettingEntity } from '../../event/src/entities/event-setting.entity';
+import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
+import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
+import { CreateRegistrantProfileDto } from './dto/create-registration.dto';
+import { RegistrantProfileEntity } from './entities/registrant-profile.entity';
 import { RegistrationEntity, RegistrationStatus } from './entities/registration.entity';
 import { RegistrationEventsPublisher } from './registration-events.publisher';
 
@@ -12,6 +18,10 @@ export interface RegisterForEventInput {
   eventId: string;
   userId: string;
   ticketId: string;
+  orderId?: string;
+  orderItemId?: string;
+  attendeeIndex?: number;
+  profile: CreateRegistrantProfileDto;
 }
 
 export interface UpdateRegistrationInput {
@@ -25,6 +35,16 @@ export class RegistrationService {
     private readonly registrationRepository: Repository<RegistrationEntity>,
     @InjectRepository(EventSettingEntity)
     private readonly eventSettingRepository: Repository<EventSettingEntity>,
+    @InjectRepository(TicketEntity)
+    private readonly ticketRepository: Repository<TicketEntity>,
+    @InjectRepository(OrderEntity)
+    private readonly orderRepository: Repository<OrderEntity>,
+    @InjectRepository(OrderItemEntity)
+    private readonly orderItemRepository: Repository<OrderItemEntity>,
+    @InjectRepository(RegistrantProfileEntity)
+    private readonly registrantProfileRepository: Repository<RegistrantProfileEntity>,
+    @InjectRepository(RegistrationQuestionEntity)
+    private readonly registrationQuestionRepository: Repository<RegistrationQuestionEntity>,
     private readonly registrationEventsPublisher: RegistrationEventsPublisher,
     private readonly auditService: AuditService,
   ) {}
@@ -33,6 +53,9 @@ export class RegistrationService {
     return this.registrationRepository.manager.transaction(async (manager) => {
       const registrationRepo = manager.getRepository(RegistrationEntity);
       const eventSettingRepo = manager.getRepository(EventSettingEntity);
+      const registrantProfileRepo = manager.getRepository(RegistrantProfileEntity);
+
+      await this.assertRegistrationInput(input);
 
       const existing = await registrationRepo.findOne({
         where: {
@@ -64,9 +87,25 @@ export class RegistrationService {
         ...(existing ?? {}),
         ...input,
         status,
+        orderId: input.orderId ?? null,
+        orderItemId: input.orderItemId ?? null,
+        attendeeIndex: input.attendeeIndex ?? null,
       });
 
       const savedRegistration = await registrationRepo.save(registration);
+
+      const profile = registrantProfileRepo.create({
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+        registrationId: savedRegistration.id,
+        name: input.profile.name,
+        contact: {
+          email: input.profile.contact.email.trim().toLowerCase(),
+          phone: input.profile.contact.phone,
+        },
+        answers: input.profile.answers,
+      });
+      await registrantProfileRepo.save(profile);
 
       await this.registrationEventsPublisher.publishRegistrationCreated(savedRegistration);
 
@@ -85,11 +124,86 @@ export class RegistrationService {
           registrationId: savedRegistration.id,
           eventId: savedRegistration.eventId,
           ticketId: savedRegistration.ticketId,
+          orderId: savedRegistration.orderId,
         },
       });
 
       return savedRegistration;
     });
+  }
+
+  private async assertRegistrationInput(input: RegisterForEventInput): Promise<void> {
+    const ticket = await this.ticketRepository.findOne({
+      where: {
+        id: input.ticketId,
+        tenantId: input.tenantId,
+      },
+    });
+
+    if (!ticket || ticket.eventId !== input.eventId) {
+      throw new BadRequestException('Ticket is invalid for the selected event.');
+    }
+
+    if (input.orderId || input.orderItemId || input.attendeeIndex !== undefined) {
+      if (!input.orderId || !input.orderItemId || input.attendeeIndex === undefined) {
+        throw new BadRequestException('orderId, orderItemId, and attendeeIndex must be provided together.');
+      }
+
+      const order = await this.orderRepository.findOne({
+        where: {
+          id: input.orderId,
+          tenantId: input.tenantId,
+        },
+      });
+
+      if (!order) {
+        throw new BadRequestException('Order does not exist in the tenant context.');
+      }
+
+      const orderItem = await this.orderItemRepository.findOne({
+        where: {
+          id: input.orderItemId,
+          tenantId: input.tenantId,
+          orderId: input.orderId,
+        },
+      });
+
+      if (!orderItem) {
+        throw new BadRequestException('Order item does not exist in the tenant context.');
+      }
+
+      if (ticket.inventoryId !== orderItem.inventoryId) {
+        throw new BadRequestException('Order item does not match the selected ticket inventory.');
+      }
+
+      const attendee = orderItem.attendees[input.attendeeIndex];
+      if (!attendee || attendee.isTicketOwner !== true) {
+        throw new BadRequestException('Registration attendee must be the designated ticket owner.');
+      }
+    }
+
+    const requiredQuestions = await this.registrationQuestionRepository.find({
+      where: {
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+        isActive: true,
+        isRequired: true,
+      },
+    });
+
+    const providedAnswers = new Map(
+      input.profile.answers.map((answer) => [answer.questionId, answer.value?.trim()]),
+    );
+
+    const missingRequiredQuestionIds = requiredQuestions
+      .filter((question) => !providedAnswers.get(question.id))
+      .map((question) => question.id);
+
+    if (missingRequiredQuestionIds.length > 0) {
+      throw new BadRequestException(
+        `Missing required registration answers for question IDs: ${missingRequiredQuestionIds.join(', ')}.`,
+      );
+    }
   }
 
   async list(

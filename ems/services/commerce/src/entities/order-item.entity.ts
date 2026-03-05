@@ -14,6 +14,11 @@ export interface OrderItemAttendee {
   firstName?: string;
   lastName?: string;
   email?: string;
+  isTicketOwner?: boolean;
+  answers?: Array<{
+    questionId: string;
+    value: string;
+  }>;
 }
 
 @Entity({ name: 'order_items' })
