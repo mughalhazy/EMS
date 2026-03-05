@@ -1,23 +1,26 @@
 import {
-  Check,
   Column,
   CreateDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-export enum EventLifecycleState {
+import { RoomEntity } from './room.entity';
+import { VenueEntity } from './venue.entity';
+
+export enum EventStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
   LIVE = 'live',
-  ARCHIVED = 'archived',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
 }
 
 @Entity({ name: 'events' })
 @Index('uq_events_tenant_code', ['tenantId', 'code'], { unique: true })
-@Check('"start_at" < "end_at"')
 export class EventEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -31,13 +34,13 @@ export class EventEntity {
   @Column({ type: 'varchar', length: 255 })
   name!: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 64 })
   code!: string;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 64 })
   timezone!: string;
 
   @Column({ type: 'timestamptz', name: 'start_at' })
@@ -46,12 +49,14 @@ export class EventEntity {
   @Column({ type: 'timestamptz', name: 'end_at' })
   endAt!: Date;
 
-  @Column({
-    type: 'enum',
-    enum: EventLifecycleState,
-    default: EventLifecycleState.DRAFT,
-  })
-  status!: EventLifecycleState;
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT })
+  status!: EventStatus;
+
+  @OneToMany(() => VenueEntity, (venue) => venue.event)
+  venues!: VenueEntity[];
+
+  @OneToMany(() => RoomEntity, (room) => room.event)
+  rooms!: RoomEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
