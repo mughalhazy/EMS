@@ -6,6 +6,7 @@ import { EventController } from './event.controller';
 import { EventSettingController } from './event-setting.controller';
 import { EventSettingService } from './event-setting.service';
 import { EventSearchIndexService } from './event-search-index.service';
+import { EventLifecyclePublisher } from './event-lifecycle.publisher';
 import { EventService } from './event.service';
 import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
@@ -25,6 +26,7 @@ import { VenueService } from './venue.service';
   providers: [
     EventService,
     EventSearchIndexService,
+    EventLifecyclePublisher,
     EventSettingService,
     VenueService,
     RoomService,

@@ -5,7 +5,7 @@ export class CreateEventsTable1713000000000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TYPE "public"."events_status_enum" AS ENUM('draft', 'published', 'live', 'completed', 'cancelled')
+      CREATE TYPE "public"."events_status_enum" AS ENUM('draft', 'published', 'live', 'archived')
     `);
 
     await queryRunner.query(`
