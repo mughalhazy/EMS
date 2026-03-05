@@ -42,6 +42,8 @@ export class EventController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Body() payload: CreateEventDto,
   ): Promise<EventEntity> {
+    await this.ensureTenantOwnsTemplateEvent(tenantId, payload.templateEventId);
+
     const existingEvent = await this.eventService.findByTenantAndCode(
       tenantId,
       payload.code,
@@ -53,28 +55,21 @@ export class EventController {
       );
     }
 
-    const createdEvent = await this.eventService.create({
-      tenantId,
-      organizationId: payload.organizationId,
-      name: payload.name,
-      code: payload.code,
-      description: payload.description ?? null,
-      timezone: payload.timezone,
-      startAt: new Date(payload.startAt),
-      endAt: new Date(payload.endAt),
-      status: payload.status,
-      agenda: payload.agenda,
-      settings: payload.settings,
-    });
-
-    await this.auditService.trackEventChange({
-      tenantId,
-      action: 'event.created',
-      metadata: { eventId: createdEvent.id },
-      after: this.serializeEventForAudit(createdEvent),
-    });
-
-    return createdEvent;
+    return this.eventService.create(
+      {
+        tenantId,
+        organizationId: payload.organizationId,
+        name: payload.name,
+        code: payload.code,
+        description: payload.description ?? null,
+        timezone: payload.timezone,
+        startAt: new Date(payload.startAt),
+        endAt: new Date(payload.endAt),
+        status: payload.status,
+        agenda: payload.agenda,
+        settings: payload.settings,
+      },
+    );
   }
 
   @Get()
@@ -211,5 +206,23 @@ export class EventController {
       createdAt: event.createdAt.toISOString(),
       updatedAt: event.updatedAt.toISOString(),
     };
+  }
+
+  private async ensureTenantOwnsTemplateEvent(
+    tenantId: string,
+    templateEventId?: string,
+  ): Promise<void> {
+    if (!templateEventId) {
+      return;
+    }
+
+    const templateEvent = await this.eventService.findByTenantAndId(
+      tenantId,
+      templateEventId,
+    );
+
+    if (!templateEvent) {
+      throw new NotFoundException('Template event not found in tenant.');
+    }
   }
 }
