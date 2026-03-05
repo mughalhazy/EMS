@@ -29,6 +29,7 @@ export class ExhibitorManagementService {
     description?: string | null;
     sponsorshipTier?: ExhibitorEntity['sponsorshipTier'];
     contactInfo?: Record<string, unknown> | null;
+    sponsorshipTier?: ExhibitorEntity['sponsorshipTier'];
     actorUserId?: string;
   }): Promise<ExhibitorEntity> {
     await this.ensureEventExists(input.tenantId, input.eventId);
@@ -93,6 +94,14 @@ export class ExhibitorManagementService {
       return null;
     }
 
+    if (input.eventId && input.eventId !== eventId) {
+      throw new ConflictException('Exhibitor cannot be moved to a different event.');
+    }
+
+    if (input.tenantId && input.tenantId !== tenantId) {
+      throw new ConflictException('Exhibitor cannot be moved to a different tenant.');
+    }
+
     const before = this.auditExhibitor(exhibitor);
     Object.assign(exhibitor, input);
     const updated = await this.exhibitorRepository.save(exhibitor);
@@ -153,7 +162,7 @@ export class ExhibitorManagementService {
     });
 
     return this.boothRepository.findOneOrFail({
-      where: { id: booth.id },
+      where: { id: booth.id, tenantId: input.tenantId, eventId: input.eventId },
       relations: { exhibitor: true, venue: true },
     });
   }
@@ -213,7 +222,7 @@ export class ExhibitorManagementService {
     });
 
     return this.boothRepository.findOneOrFail({
-      where: { id: updated.id },
+      where: { id: updated.id, tenantId: input.tenantId, eventId: input.eventId },
       relations: { exhibitor: true, venue: true },
     });
   }
