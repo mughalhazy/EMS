@@ -10,10 +10,17 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
+import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
+import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { CheckoutOrderDto } from './dto/checkout-order.dto';
-import { CreateTicketOrderDto } from './dto/create-ticket-order.dto';
+import {
+  CreateTicketOrderAttendeeDto,
+  CreateTicketOrderDto,
+} from './dto/create-ticket-order.dto';
 import { OrderEntity, OrderStatus } from './entities/order.entity';
 import { PaymentEntity } from './entities/payment.entity';
 import { OrderService } from './order.service';
@@ -22,6 +29,10 @@ import { PaymentService } from './payment.service';
 @Controller('api/v1/tenants/:tenantId/ticket-purchases')
 export class CheckoutController {
   constructor(
+    @InjectRepository(TicketEntity)
+    private readonly ticketRepository: Repository<TicketEntity>,
+    @InjectRepository(RegistrationQuestionEntity)
+    private readonly registrationQuestionRepository: Repository<RegistrationQuestionEntity>,
     private readonly orderService: OrderService,
     private readonly paymentService: PaymentService,
   ) {}
@@ -35,6 +46,7 @@ export class CheckoutController {
   ): Promise<OrderEntity> {
     this.assertIdempotencyKey(idempotencyKey);
     this.assertAttendeeCounts(payload);
+    await this.assertTicketOwnershipAndRequiredQuestions(tenantId, payload);
 
     const items = payload.items ?? [];
     const subtotal = items.reduce((total, item) => total + item.quantity * item.unitPrice, 0);
@@ -110,5 +122,88 @@ export class CheckoutController {
         );
       }
     }
+  }
+
+  private async assertTicketOwnershipAndRequiredQuestions(
+    tenantId: string,
+    payload: CreateTicketOrderDto,
+  ): Promise<void> {
+    const inventoryIds = Array.from(new Set((payload.items ?? []).map((item) => item.inventoryId)));
+    if (inventoryIds.length === 0) {
+      return;
+    }
+
+    const tickets = await this.ticketRepository.find({
+      where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
+    });
+
+    const ticketByInventoryId = new Map(tickets.map((ticket) => [ticket.inventoryId, ticket]));
+    const eventIds = Array.from(new Set(tickets.map((ticket) => ticket.eventId)));
+
+    const questions = eventIds.length
+      ? await this.registrationQuestionRepository.find({
+          where: eventIds.map((eventId) => ({ tenantId, eventId, isActive: true })),
+        })
+      : [];
+
+    const requiredQuestionIdsByEvent = new Map<string, Set<string>>();
+
+    for (const question of questions) {
+      if (!question.isRequired) {
+        continue;
+      }
+
+      const eventQuestionIds = requiredQuestionIdsByEvent.get(question.eventId) ?? new Set<string>();
+      eventQuestionIds.add(question.id);
+      requiredQuestionIdsByEvent.set(question.eventId, eventQuestionIds);
+    }
+
+    for (const item of payload.items ?? []) {
+      const ticket = ticketByInventoryId.get(item.inventoryId);
+      if (!ticket) {
+        throw new BadRequestException(`Ticket not found for inventory '${item.inventoryId}'.`);
+      }
+
+      const attendees = item.attendees ?? [];
+      const ticketOwners = attendees.filter((attendee) => attendee.isTicketOwner);
+      if (ticketOwners.length !== 1) {
+        throw new BadRequestException(
+          `Exactly one ticket owner is required for inventory '${item.inventoryId}'.`,
+        );
+      }
+
+      const requiredQuestionIds = requiredQuestionIdsByEvent.get(ticket.eventId);
+      if (!requiredQuestionIds?.size) {
+        continue;
+      }
+
+      attendees.forEach((attendee, attendeeIndex) => {
+        this.assertRequiredQuestionAnswers(item.inventoryId, attendeeIndex, attendee, requiredQuestionIds);
+      });
+    }
+  }
+
+  private assertRequiredQuestionAnswers(
+    inventoryId: string,
+    attendeeIndex: number,
+    attendee: CreateTicketOrderAttendeeDto,
+    requiredQuestionIds: Set<string>,
+  ): void {
+    const answersByQuestionId = new Map(
+      (attendee.answers ?? []).map((answer) => [answer.questionId, answer.value]),
+    );
+
+    const missingRequiredQuestionIds = Array.from(requiredQuestionIds).filter((questionId) => {
+      const value = answersByQuestionId.get(questionId);
+      return typeof value !== 'string' || !value.trim();
+    });
+
+    if (missingRequiredQuestionIds.length === 0) {
+      return;
+    }
+
+    throw new BadRequestException(
+      `Attendee at index ${attendeeIndex} for inventory '${inventoryId}' is missing required answers for question IDs: ${missingRequiredQuestionIds.join(', ')}.`,
+    );
   }
 }
