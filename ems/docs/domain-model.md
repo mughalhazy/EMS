@@ -384,6 +384,38 @@ Message sent by system (email/SMS/push/in-app) related to operational or transac
 
 ---
 
+### 19) ticket_fulfillment
+Represents issuance and lifecycle of a digital ticket artifact after payment success (e.g., QR pass attached to an attendee/registration).
+
+**Key attributes**
+- `id` (PK)
+- `tenant_id` (FK -> tenant)
+- `event_id` (FK -> event)
+- `order_id` (FK -> order)
+- `payment_id` (FK -> payment)
+- `registration_id` (FK -> registration)
+- `attendee_id` (FK -> attendee)
+- `ticket_id` (FK -> ticket)
+- `fulfillment_status` (`pending|generated|attached|revoked|failed`)
+- `artifact_type` (`qr_png|qr_svg|wallet_pass|pdf`)
+- `artifact_url` (secure storage path, nullable until generated)
+- `artifact_checksum` (optional integrity hash)
+- `issued_at` (optional)
+- `attached_at` (optional)
+- `revoked_at` (optional)
+- `failure_reason` (optional)
+- `idempotency_key` (generation dedupe key)
+- `created_at`, `updated_at`
+
+**Constraints**
+- Exactly one active generated fulfillment per registration (`registration_id`, `fulfillment_status in generated|attached`).
+- Fulfillment generation is allowed only when linked `payment.status = captured` and `order.status in paid|partially_refunded`.
+- `attendee_id`, `registration_id`, `ticket_id`, and `event_id` must all resolve to the same event and tenant.
+- Replays with same `idempotency_key` must return existing fulfillment artifact instead of generating a new QR.
+- On refund/void/cancel transitions, fulfillment must move to `revoked` and previously issued QR must be invalidated.
+
+---
+
 ## Relationship Summary
 
 ### Core hierarchy
@@ -405,6 +437,8 @@ Message sent by system (email/SMS/push/in-app) related to operational or transac
 - `ticket` 1---* `registration`
 - `order` 1---* `payment`
 - `order` 1---* `registration` (one order can cover multiple registrations)
+- `registration` 1---* `ticket_fulfillment`
+- `attendee` 1---* `ticket_fulfillment`
 
 ### Partners & lead capture
 - `event` 1---* `sponsor`
@@ -449,6 +483,7 @@ To operationalize the model cleanly, these additional models are recommended:
 - `order_line` (order <-> ticket with quantity/unit price)
 - `registration_checkin` (historical check-in/out records)
 - `notification_delivery_attempt` (provider-level retry log)
+- `ticket_fulfillment_attempt` (generation/attachment retry log)
 
 These are not part of the mandatory entity list but are typically required for production-grade behavior.
 

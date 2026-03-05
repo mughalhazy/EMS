@@ -269,11 +269,12 @@ This structure supports immediate productivity while preserving clear seams for 
 ### Canonical domain ownership map
 - **Identity & Access:** `tenant`, `organization`, `user`, `role`.
 - **Event Operations:** `event`, `venue`, `session`, `sponsor`, `exhibitor`.
-- **Commerce & Participation:** `ticket`, `registration`, `attendee`, `order`, `payment`.
+- **Commerce & Participation:** `ticket`, `registration`, `attendee`, `order`, `payment`, `ticket_fulfillment`.
 - **Engagement:** `notification`.
 
 ### Consistency guardrails
 1. Each canonical entity has exactly one write-owner module at any time.
 2. Cross-module state changes occur via API command contracts or domain events, never shared mutable persistence.
 3. Extracted services must preserve existing API/event schema compatibility for at least one deprecation window.
-4. AI-facing pipelines must consume only governed projections (no direct cross-tenant table scans).
+4. Payment-captured events must drive idempotent QR/pass fulfillment generation and attendee attachment updates via asynchronous handlers.
+5. AI-facing pipelines must consume only governed projections (no direct cross-tenant table scans).
