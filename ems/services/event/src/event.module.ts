@@ -24,6 +24,10 @@ import { VenueController } from './venue.controller';
 import { VenueService } from './venue.service';
 import { SessionCapacityService } from './session-capacity.service';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
+import { SpeakerAssignmentController } from './speaker-assignment.controller';
+import { SpeakerAssignmentService } from './speaker-assignment.service';
+import { SpeakerController } from './speaker.controller';
+import { SpeakerService } from './speaker.service';
 
 @Module({
   imports: [
@@ -45,6 +49,7 @@ import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
     EventSettingController,
     VenueController,
     RoomController,
+    SpeakerController,
     SpeakerAssignmentController,
   ],
   providers: [
@@ -55,8 +60,17 @@ import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
     VenueService,
     RoomService,
     SessionService,
+    SpeakerService,
+    SpeakerAssignmentService,
     SessionLifecyclePublisher,
   ],
-  exports: [EventService, EventSettingService, VenueService, RoomService, SessionService],
+  exports: [
+    EventService,
+    EventSettingService,
+    VenueService,
+    RoomService,
+    SessionService,
+    SpeakerService,
+  ],
 })
 export class EventModule {}
