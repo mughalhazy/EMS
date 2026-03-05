@@ -18,6 +18,7 @@ import {
 import { AuthTokenEntity, AuthTokenType } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
 import { UserEntity, UserStatus } from '../../user/src/entities/user.entity';
+import { TenantContext } from './tenant-context';
 
 const DEFAULT_BCRYPT_ROUNDS = 12;
 const PASSWORD_RESET_TTL_MS = 1000 * 60 * 30;
@@ -156,9 +157,14 @@ export class AuthService {
     return this.linkFederatedIdentity(provider.id, createdUser, input);
   }
 
-  async upsertPassword(userId: string, plaintextPassword: string): Promise<void> {
+  async upsertPassword(
+    tenantId: string | undefined,
+    userId: string,
+    plaintextPassword: string,
+  ): Promise<void> {
     this.ensurePasswordStrength(plaintextPassword);
 
+    const scopedTenantId = this.resolveTenantId(tenantId);
     const passwordHash = await bcrypt.hash(plaintextPassword, DEFAULT_BCRYPT_ROUNDS);
     const existing = await this.findCredentialByTenantAndUserId(scopedTenantId, userId);
 
@@ -320,6 +326,75 @@ export class AuthService {
         emailVerifiedAt: null,
       }),
     );
+  }
+
+  private resolveTenantId(tenantId?: string): string {
+    return tenantId ?? TenantContext.requireTenantId();
+  }
+
+  private async ensureTenantUserExists(tenantId: string, userId: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId, tenantId } });
+
+    if (!user) {
+      throw new NotFoundException('User does not exist for the tenant');
+    }
+  }
+
+  private async findCredentialByTenantAndUserId(
+    tenantId: string,
+    userId: string,
+  ): Promise<AuthCredentialEntity | null> {
+    return this.credentialRepository
+      .createQueryBuilder('credential')
+      .innerJoin(UserEntity, 'user', 'user.id = credential.user_id')
+      .where('credential.user_id = :userId', { userId })
+      .andWhere('user.tenant_id = :tenantId', { tenantId })
+      .getOne();
+  }
+
+  private async findTokensByTenantAndType(
+    tenantId: string,
+    userId: string,
+    type: AuthTokenType,
+  ): Promise<AuthTokenEntity[]> {
+    return this.tokenRepository
+      .createQueryBuilder('token')
+      .innerJoin(UserEntity, 'user', 'user.id = token.user_id')
+      .where('token.user_id = :userId', { userId })
+      .andWhere('token.type = :type', { type })
+      .andWhere('token.consumed_at IS NULL')
+      .andWhere('token.expires_at > :now', { now: new Date() })
+      .andWhere('user.tenant_id = :tenantId', { tenantId })
+      .getMany();
+  }
+
+  private async findTokenByTenantAndHash(
+    tenantId: string,
+    userId: string,
+    type: AuthTokenType,
+    tokenHash: string,
+  ): Promise<AuthTokenEntity | null> {
+    return this.tokenRepository
+      .createQueryBuilder('token')
+      .innerJoin(UserEntity, 'user', 'user.id = token.user_id')
+      .where('token.user_id = :userId', { userId })
+      .andWhere('token.type = :type', { type })
+      .andWhere('token.token_hash = :tokenHash', { tokenHash })
+      .andWhere('token.consumed_at IS NULL')
+      .andWhere('user.tenant_id = :tenantId', { tenantId })
+      .getOne();
+  }
+
+  private async findUserStateByTenantAndUserId(
+    tenantId: string,
+    userId: string,
+  ): Promise<AuthUserStateEntity | null> {
+    return this.stateRepository
+      .createQueryBuilder('state')
+      .innerJoin(UserEntity, 'user', 'user.id = state.user_id')
+      .where('state.user_id = :userId', { userId })
+      .andWhere('user.tenant_id = :tenantId', { tenantId })
+      .getOne();
   }
 
   private generateToken(): string {
