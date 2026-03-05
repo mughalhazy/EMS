@@ -34,7 +34,7 @@ export class VenueController {
   ): Promise<VenueEntity> {
     await this.ensureEventExists(tenantId, eventId);
 
-    return this.venueService.create({
+    const venue = await this.venueService.create({
       tenantId,
       eventId,
       name: payload.name,
@@ -45,6 +45,9 @@ export class VenueController {
       virtualUrl: payload.virtualUrl ?? null,
       capacity: payload.capacity ?? null,
     });
+
+    await this.eventService.reindexSearchDocument(tenantId, eventId);
+    return venue;
   }
 
   @Get()
@@ -88,6 +91,7 @@ export class VenueController {
       throw new NotFoundException('Venue not found in event.');
     }
 
+    await this.eventService.reindexSearchDocument(tenantId, eventId);
     return venue;
   }
 
@@ -103,6 +107,8 @@ export class VenueController {
     if (!deleted) {
       throw new NotFoundException('Venue not found in event.');
     }
+
+    await this.eventService.reindexSearchDocument(tenantId, eventId);
   }
 
   private async ensureEventExists(tenantId: string, eventId: string): Promise<void> {
