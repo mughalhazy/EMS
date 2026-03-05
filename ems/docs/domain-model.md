@@ -95,7 +95,7 @@ Top-level event (conference, expo, summit).
 - `description`
 - `timezone`
 - `start_at`, `end_at`
-- `status` (`draft|published|live|completed|cancelled`)
+- `status` (`draft|published|live|archived`)
 - `created_at`, `updated_at`
 
 **Constraints**
