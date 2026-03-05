@@ -12,10 +12,12 @@ import {
 } from '@nestjs/common';
 
 import { AssignExhibitorBoothDto } from './dto/assign-exhibitor-booth.dto';
+import { CaptureLeadDto } from './dto/capture-lead.dto';
 import { CreateBoothDto } from './dto/create-booth.dto';
 import { CreateExhibitorDto } from './dto/create-exhibitor.dto';
 import { UpdateExhibitorDto } from './dto/update-exhibitor.dto';
 import { BoothEntity } from './entities/booth.entity';
+import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { ExhibitorManagementService } from './exhibitor-management.service';
 
@@ -115,6 +117,23 @@ export class ExhibitorManagementController {
       eventId,
       boothId,
       exhibitorId: payload.exhibitorId,
+    });
+  }
+
+  @Post('exhibitors/:exhibitorId/leads')
+  @HttpCode(HttpStatus.CREATED)
+  async captureLead(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
+    @Body() payload: CaptureLeadDto,
+  ): Promise<ExhibitorLeadCaptureEntity> {
+    return this.exhibitorManagementService.captureLead({
+      tenantId,
+      eventId,
+      exhibitorId,
+      attendeeId: payload.attendeeId,
+      capturedAt: payload.capturedAt ? new Date(payload.capturedAt) : undefined,
     });
   }
 }

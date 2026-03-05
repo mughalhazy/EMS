@@ -3,10 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
+import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { EventEntity } from '../../event/src/entities/event.entity';
 import { VenueEntity } from '../../event/src/entities/venue.entity';
 import { BoothEntity } from './entities/booth.entity';
+import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
+import { ExhibitorEventsPublisher } from './exhibitor-events.publisher';
 
 @Injectable()
 export class ExhibitorManagementService {
@@ -17,9 +20,14 @@ export class ExhibitorManagementService {
     private readonly venueRepository: Repository<VenueEntity>,
     @InjectRepository(ExhibitorEntity)
     private readonly exhibitorRepository: Repository<ExhibitorEntity>,
+    @InjectRepository(AttendeeEntity)
+    private readonly attendeeRepository: Repository<AttendeeEntity>,
+    @InjectRepository(ExhibitorLeadCaptureEntity)
+    private readonly exhibitorLeadCaptureRepository: Repository<ExhibitorLeadCaptureEntity>,
     @InjectRepository(BoothEntity)
     private readonly boothRepository: Repository<BoothEntity>,
     private readonly auditService: AuditService,
+    private readonly exhibitorEventsPublisher: ExhibitorEventsPublisher,
   ) {}
 
   async createExhibitor(input: {
@@ -61,7 +69,47 @@ export class ExhibitorManagementService {
       after: this.auditExhibitor(exhibitor),
     });
 
+    await this.exhibitorEventsPublisher.publishExhibitorCreated(exhibitor);
+
     return exhibitor;
+  }
+
+  async captureLead(input: {
+    tenantId: string;
+    eventId: string;
+    exhibitorId: string;
+    attendeeId: string;
+    capturedAt?: Date;
+    actorUserId?: string;
+  }): Promise<ExhibitorLeadCaptureEntity> {
+    await this.ensureExhibitorExists(input.tenantId, input.eventId, input.exhibitorId);
+    await this.ensureAttendeeExists(input.tenantId, input.eventId, input.attendeeId);
+
+    const leadCapture = await this.exhibitorLeadCaptureRepository.save(
+      this.exhibitorLeadCaptureRepository.create({
+        exhibitorId: input.exhibitorId,
+        attendeeId: input.attendeeId,
+        capturedAt: input.capturedAt ?? new Date(),
+      }),
+    );
+
+    await this.auditService.trackEventChange({
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      action: 'lead.captured',
+      after: {
+        exhibitorId: leadCapture.exhibitorId,
+        attendeeId: leadCapture.attendeeId,
+        capturedAt: leadCapture.capturedAt,
+      },
+    });
+
+    await this.exhibitorEventsPublisher.publishLeadCaptured(leadCapture, {
+      tenantId: input.tenantId,
+      eventId: input.eventId,
+    });
+
+    return leadCapture;
   }
 
   async listExhibitors(tenantId: string, eventId: string): Promise<ExhibitorEntity[]> {
@@ -230,6 +278,17 @@ export class ExhibitorManagementService {
     const venue = await this.venueRepository.findOne({ where: { id: venueId, tenantId, eventId } });
     if (!venue) {
       throw new NotFoundException('Venue not found in event.');
+    }
+  }
+
+  private async ensureAttendeeExists(
+    tenantId: string,
+    eventId: string,
+    attendeeId: string,
+  ): Promise<void> {
+    const attendee = await this.attendeeRepository.findOne({ where: { id: attendeeId, tenantId, eventId } });
+    if (!attendee) {
+      throw new NotFoundException('Attendee not found in event.');
     }
   }
 
