@@ -60,6 +60,7 @@ export class PaymentService {
       }),
     );
 
+    await this.publishPaymentCompletedIfNeeded(payment);
     await this.syncOrderStatusFromPayment(payment);
     await this.trackPurchaseOrRefundAudit(null, payment);
 
@@ -82,6 +83,9 @@ export class PaymentService {
     const previousStatus = payment.status;
     payment.status = status;
     const savedPayment = await this.paymentRepository.save(payment);
+    if (previousStatus !== PaymentStatus.SUCCEEDED) {
+      await this.publishPaymentCompletedIfNeeded(savedPayment);
+    }
     await this.syncOrderStatusFromPayment(savedPayment);
     await this.trackPurchaseOrRefundAudit(previousStatus, savedPayment);
 

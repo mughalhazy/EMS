@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuditModule } from '../../audit/src/audit.module';
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
+import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderItemEntity } from './entities/order-item.entity';
 import { OrderEntity } from './entities/order.entity';
 import { PaymentEntity } from './entities/payment.entity';

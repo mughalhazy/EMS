@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
+import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderItemEntity } from './entities/order-item.entity';
 import {
   OrderEntity,
@@ -36,6 +37,7 @@ export class OrderService {
     @InjectRepository(InventoryEntity)
     private readonly inventoryRepository: Repository<InventoryEntity>,
     private readonly redisLockService: RedisLockService,
+    private readonly commerceEventsPublisher: CommerceEventsPublisher,
   ) {}
 
   async create(input: CreateOrderInput): Promise<OrderEntity> {
@@ -67,6 +69,8 @@ export class OrderService {
       await this.orderItemRepository.save(items);
       savedOrder.items = items;
     }
+
+    await this.commerceEventsPublisher.publishOrderCreated(savedOrder);
 
     return savedOrder;
   }
