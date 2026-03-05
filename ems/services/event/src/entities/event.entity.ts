@@ -52,6 +52,12 @@ export class EventEntity {
   @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT })
   status!: EventStatus;
 
+  @Column({ type: 'jsonb', nullable: true })
+  agenda!: Record<string, unknown> | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  settings!: Record<string, unknown> | null;
+
   @OneToMany(() => VenueEntity, (venue) => venue.event)
   venues!: VenueEntity[];
 

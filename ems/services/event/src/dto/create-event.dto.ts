@@ -9,4 +9,7 @@ export class CreateEventDto {
   startAt!: string;
   endAt!: string;
   status?: EventStatus;
+  templateEventId?: string;
+  agenda?: Record<string, unknown> | null;
+  settings?: Record<string, unknown> | null;
 }
