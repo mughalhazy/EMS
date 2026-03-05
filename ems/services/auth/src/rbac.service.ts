@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { RolePermissionEntity } from './entities/role-permission.entity';
+import { RoleEntity } from './entities/role.entity';
 import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
 
 @Injectable()
@@ -37,12 +38,13 @@ export class RbacService {
       return { roles: [], permissions: [] };
     }
 
-    const rolePermissions = await this.rolePermissionRepository.find({
-      where: roleIds.map((roleId) => ({ roleId })),
-      relations: {
-        permission: true,
-      },
-    });
+    const rolePermissions = await this.rolePermissionRepository
+      .createQueryBuilder('rolePermission')
+      .innerJoinAndSelect('rolePermission.permission', 'permission')
+      .innerJoin(RoleEntity, 'role', 'role.id = rolePermission.role_id')
+      .where('rolePermission.role_id IN (:...roleIds)', { roleIds })
+      .andWhere('role.tenant_id = :tenantId', { tenantId })
+      .getMany();
 
     const permissions = [...new Set(rolePermissions.map((row) => row.permission.code))];
     return {
