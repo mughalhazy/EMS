@@ -1,6 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { UserEntity } from '../../user/src/entities/user.entity';
+import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
 import { RbacService } from './rbac.service';
@@ -23,6 +25,11 @@ import { UserEntity } from '../../user/src/entities/user.entity';
       AuthUserStateEntity,
       AuthSsoProviderEntity,
       AuthFederatedIdentityEntity,
+      RefreshTokenEntity,
+      RoleEntity,
+      PermissionEntity,
+      RolePermissionEntity,
+      UserRoleAssignmentEntity,
       UserEntity,
       RoleEntity,
       PermissionEntity,
