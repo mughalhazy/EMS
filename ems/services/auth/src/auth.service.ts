@@ -9,8 +9,14 @@ import { createHash, randomBytes } from 'crypto';
 import { Repository } from 'typeorm';
 
 import { AuthCredentialEntity } from './entities/auth-credential.entity';
+import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
+import {
+  AuthSsoProviderEntity,
+  AuthSsoProviderType,
+} from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity, AuthTokenType } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
+import { UserEntity, UserStatus } from '../../user/src/entities/user.entity';
 
 const DEFAULT_BCRYPT_ROUNDS = 12;
 const PASSWORD_RESET_TTL_MS = 1000 * 60 * 30;
@@ -19,6 +25,26 @@ const EMAIL_VERIFICATION_TTL_MS = 1000 * 60 * 60 * 24;
 export interface AuthTokenIssueResult {
   token: string;
   expiresAt: Date;
+}
+
+export interface UpsertSsoProviderInput {
+  tenantId: string;
+  type: AuthSsoProviderType;
+  slug: string;
+  name: string;
+  enabled?: boolean;
+  configuration: Record<string, unknown>;
+}
+
+export interface FederatedSignInInput {
+  tenantId: string;
+  providerSlug: string;
+  providerType: AuthSsoProviderType;
+  subject: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  allowJitProvisioning?: boolean;
 }
 
 @Injectable()
@@ -30,7 +56,104 @@ export class AuthService {
     private readonly tokenRepository: Repository<AuthTokenEntity>,
     @InjectRepository(AuthUserStateEntity)
     private readonly stateRepository: Repository<AuthUserStateEntity>,
+    @InjectRepository(AuthSsoProviderEntity)
+    private readonly ssoProviderRepository: Repository<AuthSsoProviderEntity>,
+    @InjectRepository(AuthFederatedIdentityEntity)
+    private readonly federatedIdentityRepository: Repository<AuthFederatedIdentityEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
+
+  async upsertSsoProvider(input: UpsertSsoProviderInput): Promise<AuthSsoProviderEntity> {
+    const existing = await this.ssoProviderRepository.findOne({
+      where: { tenantId: input.tenantId, slug: input.slug },
+    });
+
+    const provider = existing ?? this.ssoProviderRepository.create();
+    provider.tenantId = input.tenantId;
+    provider.type = input.type;
+    provider.slug = input.slug;
+    provider.name = input.name;
+    provider.enabled = input.enabled ?? true;
+    provider.configuration = input.configuration;
+
+    return this.ssoProviderRepository.save(provider);
+  }
+
+  async getTenantSsoProviders(tenantId: string): Promise<AuthSsoProviderEntity[]> {
+    return this.ssoProviderRepository.find({
+      where: { tenantId, enabled: true },
+      order: { name: 'ASC' },
+    });
+  }
+
+  async signInWithFederatedIdentity(input: FederatedSignInInput): Promise<UserEntity> {
+    const provider = await this.ssoProviderRepository.findOne({
+      where: {
+        tenantId: input.tenantId,
+        slug: input.providerSlug,
+        type: input.providerType,
+        enabled: true,
+      },
+    });
+
+    if (!provider) {
+      throw new UnauthorizedException('SSO provider is not configured for the tenant');
+    }
+
+    const existingIdentity = await this.federatedIdentityRepository.findOne({
+      where: { providerId: provider.id, subject: input.subject },
+    });
+
+    if (existingIdentity) {
+      const existingUser = await this.userRepository.findOne({
+        where: { id: existingIdentity.userId },
+      });
+
+      if (!existingUser) {
+        throw new UnauthorizedException('Federated identity is linked to an unknown user');
+      }
+
+      existingIdentity.email = input.email ?? existingIdentity.email;
+      existingIdentity.firstName = input.firstName ?? existingIdentity.firstName;
+      existingIdentity.lastName = input.lastName ?? existingIdentity.lastName;
+      existingIdentity.lastAuthenticatedAt = new Date();
+      await this.federatedIdentityRepository.save(existingIdentity);
+
+      existingUser.lastLoginAt = new Date();
+      await this.userRepository.save(existingUser);
+      return existingUser;
+    }
+
+    if (!input.email) {
+      throw new UnauthorizedException('Federated sign-in requires an email claim');
+    }
+
+    const existingByEmail = await this.userRepository.findOne({
+      where: { tenantId: input.tenantId, email: input.email },
+    });
+
+    if (existingByEmail) {
+      return this.linkFederatedIdentity(provider.id, existingByEmail, input);
+    }
+
+    if (!input.allowJitProvisioning) {
+      throw new UnauthorizedException('No matching user account found for federated sign-in');
+    }
+
+    const createdUser = await this.userRepository.save(
+      this.userRepository.create({
+        tenantId: input.tenantId,
+        email: input.email,
+        firstName: input.firstName ?? 'SSO',
+        lastName: input.lastName ?? 'User',
+        status: UserStatus.ACTIVE,
+        lastLoginAt: new Date(),
+      }),
+    );
+
+    return this.linkFederatedIdentity(provider.id, createdUser, input);
+  }
 
   async upsertPassword(userId: string, plaintextPassword: string): Promise<void> {
     this.ensurePasswordStrength(plaintextPassword);
@@ -186,5 +309,27 @@ export class AuthService {
     if (password.length < 12) {
       throw new BadRequestException('Password must be at least 12 characters');
     }
+  }
+
+  private async linkFederatedIdentity(
+    providerId: string,
+    user: UserEntity,
+    input: FederatedSignInInput,
+  ): Promise<UserEntity> {
+    await this.federatedIdentityRepository.save(
+      this.federatedIdentityRepository.create({
+        providerId,
+        userId: user.id,
+        subject: input.subject,
+        email: input.email ?? null,
+        firstName: input.firstName ?? null,
+        lastName: input.lastName ?? null,
+        lastAuthenticatedAt: new Date(),
+      }),
+    );
+
+    user.lastLoginAt = new Date();
+    await this.userRepository.save(user);
+    return user;
   }
 }

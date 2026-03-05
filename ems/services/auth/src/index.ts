@@ -1,5 +1,7 @@
 export * from './auth.module';
 export * from './auth.service';
 export * from './entities/auth-credential.entity';
+export * from './entities/auth-federated-identity.entity';
+export * from './entities/auth-sso-provider.entity';
 export * from './entities/auth-token.entity';
 export * from './entities/auth-user-state.entity';
