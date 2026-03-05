@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
 import { EventEntity, EventStatus } from './entities/event.entity';
-import { RoomEntity } from './entities/room.entity';
 import { VenueEntity } from './entities/venue.entity';
+import { EventSearchIndexService } from './event-search-index.service';
 
 @Injectable()
 export class EventService {
@@ -20,42 +20,17 @@ export class EventService {
 
   constructor(
     @InjectRepository(EventEntity)
-    private readonly eventRepository: Repository<EventEntity>
+    private readonly eventRepository: Repository<EventEntity>,
+    @InjectRepository(VenueEntity)
+    private readonly venueRepository: Repository<VenueEntity>,
+    private readonly eventSearchIndexService: EventSearchIndexService,
   ) {}
 
-  async create(
-    input: DeepPartial<EventEntity>,
-    templateEventId?: string,
-  ): Promise<EventEntity> {
-    return this.eventRepository.manager.transaction(async (manager) => {
-      const template = templateEventId
-        ? await manager.findOne(EventEntity, {
-            where: { id: templateEventId, tenantId: input.tenantId },
-            relations: { venues: { rooms: true } },
-          })
-        : null;
-
-      if (templateEventId && !template) {
-        throw new BadRequestException('Template event not found in tenant.');
-      }
-
-      const event = manager.create(EventEntity, {
-        ...input,
-        agenda: input.agenda ?? template?.agenda ?? null,
-        settings: input.settings ?? template?.settings ?? null,
-      });
-      const createdEvent = await manager.save(event);
-
-      if (template) {
-        await this.cloneTemplateVenues(manager.getRepository(VenueEntity), manager.getRepository(RoomEntity), {
-          template,
-          newEventId: createdEvent.id,
-          tenantId: createdEvent.tenantId,
-        });
-      }
-
-      return createdEvent;
-    });
+  async create(input: DeepPartial<EventEntity>): Promise<EventEntity> {
+    const event = this.eventRepository.create(input);
+    const savedEvent = await this.eventRepository.save(event);
+    await this.reindexSearchDocument(savedEvent.tenantId, savedEvent.id);
+    return savedEvent;
   }
 
   async findByTenant(tenantId: string): Promise<EventEntity[]> {
@@ -130,47 +105,31 @@ export class EventService {
     }
 
     Object.assign(event, input);
-    return this.eventRepository.save(event);
+    const updatedEvent = await this.eventRepository.save(event);
+    await this.reindexSearchDocument(updatedEvent.tenantId, updatedEvent.id);
+    return updatedEvent;
   }
 
   async remove(tenantId: string, eventId: string): Promise<boolean> {
     const result = await this.eventRepository.delete({ id: eventId, tenantId });
+    if ((result.affected ?? 0) > 0) {
+      await this.eventSearchIndexService.deleteEvent(eventId);
+    }
     return (result.affected ?? 0) > 0;
   }
 
-  private async cloneTemplateVenues(
-    venueRepository: Repository<VenueEntity>,
-    roomRepository: Repository<RoomEntity>,
-    input: { template: EventEntity; newEventId: string; tenantId: string },
-  ): Promise<void> {
-    for (const sourceVenue of input.template.venues ?? []) {
-      const clonedVenue = await venueRepository.save(
-        venueRepository.create({
-          tenantId: input.tenantId,
-          eventId: input.newEventId,
-          name: sourceVenue.name,
-          type: sourceVenue.type,
-          addressLine1: sourceVenue.addressLine1,
-          city: sourceVenue.city,
-          country: sourceVenue.country,
-          virtualUrl: sourceVenue.virtualUrl,
-          capacity: sourceVenue.capacity,
-        }),
-      );
-
-      for (const sourceRoom of sourceVenue.rooms ?? []) {
-        await roomRepository.save(
-          roomRepository.create({
-            tenantId: input.tenantId,
-            eventId: input.newEventId,
-            venueId: clonedVenue.id,
-            name: sourceRoom.name,
-            floor: sourceRoom.floor,
-            capacity: sourceRoom.capacity,
-          }),
-        );
-      }
+  async reindexSearchDocument(tenantId: string, eventId: string): Promise<void> {
+    const event = await this.findByTenantAndId(tenantId, eventId);
+    if (!event) {
+      return;
     }
+
+    const venues = await this.venueRepository.find({
+      where: { tenantId, eventId },
+      order: { createdAt: 'DESC' },
+    });
+
+    await this.eventSearchIndexService.upsertEvent(event, venues);
   }
 
   private async transitionStatus(
