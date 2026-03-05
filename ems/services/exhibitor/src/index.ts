@@ -4,6 +4,4 @@ export * from './dto/create-exhibitor.dto';
 export * from './dto/update-exhibitor.dto';
 export * from './entities/booth.entity';
 export * from './entities/exhibitor.entity';
-export * from './exhibitor-management.controller';
-export * from './exhibitor-management.service';
-export * from './exhibitor.module';
+export * from './entities/sponsor-tier.enum';
