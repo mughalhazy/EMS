@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { AuditService } from '../../audit/src/audit.service';
 import { OrderEntity, OrderStatus } from './entities/order.entity';
 import { PaymentEntity, PaymentStatus } from './entities/payment.entity';
 import { OrderService } from './order.service';
@@ -24,6 +25,7 @@ export class PaymentService {
     private readonly orderRepository: Repository<OrderEntity>,
     private readonly orderService: OrderService,
     private readonly stripeCompatibleGateway: StripeCompatibleGateway,
+    private readonly auditService: AuditService,
   ) {}
 
   async createForOrder(input: CreatePaymentInput): Promise<PaymentEntity> {
@@ -59,6 +61,8 @@ export class PaymentService {
     );
 
     await this.syncOrderStatusFromPayment(payment);
+    await this.trackPurchaseOrRefundAudit(null, payment);
+
     return payment;
   }
 
@@ -75,9 +79,11 @@ export class PaymentService {
       throw new NotFoundException('Payment not found.');
     }
 
+    const previousStatus = payment.status;
     payment.status = status;
     const savedPayment = await this.paymentRepository.save(payment);
     await this.syncOrderStatusFromPayment(savedPayment);
+    await this.trackPurchaseOrRefundAudit(previousStatus, savedPayment);
 
     return savedPayment;
   }
@@ -105,5 +111,36 @@ export class PaymentService {
       default:
         return null;
     }
+  }
+
+  private async trackPurchaseOrRefundAudit(
+    beforeStatus: PaymentStatus | null,
+    payment: PaymentEntity,
+  ): Promise<void> {
+    if (payment.status !== PaymentStatus.SUCCEEDED && payment.status !== PaymentStatus.REFUNDED) {
+      return;
+    }
+
+    if (beforeStatus === payment.status) {
+      return;
+    }
+
+    const action =
+      payment.status === PaymentStatus.SUCCEEDED ? 'ticket.purchase.completed' : 'ticket.refund.completed';
+
+    await this.auditService.trackCommerceChange({
+      tenantId: payment.tenantId,
+      action,
+      before: beforeStatus ? { paymentStatus: beforeStatus } : null,
+      after: { paymentStatus: payment.status },
+      metadata: {
+        orderId: payment.orderId,
+        paymentId: payment.id,
+        provider: payment.provider,
+        providerReference: payment.providerReference,
+        amountMinor: payment.amountMinor,
+        currency: payment.currency,
+      },
+    });
   }
 }
