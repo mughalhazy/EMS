@@ -33,4 +33,34 @@ export class UserService {
       relations: { tenant: true },
     });
   }
+
+  async findByTenantAndEmail(
+    tenantId: string,
+    email: string,
+  ): Promise<UserEntity | null> {
+    return this.userRepository.findOne({
+      where: { tenantId, email },
+      relations: { tenant: true },
+    });
+  }
+
+  async updateStatus(
+    tenantId: string,
+    userId: string,
+    status: UserEntity['status'],
+  ): Promise<UserEntity | null> {
+    const user = await this.findByTenantAndId(tenantId, userId);
+    if (!user) {
+      return null;
+    }
+
+    user.status = status;
+    return this.userRepository.save(user);
+  }
+
+  async remove(tenantId: string, userId: string): Promise<boolean> {
+    const result = await this.userRepository.delete({ id: userId, tenantId });
+    return (result.affected ?? 0) > 0;
+  }
+
 }
