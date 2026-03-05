@@ -115,6 +115,34 @@ export class ExhibitorManagementService {
     return leadCapture;
   }
 
+  async listLeadCapturesByExhibitor(
+    tenantId: string,
+    eventId: string,
+    exhibitorId: string,
+  ): Promise<ExhibitorLeadCaptureEntity[]> {
+    await this.ensureExhibitorExists(tenantId, eventId, exhibitorId);
+
+    return this.exhibitorLeadCaptureRepository.find({
+      where: { exhibitorId, exhibitor: { tenantId, eventId } },
+      relations: { attendee: true },
+      order: { capturedAt: 'DESC' },
+    });
+  }
+
+  async listLeadCapturesByAttendee(
+    tenantId: string,
+    eventId: string,
+    attendeeId: string,
+  ): Promise<ExhibitorLeadCaptureEntity[]> {
+    await this.ensureAttendeeExists(tenantId, eventId, attendeeId);
+
+    return this.exhibitorLeadCaptureRepository.find({
+      where: { attendeeId, attendee: { tenantId, eventId } },
+      relations: { exhibitor: true },
+      order: { capturedAt: 'DESC' },
+    });
+  }
+
   async listExhibitors(tenantId: string, eventId: string): Promise<ExhibitorEntity[]> {
     return this.exhibitorRepository.find({
       where: { tenantId, eventId },

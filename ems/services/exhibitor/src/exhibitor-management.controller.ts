@@ -121,6 +121,33 @@ export class ExhibitorManagementController {
     });
   }
 
+  @Get('exhibitors/:exhibitorId/leads')
+  async listLeadsByExhibitor(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
+  ): Promise<ExhibitorLeadCaptureEntity[]> {
+    return this.exhibitorManagementService.listLeadCapturesByExhibitor(tenantId, eventId, exhibitorId);
+  }
+
+  @Get('exhibitors/:exhibitorId/scans')
+  async listScansByExhibitor(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
+  ): Promise<ExhibitorLeadCaptureEntity[]> {
+    return this.exhibitorManagementService.listLeadCapturesByExhibitor(tenantId, eventId, exhibitorId);
+  }
+
+  @Get('attendees/:attendeeId/scans')
+  async listScansByAttendee(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('attendeeId', ParseUUIDPipe) attendeeId: string,
+  ): Promise<ExhibitorLeadCaptureEntity[]> {
+    return this.exhibitorManagementService.listLeadCapturesByAttendee(tenantId, eventId, attendeeId);
+  }
+
   @Post('exhibitors/:exhibitorId/leads')
   @HttpCode(HttpStatus.CREATED)
   async captureLead(
