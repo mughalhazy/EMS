@@ -14,6 +14,7 @@ import {
   Query,
 } from '@nestjs/common';
 
+import { AuditService } from '../../audit/src/audit.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { ListEventsQueryDto } from './dto/list-events-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -30,7 +31,10 @@ type PaginatedEventsResponse = {
 
 @Controller('api/v1/tenants/:tenantId/events')
 export class EventController {
-  constructor(private readonly eventService: EventService) {}
+  constructor(
+    private readonly eventService: EventService,
+    private readonly auditService: AuditService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -49,22 +53,28 @@ export class EventController {
       );
     }
 
-    return this.eventService.create(
-      {
-        tenantId,
-        organizationId: payload.organizationId,
-        name: payload.name,
-        code: payload.code,
-        description: payload.description ?? null,
-        timezone: payload.timezone,
-        startAt: new Date(payload.startAt),
-        endAt: new Date(payload.endAt),
-        status: payload.status,
-        agenda: payload.agenda,
-        settings: payload.settings,
-      },
-      payload.templateEventId,
-    );
+    const createdEvent = await this.eventService.create({
+      tenantId,
+      organizationId: payload.organizationId,
+      name: payload.name,
+      code: payload.code,
+      description: payload.description ?? null,
+      timezone: payload.timezone,
+      startAt: new Date(payload.startAt),
+      endAt: new Date(payload.endAt),
+      status: payload.status,
+      agenda: payload.agenda,
+      settings: payload.settings,
+    });
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'event.created',
+      metadata: { eventId: createdEvent.id },
+      after: this.serializeEventForAudit(createdEvent),
+    });
+
+    return createdEvent;
   }
 
   @Get()
@@ -112,6 +122,11 @@ export class EventController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() payload: UpdateEventDto,
   ): Promise<EventEntity> {
+    const existingEventById = await this.eventService.findByTenantAndId(tenantId, eventId);
+    if (!existingEventById) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
     if (payload.code) {
       const existingEvent = await this.eventService.findByTenantAndCode(
         tenantId,
@@ -124,6 +139,8 @@ export class EventController {
         );
       }
     }
+
+    const before = this.serializeEventForAudit(existingEventById);
 
     const event = await this.eventService.update(tenantId, eventId, {
       organizationId: payload.organizationId,
@@ -142,6 +159,14 @@ export class EventController {
       throw new NotFoundException('Event not found in tenant.');
     }
 
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'event.updated',
+      metadata: { eventId: event.id },
+      before,
+      after: this.serializeEventForAudit(event),
+    });
+
     return event;
   }
 
@@ -151,9 +176,40 @@ export class EventController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
   ): Promise<void> {
+    const event = await this.eventService.findByTenantAndId(tenantId, eventId);
+    if (!event) {
+      throw new NotFoundException('Event not found in tenant.');
+    }
+
     const deleted = await this.eventService.remove(tenantId, eventId);
     if (!deleted) {
       throw new NotFoundException('Event not found in tenant.');
     }
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'event.deleted',
+      metadata: { eventId },
+      before: this.serializeEventForAudit(event),
+    });
+  }
+
+  private serializeEventForAudit(event: EventEntity): Record<string, unknown> {
+    return {
+      id: event.id,
+      tenantId: event.tenantId,
+      organizationId: event.organizationId,
+      name: event.name,
+      code: event.code,
+      description: event.description,
+      timezone: event.timezone,
+      startAt: event.startAt.toISOString(),
+      endAt: event.endAt.toISOString(),
+      status: event.status,
+      agenda: event.agenda,
+      settings: event.settings,
+      createdAt: event.createdAt.toISOString(),
+      updatedAt: event.updatedAt.toISOString(),
+    };
   }
 }
