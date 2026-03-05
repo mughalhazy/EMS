@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { EventSettingEntity } from '../../event/src/entities/event-setting.entity';
 import { RegistrationEntity, RegistrationStatus } from './entities/registration.entity';
+import { RegistrationEventsPublisher } from './registration-events.publisher';
 
 export interface RegisterForEventInput {
   tenantId: string;
@@ -19,6 +20,7 @@ export class RegistrationService {
     private readonly registrationRepository: Repository<RegistrationEntity>,
     @InjectRepository(EventSettingEntity)
     private readonly eventSettingRepository: Repository<EventSettingEntity>,
+    private readonly registrationEventsPublisher: RegistrationEventsPublisher,
   ) {}
 
   async register(input: RegisterForEventInput): Promise<RegistrationEntity> {
@@ -58,7 +60,15 @@ export class RegistrationService {
         status,
       });
 
-      return registrationRepo.save(registration);
+      const savedRegistration = await registrationRepo.save(registration);
+
+      await this.registrationEventsPublisher.publishRegistrationCreated(savedRegistration);
+
+      if (savedRegistration.status === RegistrationStatus.CONFIRMED) {
+        await this.registrationEventsPublisher.publishRegistrationConfirmed(savedRegistration);
+      }
+
+      return savedRegistration;
     });
   }
 
@@ -131,6 +141,7 @@ export class RegistrationService {
     }
 
     nextWaitlisted.status = RegistrationStatus.CONFIRMED;
-    await repository.save(nextWaitlisted);
+    const promotedRegistration = await repository.save(nextWaitlisted);
+    await this.registrationEventsPublisher.publishRegistrationConfirmed(promotedRegistration);
   }
 }
