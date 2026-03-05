@@ -199,3 +199,20 @@ The goal is to give enterprises one system to:
 
 ## Positioning Statement
 EMS is the enterprise-grade platform for organizations that need both sophisticated event operations and ultra-reliable ticketing performance. By combining end-to-end lifecycle management, robust governance, and AI-powered optimization, EMS enables teams to run better events and grow revenue with confidence.
+
+## QC-01 Completeness Addendum
+
+### Canonical product scope
+EMS canonically supports these business entities across planning, sales, and delivery: `tenant`, `organization`, `user`, `role`, `event`, `venue`, `session`, `ticket`, `registration`, `attendee`, `sponsor`, `exhibitor`, `order`, `payment`, `notification`.
+
+### Explicit non-functional commitments
+- **Multi-tenant SaaS:** strict tenant isolation with delegated admin by organization.
+- **API-first:** every core workflow is available via stable versioned APIs before UI-only features ship.
+- **AI-compatible by design:** all event lifecycle data is emitted as structured events and curated read models consumable by AI services.
+- **Evolution path:** modular monolith first, event-driven service extraction as scale/team topology requires.
+
+### Product acceptance baseline
+A release is considered product-complete only when it includes:
+1. End-to-end flow from event creation -> ticket sale -> registration -> attendee check-in -> order/payment reconciliation -> notification/audit outputs.
+2. Role-aware workflows for organizer, operations, finance, and support users.
+3. Tenant-safe reporting and AI assistant interactions with citations and policy controls.

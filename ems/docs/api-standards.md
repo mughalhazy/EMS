@@ -168,3 +168,23 @@ Recommended headers:
 - New endpoints and changes must pass API design review before implementation.
 - OpenAPI specs must be updated with every API change.
 - Changes to auth, error contracts, or versioning require architecture sign-off.
+
+## QC-01 clarity addendum
+
+### Tenant and idempotency requirements
+- Every request must carry tenant context from a validated token and/or trusted routing metadata; clients must never self-assert arbitrary tenant IDs.
+- Mutating endpoints for `order`, `payment`, and `registration` must require `Idempotency-Key` and return the original successful response for key replays.
+
+### Canonical resource coverage
+At minimum, versioned APIs must exist for:
+- `/tenants`, `/organizations`, `/users`, `/roles`
+- `/events`, `/venues`, `/sessions`, `/tickets`
+- `/registrations`, `/attendees`
+- `/sponsors`, `/exhibitors`
+- `/orders`, `/payments`
+- `/notifications`
+
+### Security and AI-specific API rules
+- Webhooks must use signature verification with timestamp tolerance and replay protection.
+- AI endpoints must return structured output with provenance metadata (`citations`, `modelVersion`, `policyVersion`) when applicable.
+- Any endpoint returning AI-generated recommendations must provide a deterministic fallback behavior when AI is unavailable.

@@ -269,3 +269,15 @@ A stable abstraction over model providers.
 - Reuse OpenSearch for hybrid lexical retrieval; vector store handles embeddings.
 - Store canonical domain truth in PostgreSQL; never treat vector storage as source-of-truth.
 - Expose AI APIs through existing gateway/BFF with consistent auth and tracing.
+
+## 9) QC-01 AI compatibility addendum
+
+### Canonical entity compatibility contract
+AI capabilities must support retrieval and reasoning over governed projections for:
+`tenant`, `organization`, `user`, `role`, `event`, `venue`, `session`, `ticket`, `registration`, `attendee`, `sponsor`, `exhibitor`, `order`, `payment`, and `notification`.
+
+### Interoperability requirements
+- AI tools consume stable API/event schemas rather than direct database coupling.
+- Every AI response used in organizer workflows includes provenance metadata and confidence signal.
+- AI-generated actions execute through the same API command contracts as human users.
+- If model providers fail, EMS falls back to deterministic rule-based outputs without breaking user journeys.
