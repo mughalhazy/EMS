@@ -5,12 +5,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { EventEntity } from '../../../event/src/entities/event.entity';
 import { Tenant } from '../../../tenant/src/tenant.entity';
+import { BoothEntity } from './booth.entity';
 
 @Entity({ name: 'exhibitors' })
 @Index('idx_exhibitors_tenant_id', ['tenantId'])
@@ -42,6 +44,9 @@ export class ExhibitorEntity {
 
   @Column({ type: 'jsonb', name: 'contact_info', nullable: true })
   contactInfo!: Record<string, unknown> | null;
+
+  @OneToMany(() => BoothEntity, (booth) => booth.exhibitor)
+  booths!: BoothEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
