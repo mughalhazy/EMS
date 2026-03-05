@@ -24,7 +24,7 @@ export interface CreateOrderInput {
   tenantId: string;
   status?: OrderStatus;
   totals?: Partial<OrderTotals>;
-  reservation?: OrderInventoryReservation;
+  reservations?: OrderInventoryReservation[];
   items?: CreateOrderItemInput[];
 }
 
@@ -42,15 +42,16 @@ export class OrderService {
   ) {}
 
   async create(input: CreateOrderInput): Promise<OrderEntity> {
-    if (input.reservation) {
-      await this.reserveInventory(input.tenantId, input.reservation.inventoryId, input.reservation.quantity);
+    const reservations = input.reservations ?? [];
+    if (reservations.length > 0) {
+      await this.reserveInventories(input.tenantId, reservations);
     }
 
     const order = this.orderRepository.create({
       tenantId: input.tenantId,
       status: input.status ?? OrderStatus.DRAFT,
       totals: this.normalizeTotals(input.totals),
-      reservation: input.reservation ?? null,
+      reservation: reservations.length > 0 ? reservations : null,
     });
 
     const savedOrder = await this.orderRepository.save(order);
@@ -105,14 +106,15 @@ export class OrderService {
       return null;
     }
 
-    if (order.reservation) {
+    const reservations = order.reservation ?? [];
+    if (reservations.length > 0) {
       if (status === OrderStatus.PLACED) {
-        await this.commitInventory(tenantId, order.reservation.inventoryId, order.reservation.quantity);
+        await this.commitInventories(tenantId, reservations);
         order.reservation = null;
       }
 
       if (status === OrderStatus.CANCELLED || status === OrderStatus.REFUNDED) {
-        await this.releaseInventory(tenantId, order.reservation.inventoryId, order.reservation.quantity);
+        await this.releaseInventories(tenantId, reservations);
         order.reservation = null;
       }
     }
@@ -139,54 +141,148 @@ export class OrderService {
     });
   }
 
-  private async reserveInventory(tenantId: string, inventoryId: string, quantity: number): Promise<void> {
-    if (quantity <= 0) {
-      throw new ConflictException('Reservation quantity must be greater than zero.');
+  private async reserveInventories(
+    tenantId: string,
+    reservations: OrderInventoryReservation[],
+  ): Promise<void> {
+    for (const reservation of reservations) {
+      if (!Number.isInteger(reservation.quantity) || reservation.quantity <= 0) {
+        throw new ConflictException('Reservation quantity must be a positive integer.');
+      }
     }
 
-    await this.redisLockService.withLock(`${tenantId}:${inventoryId}`, 5000, async () => {
-      const inventory = await this.inventoryRepository.findOne({ where: { id: inventoryId, tenantId } });
-      if (!inventory) {
-        throw new NotFoundException('Inventory item not found.');
+    const grouped = this.groupReservations(reservations);
+    const inventoryIds = grouped.map((entry) => entry.inventoryId);
+    const releaseLocks = await this.acquireInventoryLocks(tenantId, inventoryIds);
+
+    try {
+      const inventories = await this.inventoryRepository.find({
+        where: inventoryIds.map((inventoryId) => ({ id: inventoryId, tenantId })),
+      });
+      const inventoryById = new Map(inventories.map((inventory) => [inventory.id, inventory]));
+
+      for (const { inventoryId, quantity } of grouped) {
+        const inventory = inventoryById.get(inventoryId);
+        if (!inventory) {
+          throw new NotFoundException(`Inventory item '${inventoryId}' not found.`);
+        }
+
+        const remaining = inventory.totalQuantity - inventory.reservedQuantity;
+        if (remaining < quantity) {
+          throw new ConflictException('Not enough inventory available to reserve.');
+        }
       }
 
-      const remaining = inventory.totalQuantity - inventory.reservedQuantity;
-      if (remaining < quantity) {
-        throw new ConflictException('Not enough inventory available to reserve.');
+      for (const { inventoryId, quantity } of grouped) {
+        const inventory = inventoryById.get(inventoryId)!;
+        inventory.reservedQuantity += quantity;
       }
 
-      inventory.reservedQuantity += quantity;
-      await this.inventoryRepository.save(inventory);
-    });
+      await this.inventoryRepository.save([...inventoryById.values()]);
+    } finally {
+      await releaseLocks();
+    }
   }
 
-  private async releaseInventory(tenantId: string, inventoryId: string, quantity: number): Promise<void> {
-    await this.redisLockService.withLock(`${tenantId}:${inventoryId}`, 5000, async () => {
-      const inventory = await this.inventoryRepository.findOne({ where: { id: inventoryId, tenantId } });
-      if (!inventory) {
-        throw new NotFoundException('Inventory item not found.');
+  private async releaseInventories(
+    tenantId: string,
+    reservations: OrderInventoryReservation[],
+  ): Promise<void> {
+    const grouped = this.groupReservations(reservations);
+    const inventoryIds = grouped.map((entry) => entry.inventoryId);
+    const releaseLocks = await this.acquireInventoryLocks(tenantId, inventoryIds);
+
+    try {
+      const inventories = await this.inventoryRepository.find({
+        where: inventoryIds.map((inventoryId) => ({ id: inventoryId, tenantId })),
+      });
+      const inventoryById = new Map(inventories.map((inventory) => [inventory.id, inventory]));
+
+      for (const { inventoryId, quantity } of grouped) {
+        const inventory = inventoryById.get(inventoryId);
+        if (!inventory) {
+          throw new NotFoundException(`Inventory item '${inventoryId}' not found.`);
+        }
+
+        inventory.reservedQuantity = Math.max(0, inventory.reservedQuantity - quantity);
       }
 
-      inventory.reservedQuantity = Math.max(0, inventory.reservedQuantity - quantity);
-      await this.inventoryRepository.save(inventory);
-    });
+      await this.inventoryRepository.save([...inventoryById.values()]);
+    } finally {
+      await releaseLocks();
+    }
   }
 
-  private async commitInventory(tenantId: string, inventoryId: string, quantity: number): Promise<void> {
-    await this.redisLockService.withLock(`${tenantId}:${inventoryId}`, 5000, async () => {
-      const inventory = await this.inventoryRepository.findOne({ where: { id: inventoryId, tenantId } });
-      if (!inventory) {
-        throw new NotFoundException('Inventory item not found.');
+  private async commitInventories(
+    tenantId: string,
+    reservations: OrderInventoryReservation[],
+  ): Promise<void> {
+    const grouped = this.groupReservations(reservations);
+    const inventoryIds = grouped.map((entry) => entry.inventoryId);
+    const releaseLocks = await this.acquireInventoryLocks(tenantId, inventoryIds);
+
+    try {
+      const inventories = await this.inventoryRepository.find({
+        where: inventoryIds.map((inventoryId) => ({ id: inventoryId, tenantId })),
+      });
+      const inventoryById = new Map(inventories.map((inventory) => [inventory.id, inventory]));
+
+      for (const { inventoryId, quantity } of grouped) {
+        const inventory = inventoryById.get(inventoryId);
+        if (!inventory) {
+          throw new NotFoundException(`Inventory item '${inventoryId}' not found.`);
+        }
+
+        if (inventory.reservedQuantity < quantity || inventory.totalQuantity < quantity) {
+          throw new ConflictException('Inventory is out of sync for commit.');
+        }
       }
 
-      if (inventory.reservedQuantity < quantity || inventory.totalQuantity < quantity) {
-        throw new ConflictException('Inventory is out of sync for commit.');
+      for (const { inventoryId, quantity } of grouped) {
+        const inventory = inventoryById.get(inventoryId)!;
+        inventory.reservedQuantity -= quantity;
+        inventory.totalQuantity -= quantity;
       }
 
-      inventory.reservedQuantity -= quantity;
-      inventory.totalQuantity -= quantity;
-      await this.inventoryRepository.save(inventory);
-    });
+      await this.inventoryRepository.save([...inventoryById.values()]);
+    } finally {
+      await releaseLocks();
+    }
+  }
+
+  private groupReservations(
+    reservations: OrderInventoryReservation[],
+  ): Array<{ inventoryId: string; quantity: number }> {
+    const grouped = new Map<string, number>();
+
+    for (const reservation of reservations) {
+      grouped.set(
+        reservation.inventoryId,
+        (grouped.get(reservation.inventoryId) ?? 0) + reservation.quantity,
+      );
+    }
+
+    return Array.from(grouped.entries())
+      .map(([inventoryId, quantity]) => ({ inventoryId, quantity }))
+      .sort((a, b) => a.inventoryId.localeCompare(b.inventoryId));
+  }
+
+  private async acquireInventoryLocks(
+    tenantId: string,
+    inventoryIds: string[],
+  ): Promise<() => Promise<void>> {
+    const releaseFns: Array<() => Promise<void>> = [];
+
+    for (const inventoryId of [...new Set(inventoryIds)].sort((a, b) => a.localeCompare(b))) {
+      const release = await this.redisLockService.acquireLock(`${tenantId}:${inventoryId}`, 5000);
+      releaseFns.push(release);
+    }
+
+    return async () => {
+      for (const release of releaseFns.reverse()) {
+        await release();
+      }
+    };
   }
 
   private normalizeTotals(totals?: Partial<OrderTotals>): OrderTotals {
@@ -210,6 +306,8 @@ export class OrderService {
       firstName: attendee.firstName,
       lastName: attendee.lastName,
       email: attendee.email,
+      isTicketOwner: attendee.isTicketOwner,
+      answers: attendee.answers,
     }));
   }
 }

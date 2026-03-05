@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
 import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
+import { RegistrationEventsPublisher } from '../../registration/src/registration-events.publisher';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
@@ -41,6 +42,7 @@ export class PaymentService {
     private readonly commerceEventsPublisher: CommerceEventsPublisher,
     private readonly stripeCompatibleGateway: StripeCompatibleGateway,
     private readonly ticketFulfillmentService: TicketFulfillmentService,
+    private readonly registrationEventsPublisher: RegistrationEventsPublisher,
     private readonly auditService: AuditService,
   ) {}
 
@@ -195,13 +197,7 @@ export class PaymentService {
 
     const userByEmail = new Map(users.map((user) => [user.email.toLowerCase(), user]));
 
-    const registrationsToCreate: Array<{
-      tenantId: string;
-      eventId: string;
-      userId: string;
-      ticketId: string;
-      status: RegistrationStatus;
-    }> = [];
+    const registrationsToCreate: RegistrationEntity[] = [];
 
     const dedupe = new Set<string>();
 
@@ -211,44 +207,64 @@ export class PaymentService {
         continue;
       }
 
-      for (const attendee of item.attendees) {
+      item.attendees.forEach((attendee, attendeeIndex) => {
         const normalizedEmail = attendee.email?.trim().toLowerCase();
         if (!normalizedEmail) {
-          continue;
+          return;
         }
 
         const user = userByEmail.get(normalizedEmail);
         if (!user) {
-          continue;
+          return;
         }
 
-        const key = `${payment.tenantId}:${ticket.eventId}:${user.id}:${ticket.id}`;
+        const key = `${payment.tenantId}:${ticket.eventId}:${user.id}:${ticket.id}:${item.id}:${attendeeIndex}`;
         if (dedupe.has(key)) {
-          continue;
+          return;
         }
 
         dedupe.add(key);
-        registrationsToCreate.push({
-          tenantId: payment.tenantId,
-          eventId: ticket.eventId,
-          userId: user.id,
-          ticketId: ticket.id,
-          status: RegistrationStatus.CONFIRMED,
-        });
-      }
+        registrationsToCreate.push(
+          this.registrationRepository.create({
+            tenantId: payment.tenantId,
+            eventId: ticket.eventId,
+            userId: user.id,
+            ticketId: ticket.id,
+            orderId: payment.orderId,
+            orderItemId: item.id,
+            attendeeIndex,
+            status: RegistrationStatus.CONFIRMED,
+          }),
+        );
+      });
     }
 
     if (registrationsToCreate.length === 0) {
       return;
     }
 
-    await this.registrationRepository
-      .createQueryBuilder()
-      .insert()
-      .into(RegistrationEntity)
-      .values(registrationsToCreate)
-      .orIgnore()
-      .execute();
+    for (const registration of registrationsToCreate) {
+      const existing = await this.registrationRepository.findOne({
+        where: {
+          tenantId: registration.tenantId,
+          eventId: registration.eventId,
+          userId: registration.userId,
+          ticketId: registration.ticketId,
+        },
+      });
+
+      if (existing && existing.status !== RegistrationStatus.CANCELLED) {
+        continue;
+      }
+
+      const saved = await this.registrationRepository.save({
+        ...(existing ?? {}),
+        ...registration,
+      });
+
+      await this.registrationEventsPublisher.publishRegistrationCreated(saved);
+      await this.registrationEventsPublisher.publishRegistrationConfirmed(saved);
+    }
   }
 
   private async trackPurchaseOrRefundAudit(

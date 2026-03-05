@@ -15,6 +15,7 @@ import { Repository } from 'typeorm';
 
 import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
+import { TicketPricingService } from '../../ticketing/src/ticket-pricing.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { CheckoutOrderDto } from './dto/checkout-order.dto';
 import {
@@ -28,6 +29,7 @@ import { PaymentService } from './payment.service';
 
 @Controller('api/v1/tenants/:tenantId/ticket-purchases')
 export class CheckoutController {
+  private readonly ticketPricingService = new TicketPricingService();
   constructor(
     @InjectRepository(TicketEntity)
     private readonly ticketRepository: Repository<TicketEntity>,
@@ -48,8 +50,8 @@ export class CheckoutController {
     this.assertAttendeeCounts(payload);
     await this.assertTicketOwnershipAndRequiredQuestions(tenantId, payload);
 
-    const items = payload.items ?? [];
-    const subtotal = items.reduce((total, item) => total + item.quantity * item.unitPrice, 0);
+    const pricedItems = await this.buildPricedItems(tenantId, payload);
+    const subtotal = Number(pricedItems.reduce((total, item) => total + item.quantity * item.unitPrice, 0).toFixed(2));
     const discount = payload.discount ?? 0;
     const tax = payload.tax ?? 0;
 
@@ -62,7 +64,11 @@ export class CheckoutController {
         tax,
         grandTotal: subtotal - discount + tax,
       },
-      items,
+      reservations: pricedItems.map((item) => ({
+        inventoryId: item.inventoryId,
+        quantity: item.quantity,
+      })),
+      items: pricedItems,
     });
   }
 
@@ -106,6 +112,39 @@ export class CheckoutController {
       payload.providerReference,
       payload.status,
     );
+  }
+
+  private async buildPricedItems(
+    tenantId: string,
+    payload: CreateTicketOrderDto,
+  ): Promise<CreateTicketOrderDto['items']> {
+    const inventoryIds = Array.from(new Set((payload.items ?? []).map((item) => item.inventoryId)));
+    if (inventoryIds.length === 0) {
+      return [];
+    }
+
+    const tickets = await this.ticketRepository.find({
+      where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
+      relations: ['pricingTiers', 'earlyBirdRules', 'promoCodes'],
+    });
+
+    const ticketByInventoryId = new Map(tickets.map((ticket) => [ticket.inventoryId, ticket]));
+
+    return (payload.items ?? []).map((item) => {
+      const ticket = ticketByInventoryId.get(item.inventoryId);
+      if (!ticket) {
+        throw new BadRequestException(`Ticket not found for inventory '${item.inventoryId}'.`);
+      }
+
+      const pricing = this.ticketPricingService.calculate(ticket, {
+        quantity: item.quantity,
+      });
+
+      return {
+        ...item,
+        unitPrice: pricing.unitPrice,
+      };
+    });
   }
 
   private assertIdempotencyKey(idempotencyKey?: string): void {

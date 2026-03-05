@@ -17,13 +17,10 @@ export interface RedisClient {
 export class RedisLockService {
   constructor(@Optional() @Inject(REDIS_CLIENT) private readonly redisClient?: RedisClient) {}
 
-  async withLock<T>(
-    key: string,
-    ttlMs: number,
-    work: () => Promise<T>,
-  ): Promise<T> {
+
+  async acquireLock(key: string, ttlMs: number): Promise<() => Promise<void>> {
     if (!this.redisClient) {
-      return work();
+      return async () => undefined;
     }
 
     const lockToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -34,10 +31,8 @@ export class RedisLockService {
       throw new Error(`Unable to acquire lock for ${key}`);
     }
 
-    try {
-      return await work();
-    } finally {
-      await this.redisClient.eval(
+    return async () => {
+      await this.redisClient!.eval(
         `
           if redis.call("get", KEYS[1]) == ARGV[1] then
             return redis.call("del", KEYS[1])
@@ -49,6 +44,24 @@ export class RedisLockService {
         lockKey,
         lockToken,
       );
+    };
+  }
+
+  async withLock<T>(
+    key: string,
+    ttlMs: number,
+    work: () => Promise<T>,
+  ): Promise<T> {
+    if (!this.redisClient) {
+      return work();
+    }
+
+    const release = await this.acquireLock(key, ttlMs);
+
+    try {
+      return await work();
+    } finally {
+      await release();
     }
   }
 }

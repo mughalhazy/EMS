@@ -71,6 +71,7 @@ export class AttendeeService {
 
     const existingAttendee = await this.attendeeRepository.findOne({
       where: {
+        tenantId: registration.tenantId,
         eventId: registration.eventId,
         email: normalizedEmail,
       },
