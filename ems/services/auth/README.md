@@ -4,10 +4,7 @@ This directory contains the RBAC model and core credential security flow for EMS
 
 ## RBAC Tables
 
-- `role`: tenant-scoped role definitions (e.g., `tenant_admin`, `operator`).
-- `permission`: resource-action permissions (e.g., `event:read`, `user:invite`).
-- `role_permission`: many-to-many relation between roles and permissions.
-- `user_role_assignment`: assigns roles to users with optional scope bindings.
+## Module API
 
 ## Credential Security Tables
 
