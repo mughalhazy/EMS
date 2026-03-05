@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  OneToMany,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { BoothEntity } from './booth.entity';
+import { EventEntity } from '../../../event/src/entities/event.entity';
+import { Tenant } from '../../../tenant/src/tenant.entity';
 
 @Entity({ name: 'exhibitors' })
 @Index('idx_exhibitors_tenant_id', ['tenantId'])
@@ -21,23 +23,25 @@ export class ExhibitorEntity {
   @Column({ type: 'uuid', name: 'tenant_id' })
   tenantId!: string;
 
+  @ManyToOne(() => Tenant, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'tenant_id' })
+  tenant!: Tenant;
+
   @Column({ type: 'uuid', name: 'event_id' })
   eventId!: string;
 
-  @Column({ type: 'varchar', length: 180 })
+  @ManyToOne(() => EventEntity, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'event_id' })
+  event!: EventEntity;
+
+  @Column({ type: 'varchar', length: 255 })
   name!: string;
-
-  @Column({ type: 'varchar', length: 320, nullable: true })
-  email!: string | null;
-
-  @Column({ type: 'varchar', length: 2048, nullable: true, name: 'website_url' })
-  websiteUrl!: string | null;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @OneToMany(() => BoothEntity, (booth) => booth.exhibitor)
-  booths!: BoothEntity[];
+  @Column({ type: 'jsonb', name: 'contact_info', nullable: true })
+  contactInfo!: Record<string, unknown> | null;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
