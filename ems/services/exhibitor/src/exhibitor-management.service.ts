@@ -28,6 +28,7 @@ export class ExhibitorManagementService {
     name: string;
     description?: string | null;
     contactInfo?: Record<string, unknown> | null;
+    sponsorshipTier?: ExhibitorEntity['sponsorshipTier'];
     actorUserId?: string;
   }): Promise<ExhibitorEntity> {
     await this.ensureEventExists(input.tenantId, input.eventId);
@@ -50,6 +51,7 @@ export class ExhibitorManagementService {
         eventId: input.eventId,
         name: input.name,
         description: input.description ?? null,
+        sponsorshipTier: input.sponsorshipTier ?? null,
         contactInfo: input.contactInfo ?? null,
       }),
     );
@@ -89,6 +91,14 @@ export class ExhibitorManagementService {
     const exhibitor = await this.findExhibitor(tenantId, eventId, exhibitorId);
     if (!exhibitor) {
       return null;
+    }
+
+    if (input.eventId && input.eventId !== eventId) {
+      throw new ConflictException('Exhibitor cannot be moved to a different event.');
+    }
+
+    if (input.tenantId && input.tenantId !== tenantId) {
+      throw new ConflictException('Exhibitor cannot be moved to a different tenant.');
     }
 
     const before = this.auditExhibitor(exhibitor);
@@ -139,7 +149,7 @@ export class ExhibitorManagementService {
     });
 
     return this.boothRepository.findOneOrFail({
-      where: { id: booth.id },
+      where: { id: booth.id, tenantId: input.tenantId, eventId: input.eventId },
       relations: { exhibitor: true, venue: true },
     });
   }
@@ -199,7 +209,7 @@ export class ExhibitorManagementService {
     });
 
     return this.boothRepository.findOneOrFail({
-      where: { id: updated.id },
+      where: { id: updated.id, tenantId: input.tenantId, eventId: input.eventId },
       relations: { exhibitor: true, venue: true },
     });
   }
@@ -239,6 +249,7 @@ export class ExhibitorManagementService {
       eventId: exhibitor.eventId,
       name: exhibitor.name,
       description: exhibitor.description,
+      sponsorshipTier: exhibitor.sponsorshipTier,
       contactInfo: exhibitor.contactInfo,
     };
   }
