@@ -1,3 +1,7 @@
+export * from './checkout.controller';
+export * from './dto/checkout-order.dto';
+export * from './dto/confirm-payment.dto';
+export * from './dto/create-ticket-order.dto';
 export * from './entities/order-item.entity';
 export * from './entities/order.entity';
 export * from './entities/payment.entity';
