@@ -1,32 +1,68 @@
-# EMS Auth Service
+# Auth RBAC + Credential Security Models
 
-NestJS auth module that provides:
+This directory contains the RBAC model and core credential security flow for EMS Auth.
 
-- Tenant-scoped login using email/password.
-- JWT access token issuance.
-- Refresh token rotation + revocation persistence.
-- RBAC resolution (roles + permissions) per user.
-- Permission checks consumable by other services.
+## RBAC Tables
 
 ## Module API
 
-- `AuthService.login()` authenticates a user and returns access/refresh token pair with resolved RBAC claims.
-- `AuthService.refresh()` validates a refresh token, rotates it, and returns a new token pair.
-- `AuthService.revokeRefreshToken()` explicitly revokes a refresh token.
-- `AuthService.hasPermission()` checks tenant/user permission codes (e.g. `event:read`).
+## Credential Security Tables
 
-## Persistence
+- `auth_credentials`: stores bcrypt password hashes and password change timestamp.
+- `auth_tokens`: stores one-time hashed tokens for password reset and email verification.
+- `auth_user_state`: stores user-level auth state like email verification status.
 
-Auth module stores RBAC + session state in:
+## Flows
 
-- `roles`
-- `permissions`
-- `role_permissions`
-- `user_role_assignments`
-- `refresh_tokens`
+### Password security
+1. `AuthService.upsertPassword` enforces minimum password length.
+2. Passwords are hashed with bcrypt (`12` rounds).
+3. Plaintext passwords are never stored.
 
-Migration: `src/migrations/1710000000001-CreateAuthTables.ts`
+### Reset flow
+1. `AuthService.issuePasswordReset` creates a random reset token.
+2. Only a SHA-256 hash of the token is persisted.
+3. `AuthService.resetPassword` validates and consumes the one-time token, then updates bcrypt hash.
 
-## User integration
+### Email verification
+1. `AuthService.issueEmailVerification` creates a one-time verification token.
+2. `AuthService.verifyEmail` validates the token and marks `email_verified=true`.
+3. Verification timestamps are stored in `auth_user_state.email_verified_at`.
 
-`AuthModule` imports `UserModule` and uses `UserService` for tenant-scoped user lookup.
+## Relations
+
+```text
+users (1) ─────< auth_credentials
+users (1) ─────< auth_tokens
+users (1) ─────< auth_user_state
+
+role ─────< role_permission >───── permission
+  │
+  └────────< user_role_assignment
+```
+
+## Authorization guards
+
+The schema defines SQL guard functions for RBAC checks:
+
+- `auth_current_tenant_id()`: reads the request tenant from `app.current_tenant_id`.
+- `auth_current_user_id()`: reads the request user from `app.current_user_id`.
+- `auth_has_permission(permission_code, requested_scope_type, requested_scope_id)`: boolean permission check scoped to current tenant and user.
+- `auth_require_permission(permission_code, requested_scope_type, requested_scope_id)`: raises `42501` when a permission check fails.
+
+Applications should set these settings at transaction start:
+
+```sql
+SET LOCAL app.current_tenant_id = '<tenant-id>';
+SET LOCAL app.current_user_id = '<user-id>';
+```
+
+## Tenant isolation
+
+Row-level security policies are enabled for tenant-scoped tables:
+
+- `role`
+- `user_role_assignment`
+- `role_permission` (through role ownership)
+
+These policies enforce that reads/writes are limited to the current tenant.

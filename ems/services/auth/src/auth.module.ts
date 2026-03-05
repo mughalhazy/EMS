@@ -1,28 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UserModule } from '../../user/src';
 import { AuthService } from './auth.service';
-import { PermissionEntity } from './entities/permission.entity';
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
-import { RolePermissionEntity } from './entities/role-permission.entity';
-import { RoleEntity } from './entities/role.entity';
-import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
-import { JwtTokenService } from './jwt-token.service';
-import { RbacService } from './rbac.service';
+import { AuthCredentialEntity } from './entities/auth-credential.entity';
+import { AuthTokenEntity } from './entities/auth-token.entity';
+import { AuthUserStateEntity } from './entities/auth-user-state.entity';
 
 @Module({
   imports: [
-    UserModule,
     TypeOrmModule.forFeature([
-      RoleEntity,
-      PermissionEntity,
-      RolePermissionEntity,
-      UserRoleAssignmentEntity,
-      RefreshTokenEntity,
+      AuthCredentialEntity,
+      AuthTokenEntity,
+      AuthUserStateEntity,
     ]),
   ],
-  providers: [AuthService, JwtTokenService, RbacService],
-  exports: [AuthService, RbacService],
+  providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}
