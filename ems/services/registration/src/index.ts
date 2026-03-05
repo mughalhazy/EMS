@@ -1,5 +1,6 @@
 export { RegistrationModule } from './registration.module';
 export { RegistrationService } from './registration.service';
+export { RegistrationController } from './registration.controller';
 export { RegistrationEntity, RegistrationStatus } from './entities/registration.entity';
 
 export {
