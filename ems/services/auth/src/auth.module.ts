@@ -3,9 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthService } from './auth.service';
 import { AuthCredentialEntity } from './entities/auth-credential.entity';
+import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
+import { AuthSsoProviderEntity } from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
-import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
+import { UserEntity } from '../../user/src/entities/user.entity';
 
 @Module({
   imports: [
@@ -13,6 +15,9 @@ import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middlew
       AuthCredentialEntity,
       AuthTokenEntity,
       AuthUserStateEntity,
+      AuthSsoProviderEntity,
+      AuthFederatedIdentityEntity,
+      UserEntity,
     ]),
   ],
   providers: [AuthService, TenantIsolationMiddleware],

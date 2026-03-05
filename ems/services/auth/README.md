@@ -12,6 +12,11 @@ This directory contains the RBAC model and core credential security flow for EMS
 - `auth_tokens`: stores one-time hashed tokens for password reset and email verification.
 - `auth_user_state`: stores user-level auth state like email verification status.
 
+## SSO Tables
+
+- `auth_sso_providers`: tenant-scoped SSO provider configuration for OAuth2 and SAML.
+- `auth_federated_identities`: mapping between external IdP subject and EMS users.
+
 ## Flows
 
 ### Password security
@@ -28,6 +33,12 @@ This directory contains the RBAC model and core credential security flow for EMS
 1. `AuthService.issueEmailVerification` creates a one-time verification token.
 2. `AuthService.verifyEmail` validates the token and marks `email_verified=true`.
 3. Verification timestamps are stored in `auth_user_state.email_verified_at`.
+
+### SSO sign-in (OAuth2 and SAML)
+1. `AuthService.upsertSsoProvider` stores per-tenant provider settings (type, slug, configuration).
+2. `AuthService.signInWithFederatedIdentity` resolves provider + subject mapping.
+3. Existing federated identities are reused and user `last_login_at` is updated.
+4. New identities can link to an existing tenant user by email, or JIT provision a user when enabled.
 
 ## Relations
 
