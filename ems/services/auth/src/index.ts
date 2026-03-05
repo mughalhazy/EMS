@@ -5,3 +5,6 @@ export * from './entities/auth-federated-identity.entity';
 export * from './entities/auth-sso-provider.entity';
 export * from './entities/auth-token.entity';
 export * from './entities/auth-user-state.entity';
+
+export * from './tenant-context';
+export * from './middleware/tenant-isolation.middleware';
