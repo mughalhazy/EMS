@@ -4,6 +4,7 @@ import { DeepPartial, Repository } from 'typeorm';
 
 import { RoomEntity } from './entities/room.entity';
 import { SessionEntity, SessionStatus } from './entities/session.entity';
+import { EventLifecyclePublisher } from './event-lifecycle.publisher';
 
 @Injectable()
 export class SessionService {
@@ -12,6 +13,7 @@ export class SessionService {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(RoomEntity)
     private readonly roomRepository: Repository<RoomEntity>,
+    private readonly eventLifecyclePublisher: EventLifecyclePublisher,
   ) {}
 
   async create(input: DeepPartial<SessionEntity>): Promise<SessionEntity> {
@@ -36,7 +38,18 @@ export class SessionService {
       endAt,
     });
 
-    return this.sessionRepository.save(session);
+    const savedSession = await this.sessionRepository.save(session);
+
+    await this.eventLifecyclePublisher.publish('session.created', savedSession, {
+      eventId: savedSession.eventId,
+      roomId: savedSession.roomId,
+      title: savedSession.title,
+      status: savedSession.status,
+      startAt: savedSession.startAt.toISOString(),
+      endAt: savedSession.endAt.toISOString(),
+    });
+
+    return savedSession;
   }
 
   async findByTenantEvent(tenantId: string, eventId: string): Promise<SessionEntity[]> {
@@ -102,7 +115,18 @@ export class SessionService {
       status: nextStatus,
     });
 
-    return this.sessionRepository.save(session);
+    const updatedSession = await this.sessionRepository.save(session);
+
+    await this.eventLifecyclePublisher.publish('session.updated', updatedSession, {
+      eventId: updatedSession.eventId,
+      roomId: updatedSession.roomId,
+      status: updatedSession.status,
+      updatedFields: Object.keys(input),
+      startAt: updatedSession.startAt.toISOString(),
+      endAt: updatedSession.endAt.toISOString(),
+    });
+
+    return updatedSession;
   }
 
   async remove(tenantId: string, eventId: string, sessionId: string): Promise<boolean> {
