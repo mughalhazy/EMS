@@ -11,6 +11,8 @@ import { EventService } from './event.service';
 import { RoomController } from './room.controller';
 import { SessionController } from './session.controller';
 import { RoomService } from './room.service';
+import { SpeakerAssignmentController } from './speaker-assignment.controller';
+import { SpeakerAssignmentService } from './speaker-assignment.service';
 import { SessionService } from './session.service';
 import { EventEntity } from './entities/event.entity';
 import { EventSettingEntity } from './entities/event-setting.entity';

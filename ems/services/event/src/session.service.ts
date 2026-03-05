@@ -4,6 +4,7 @@ import { DeepPartial, Repository } from 'typeorm';
 
 import { RoomEntity } from './entities/room.entity';
 import { SessionEntity, SessionStatus } from './entities/session.entity';
+import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
 
 @Injectable()
@@ -13,6 +14,8 @@ export class SessionService {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(RoomEntity)
     private readonly roomRepository: Repository<RoomEntity>,
+    @InjectRepository(SessionSpeakerEntity)
+    private readonly sessionSpeakerRepository: Repository<SessionSpeakerEntity>,
     private readonly sessionLifecyclePublisher: SessionLifecyclePublisher,
   ) {}
 
@@ -106,6 +109,15 @@ export class SessionService {
       excludingSessionId: sessionId,
     });
 
+    await this.ensureNoSpeakerTimeConflict({
+      tenantId,
+      eventId,
+      sessionId,
+      startAt: nextStartAt,
+      endAt: nextEndAt,
+      status: nextStatus,
+    });
+
     Object.assign(session, {
       ...input,
       roomId: nextRoomId,
@@ -171,6 +183,52 @@ export class SessionService {
     }
   }
 
+  private async ensureNoSpeakerTimeConflict(input: {
+    tenantId: string;
+    eventId: string;
+    sessionId: string;
+    startAt: Date;
+    endAt: Date;
+    status: SessionStatus;
+  }): Promise<void> {
+    if (input.status !== SessionStatus.SCHEDULED) {
+      return;
+    }
+
+    const conflict = await this.sessionSpeakerRepository
+      .createQueryBuilder('targetAssignment')
+      .innerJoin('targetAssignment.speaker', 'speaker')
+      .innerJoin('session_speakers', 'otherAssignment', 'otherAssignment.speaker_id = speaker.id')
+      .innerJoin(
+        'sessions',
+        'otherSession',
+        'otherSession.id = otherAssignment.session_id AND otherSession.id != :sessionId',
+        { sessionId: input.sessionId },
+      )
+      .where('targetAssignment.tenantId = :tenantId', { tenantId: input.tenantId })
+      .andWhere('targetAssignment.sessionId = :sessionId', { sessionId: input.sessionId })
+      .andWhere('speaker.tenantId = :tenantId', { tenantId: input.tenantId })
+      .andWhere('speaker.eventId = :eventId', { eventId: input.eventId })
+      .andWhere('otherSession.tenant_id = :tenantId', { tenantId: input.tenantId })
+      .andWhere('otherSession.event_id = :eventId', { eventId: input.eventId })
+      .andWhere('otherSession.status = :status', { status: SessionStatus.SCHEDULED })
+      .andWhere('otherSession.start_at < :endAt', { endAt: input.endAt.toISOString() })
+      .andWhere('otherSession.end_at > :startAt', { startAt: input.startAt.toISOString() })
+      .select(['speaker.id AS "speakerId"', 'speaker.first_name AS "speakerFirstName"', 'speaker.last_name AS "speakerLastName"', 'otherSession.title AS "sessionTitle"'])
+      .getRawOne<{
+        speakerId: string;
+        speakerFirstName: string;
+        speakerLastName: string;
+        sessionTitle: string;
+      }>();
+
+    if (conflict) {
+      throw new ConflictException(
+        `Speaker '${conflict.speakerFirstName} ${conflict.speakerLastName}' has a scheduling conflict with session '${conflict.sessionTitle}'.`,
+      );
+    }
+  }
+
   private async ensureRoomExistsForEvent(input: {
     tenantId?: string;
     eventId?: string;
@@ -192,7 +250,6 @@ export class SessionService {
       throw new NotFoundException('Room not found in event.');
     }
   }
-
 
   private ensureValidTimeWindow(startAt: Date, endAt: Date): void {
     if (startAt >= endAt) {
