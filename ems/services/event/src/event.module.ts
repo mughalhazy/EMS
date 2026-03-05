@@ -21,6 +21,8 @@ import { SpeakerEntity } from './entities/speaker.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { VenueController } from './venue.controller';
 import { VenueService } from './venue.service';
+import { SpeakerAssignmentController } from './speaker-assignment.controller';
+import { SpeakerAssignmentService } from './speaker-assignment.service';
 
 @Module({
   imports: [
@@ -37,7 +39,13 @@ import { VenueService } from './venue.service';
     ]),
     AuditModule,
   ],
-  controllers: [EventController, EventSettingController, VenueController, RoomController],
+  controllers: [
+    EventController,
+    EventSettingController,
+    VenueController,
+    RoomController,
+    SpeakerAssignmentController,
+  ],
   providers: [
     EventService,
     EventSearchIndexService,
@@ -45,7 +53,14 @@ import { VenueService } from './venue.service';
     EventSettingService,
     VenueService,
     RoomService,
+    SpeakerAssignmentService,
   ],
-  exports: [EventService, EventSettingService, VenueService, RoomService],
+  exports: [
+    EventService,
+    EventSettingService,
+    VenueService,
+    RoomService,
+    SpeakerAssignmentService,
+  ],
 })
 export class EventModule {}
