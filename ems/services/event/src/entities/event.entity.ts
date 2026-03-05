@@ -1,12 +1,15 @@
 import {
-  Check,
   Column,
   CreateDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { RoomEntity } from './room.entity';
+import { VenueEntity } from './venue.entity';
 
 export enum EventStatus {
   DRAFT = 'draft',
@@ -18,8 +21,6 @@ export enum EventStatus {
 
 @Entity({ name: 'events' })
 @Index('uq_events_tenant_code', ['tenantId', 'code'], { unique: true })
-@Index('idx_events_tenant_status_start', ['tenantId', 'status', 'startAt'])
-@Check('ck_events_time_window', '"start_at" < "end_at"')
 export class EventEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -48,12 +49,14 @@ export class EventEntity {
   @Column({ type: 'timestamptz', name: 'end_at' })
   endAt!: Date;
 
-  @Column({
-    type: 'enum',
-    enum: EventStatus,
-    default: EventStatus.DRAFT,
-  })
+  @Column({ type: 'enum', enum: EventStatus, default: EventStatus.DRAFT })
   status!: EventStatus;
+
+  @OneToMany(() => VenueEntity, (venue) => venue.event)
+  venues!: VenueEntity[];
+
+  @OneToMany(() => RoomEntity, (room) => room.event)
+  rooms!: RoomEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
