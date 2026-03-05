@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuditModule } from '../../audit/src/audit.module';
 import { EventSettingEntity } from '../../event/src/entities/event-setting.entity';
 import { RegistrationEntity } from './entities/registration.entity';
 import { RegistrationController } from './registration.controller';

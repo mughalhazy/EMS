@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { AuditService } from '../../audit/src/audit.service';
 import { EventSettingEntity } from '../../event/src/entities/event-setting.entity';
 import { RegistrationEntity, RegistrationStatus } from './entities/registration.entity';
 import { RegistrationEventsPublisher } from './registration-events.publisher';
@@ -25,6 +26,7 @@ export class RegistrationService {
     @InjectRepository(EventSettingEntity)
     private readonly eventSettingRepository: Repository<EventSettingEntity>,
     private readonly registrationEventsPublisher: RegistrationEventsPublisher,
+    private readonly auditService: AuditService,
   ) {}
 
   async register(input: RegisterForEventInput): Promise<RegistrationEntity> {
@@ -71,6 +73,20 @@ export class RegistrationService {
       if (savedRegistration.status === RegistrationStatus.CONFIRMED) {
         await this.registrationEventsPublisher.publishRegistrationConfirmed(savedRegistration);
       }
+
+      await this.auditService.trackRegistrationChange({
+        tenantId: savedRegistration.tenantId,
+        actorUserId: savedRegistration.userId,
+        targetUserId: savedRegistration.userId,
+        action: 'registration.created',
+        before: null,
+        after: { status: savedRegistration.status },
+        metadata: {
+          registrationId: savedRegistration.id,
+          eventId: savedRegistration.eventId,
+          ticketId: savedRegistration.ticketId,
+        },
+      });
 
       return savedRegistration;
     });
@@ -135,9 +151,24 @@ export class RegistrationService {
         return registration;
       }
 
-      const releasedConfirmedSlot = registration.status === RegistrationStatus.CONFIRMED;
+      const previousStatus = registration.status;
+      const releasedConfirmedSlot = previousStatus === RegistrationStatus.CONFIRMED;
       registration.status = RegistrationStatus.CANCELLED;
       await registrationRepo.save(registration);
+
+      await this.auditService.trackRegistrationChange({
+        tenantId: registration.tenantId,
+        actorUserId: registration.userId,
+        targetUserId: registration.userId,
+        action: 'registration.cancelled',
+        before: { status: previousStatus },
+        after: { status: registration.status },
+        metadata: {
+          registrationId: registration.id,
+          eventId: registration.eventId,
+          ticketId: registration.ticketId,
+        },
+      });
 
       if (releasedConfirmedSlot) {
         await this.promoteNextWaitlisted(registrationRepo, registration.tenantId, registration.eventId);
@@ -191,5 +222,18 @@ export class RegistrationService {
     nextWaitlisted.status = RegistrationStatus.CONFIRMED;
     const promotedRegistration = await repository.save(nextWaitlisted);
     await this.registrationEventsPublisher.publishRegistrationConfirmed(promotedRegistration);
+    await this.auditService.trackRegistrationChange({
+      tenantId: promotedRegistration.tenantId,
+      actorUserId: null,
+      targetUserId: promotedRegistration.userId,
+      action: 'registration.promoted_from_waitlist',
+      before: { status: RegistrationStatus.WAITLISTED },
+      after: { status: promotedRegistration.status },
+      metadata: {
+        registrationId: promotedRegistration.id,
+        eventId: promotedRegistration.eventId,
+        ticketId: promotedRegistration.ticketId,
+      },
+    });
   }
 }
