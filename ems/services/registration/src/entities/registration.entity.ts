@@ -26,6 +26,8 @@ export enum RegistrationStatus {
 @Index('idx_registrations_event_id', ['eventId'])
 @Index('idx_registrations_user_id', ['userId'])
 @Index('idx_registrations_ticket_id', ['ticketId'])
+@Index('idx_registrations_order_id', ['orderId'])
+@Index('idx_registrations_order_item_id', ['orderItemId'])
 @Index('idx_registrations_status', ['status'])
 @Index('uq_registrations_tenant_event_user_ticket', ['tenantId', 'eventId', 'userId', 'ticketId'], {
   unique: true,
@@ -53,6 +55,15 @@ export class RegistrationEntity {
 
   @Column({ type: 'uuid', name: 'ticket_id' })
   ticketId!: string;
+
+  @Column({ type: 'uuid', name: 'order_id', nullable: true })
+  orderId!: string | null;
+
+  @Column({ type: 'uuid', name: 'order_item_id', nullable: true })
+  orderItemId!: string | null;
+
+  @Column({ type: 'int', name: 'attendee_index', nullable: true })
+  attendeeIndex!: number | null;
 
   @ManyToOne(() => TicketEntity, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'ticket_id' })
