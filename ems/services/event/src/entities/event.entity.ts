@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { RoomEntity } from './room.entity';
+import { RegistrationQuestionEntity } from './registration-question.entity';
 import { VenueEntity } from './venue.entity';
 
 export enum EventStatus {
@@ -62,6 +63,9 @@ export class EventEntity {
 
   @OneToMany(() => RoomEntity, (room) => room.event)
   rooms!: RoomEntity[];
+
+  @OneToMany(() => RegistrationQuestionEntity, (registrationQuestion) => registrationQuestion.event)
+  registrationQuestions!: RegistrationQuestionEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
