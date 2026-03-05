@@ -61,9 +61,18 @@ import { SpeakerAssignmentService } from './speaker-assignment.service';
     VenueService,
     RoomService,
     SessionService,
+    SpeakerService,
+    SpeakerAssignmentService,
     SessionLifecyclePublisher,
     SpeakerAssignmentService,
   ],
-  exports: [EventService, EventSettingService, VenueService, RoomService, SessionService],
+  exports: [
+    EventService,
+    EventSettingService,
+    VenueService,
+    RoomService,
+    SessionService,
+    SpeakerService,
+  ],
 })
 export class EventModule {}
