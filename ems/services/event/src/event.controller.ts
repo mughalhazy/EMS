@@ -38,6 +38,8 @@ export class EventController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Body() payload: CreateEventDto,
   ): Promise<EventEntity> {
+    await this.ensureTenantOwnsTemplateEvent(tenantId, payload.templateEventId);
+
     const existingEvent = await this.eventService.findByTenantAndCode(
       tenantId,
       payload.code,
@@ -63,7 +65,6 @@ export class EventController {
         agenda: payload.agenda,
         settings: payload.settings,
       },
-      payload.templateEventId,
     );
   }
 
@@ -154,6 +155,24 @@ export class EventController {
     const deleted = await this.eventService.remove(tenantId, eventId);
     if (!deleted) {
       throw new NotFoundException('Event not found in tenant.');
+    }
+  }
+
+  private async ensureTenantOwnsTemplateEvent(
+    tenantId: string,
+    templateEventId?: string,
+  ): Promise<void> {
+    if (!templateEventId) {
+      return;
+    }
+
+    const templateEvent = await this.eventService.findByTenantAndId(
+      tenantId,
+      templateEventId,
+    );
+
+    if (!templateEvent) {
+      throw new NotFoundException('Template event not found in tenant.');
     }
   }
 }
