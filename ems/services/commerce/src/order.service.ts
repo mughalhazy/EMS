@@ -4,7 +4,7 @@ import { DeepPartial, Repository } from 'typeorm';
 
 import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
-import { OrderItemEntity } from './entities/order-item.entity';
+import { OrderItemAttendee, OrderItemEntity } from './entities/order-item.entity';
 import {
   OrderEntity,
   OrderInventoryReservation,
@@ -17,6 +17,7 @@ export interface CreateOrderItemInput {
   inventoryId: string;
   quantity: number;
   unitPrice: number;
+  attendees?: OrderItemAttendee[];
 }
 
 export interface CreateOrderInput {
@@ -63,6 +64,7 @@ export class OrderService {
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           totalPrice: item.quantity * item.unitPrice,
+          attendees: this.normalizeAttendees(item),
         }),
       );
 
@@ -196,5 +198,18 @@ export class OrderService {
         totals?.grandTotal ??
         (totals?.subtotal ?? 0) - (totals?.discount ?? 0) + (totals?.tax ?? 0),
     };
+  }
+
+  private normalizeAttendees(item: CreateOrderItemInput): OrderItemAttendee[] {
+    const providedAttendees = item.attendees ?? [];
+    if (providedAttendees.length === 0) {
+      return Array.from({ length: item.quantity }, () => ({}));
+    }
+
+    return providedAttendees.slice(0, item.quantity).map((attendee) => ({
+      firstName: attendee.firstName,
+      lastName: attendee.lastName,
+      email: attendee.email,
+    }));
   }
 }

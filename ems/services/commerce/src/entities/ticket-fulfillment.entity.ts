@@ -17,7 +17,7 @@ export enum TicketFulfillmentStatus {
 
 @Entity({ name: 'ticket_fulfillments' })
 @Index('idx_ticket_fulfillments_tenant_order', ['tenantId', 'orderId'])
-@Index('uq_ticket_fulfillments_order_item', ['orderItemId'], { unique: true })
+@Index('uq_ticket_fulfillments_order_item_attendee', ['orderItemId', 'attendeeIndex'], { unique: true })
 export class TicketFulfillmentEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -30,6 +30,9 @@ export class TicketFulfillmentEntity {
 
   @Column({ type: 'uuid', name: 'order_item_id' })
   orderItemId!: string;
+
+  @Column({ type: 'int', name: 'attendee_index', default: 0 })
+  attendeeIndex!: number;
 
   @Column({ type: 'varchar', length: 64, name: 'qr_code' })
   qrCode!: string;

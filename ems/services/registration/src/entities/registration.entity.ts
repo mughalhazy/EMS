@@ -15,10 +15,9 @@ import { UserEntity } from '../../../user/src/entities/user.entity';
 
 export enum RegistrationStatus {
   PENDING = 'pending',
+  APPROVED = 'approved',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
-  WAITLISTED = 'waitlisted',
-  CHECKED_IN = 'checked_in',
 }
 
 @Entity({ name: 'registrations' })
