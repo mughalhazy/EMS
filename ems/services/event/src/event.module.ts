@@ -12,6 +12,8 @@ import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
 import { EventEntity } from './entities/event.entity';
 import { EventSettingEntity } from './entities/event-setting.entity';
+import { RegistrationAnswerEntity } from './entities/registration-answer.entity';
+import { RegistrationQuestionEntity } from './entities/registration-question.entity';
 import { RoomEntity } from './entities/room.entity';
 import { VenueEntity } from './entities/venue.entity';
 import { VenueController } from './venue.controller';
@@ -19,7 +21,14 @@ import { VenueService } from './venue.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EventEntity, EventSettingEntity, VenueEntity, RoomEntity]),
+    TypeOrmModule.forFeature([
+      EventEntity,
+      EventSettingEntity,
+      VenueEntity,
+      RoomEntity,
+      RegistrationQuestionEntity,
+      RegistrationAnswerEntity,
+    ]),
     AuditModule,
   ],
   controllers: [EventController, EventSettingController, VenueController, RoomController],

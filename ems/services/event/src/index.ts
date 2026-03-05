@@ -1,4 +1,6 @@
 export * from './entities/event.entity';
+export * from './entities/registration-answer.entity';
+export * from './entities/registration-question.entity';
 export * from './entities/event-setting.entity';
 export * from './entities/room.entity';
 export * from './entities/venue.entity';
