@@ -5,12 +5,16 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { EventEntity } from '../../../event/src/entities/event.entity';
+import { EarlyBirdRuleEntity } from './early-bird-rule.entity';
 import { InventoryEntity } from './inventory.entity';
+import { PricingTierEntity } from './pricing-tier.entity';
+import { PromoCodeEntity } from './promo-code.entity';
 
 @Entity({ name: 'tickets' })
 @Index('idx_tickets_event_id', ['eventId'])
@@ -56,6 +60,15 @@ export class TicketEntity {
 
   @Column({ type: 'numeric', precision: 12, scale: 2, name: 'total_price' })
   totalPrice!: string;
+
+  @OneToMany(() => PricingTierEntity, (pricingTier) => pricingTier.ticket)
+  pricingTiers!: PricingTierEntity[];
+
+  @OneToMany(() => EarlyBirdRuleEntity, (earlyBirdRule) => earlyBirdRule.ticket)
+  earlyBirdRules!: EarlyBirdRuleEntity[];
+
+  @OneToMany(() => PromoCodeEntity, (promoCode) => promoCode.ticket)
+  promoCodes!: PromoCodeEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
