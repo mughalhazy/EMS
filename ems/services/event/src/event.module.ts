@@ -39,7 +39,13 @@ import { SessionCapacityService } from './session-capacity.service';
     ]),
     AuditModule,
   ],
-  controllers: [EventController, EventSettingController, VenueController, RoomController],
+  controllers: [
+    EventController,
+    EventSettingController,
+    VenueController,
+    RoomController,
+    SpeakerAssignmentController,
+  ],
   providers: [
     EventService,
     EventSearchIndexService,
