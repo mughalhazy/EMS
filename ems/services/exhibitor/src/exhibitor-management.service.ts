@@ -7,6 +7,7 @@ import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { EventEntity } from '../../event/src/entities/event.entity';
 import { VenueEntity } from '../../event/src/entities/venue.entity';
 import { BoothEntity } from './entities/booth.entity';
+import { BoothInteractionEntity } from './entities/booth-interaction.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
@@ -25,6 +26,8 @@ export class ExhibitorManagementService {
     private readonly attendeeRepository: Repository<AttendeeEntity>,
     @InjectRepository(ExhibitorLeadCaptureEntity)
     private readonly exhibitorLeadCaptureRepository: Repository<ExhibitorLeadCaptureEntity>,
+    @InjectRepository(BoothInteractionEntity)
+    private readonly boothInteractionRepository: Repository<BoothInteractionEntity>,
     @InjectRepository(BoothEntity)
     private readonly boothRepository: Repository<BoothEntity>,
     @InjectRepository(SponsorProfileEntity)
@@ -269,6 +272,122 @@ export class ExhibitorManagementService {
       relations: { exhibitor: true },
       order: { capturedAt: 'DESC' },
     });
+  }
+
+
+
+  async recordBoothInteraction(input: {
+    tenantId: string;
+    eventId: string;
+    exhibitorId: string;
+    boothId: string;
+    attendeeId: string;
+    interactionType?: string;
+    metadata?: Record<string, unknown> | null;
+    interactedAt?: Date;
+    actorUserId?: string;
+  }): Promise<BoothInteractionEntity> {
+    await this.ensureExhibitorExists(input.tenantId, input.eventId, input.exhibitorId);
+
+    const booth = await this.boothRepository.findOne({
+      where: {
+        id: input.boothId,
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+      },
+    });
+
+    if (!booth) {
+      throw new NotFoundException('Booth not found in event.');
+    }
+
+    if (booth.exhibitorId !== input.exhibitorId) {
+      throw new ConflictException('Booth is not assigned to the specified exhibitor.');
+    }
+
+    await this.ensureAttendeeExists(input.tenantId, input.eventId, input.attendeeId);
+
+    const interaction = await this.boothInteractionRepository.save(
+      this.boothInteractionRepository.create({
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+        exhibitorId: input.exhibitorId,
+        boothId: input.boothId,
+        attendeeId: input.attendeeId,
+        interactionType: input.interactionType ?? 'visit',
+        metadata: input.metadata ?? null,
+        interactedAt: input.interactedAt ?? new Date(),
+      }),
+    );
+
+    await this.auditService.trackEventChange({
+      tenantId: input.tenantId,
+      actorUserId: input.actorUserId,
+      action: 'booth.interaction_recorded',
+      after: {
+        id: interaction.id,
+        exhibitorId: interaction.exhibitorId,
+        boothId: interaction.boothId,
+        attendeeId: interaction.attendeeId,
+        interactionType: interaction.interactionType,
+        interactedAt: interaction.interactedAt,
+      },
+    });
+
+    return interaction;
+  }
+
+  async getSponsorRoiReport(tenantId: string, eventId: string): Promise<Array<Record<string, unknown>>> {
+    const exhibitorRows = await this.exhibitorRepository.find({
+      where: { tenantId, eventId },
+      order: { name: 'ASC' },
+    });
+
+    const reports = await Promise.all(
+      exhibitorRows.map(async (exhibitor) => {
+        const [leadCount, boothInteractionCount, uniqueLeadAttendeeCount, uniqueInteractionAttendeeCount] =
+          await Promise.all([
+            this.exhibitorLeadCaptureRepository.count({
+              where: { exhibitorId: exhibitor.id, exhibitor: { tenantId, eventId } },
+            }),
+            this.boothInteractionRepository.count({
+              where: { exhibitorId: exhibitor.id, tenantId, eventId },
+            }),
+            this.exhibitorLeadCaptureRepository
+              .createQueryBuilder('lead')
+              .innerJoin('lead.exhibitor', 'exhibitor')
+              .where('lead.exhibitor_id = :exhibitorId', { exhibitorId: exhibitor.id })
+              .andWhere('exhibitor.tenant_id = :tenantId', { tenantId })
+              .andWhere('exhibitor.event_id = :eventId', { eventId })
+              .select('COUNT(DISTINCT lead.attendee_id)', 'count')
+              .getRawOne<{ count: string }>(),
+            this.boothInteractionRepository
+              .createQueryBuilder('interaction')
+              .where('interaction.exhibitor_id = :exhibitorId', { exhibitorId: exhibitor.id })
+              .andWhere('interaction.tenant_id = :tenantId', { tenantId })
+              .andWhere('interaction.event_id = :eventId', { eventId })
+              .select('COUNT(DISTINCT interaction.attendee_id)', 'count')
+              .getRawOne<{ count: string }>(),
+          ]);
+
+        const uniqueLeads = Number(uniqueLeadAttendeeCount?.count ?? 0);
+        const uniqueInteractions = Number(uniqueInteractionAttendeeCount?.count ?? 0);
+
+        return {
+          exhibitorId: exhibitor.id,
+          exhibitorName: exhibitor.name,
+          sponsorshipTier: exhibitor.sponsorshipTier,
+          leadCount,
+          uniqueLeadAttendeeCount: uniqueLeads,
+          boothInteractionCount,
+          uniqueBoothInteractionAttendeeCount: uniqueInteractions,
+          leadToInteractionRatio:
+            uniqueInteractions > 0 ? Number((uniqueLeads / uniqueInteractions).toFixed(4)) : null,
+        };
+      }),
+    );
+
+    return reports;
   }
 
   async listExhibitors(tenantId: string, eventId: string): Promise<ExhibitorEntity[]> {
