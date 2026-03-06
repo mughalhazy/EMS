@@ -11,6 +11,7 @@ import { AuditService } from '../../audit/src/audit.service';
 import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
 import { SessionEntity, SessionStatus } from '../../agenda/src/entities/session.entity';
 import { BadgePrintingService } from './badge-printing.service';
+import { OnsiteEventsPublisher } from './onsite-events.publisher';
 import { BadgeEntity } from './entities/badge.entity';
 import { CheckInEntity } from './entities/check-in.entity';
 import { ScanningDeviceEntity } from './entities/scanning-device.entity';
@@ -219,6 +220,8 @@ export class OnsiteService {
     attendeeId: string,
     deviceId: string,
   ): Promise<CheckInResult> {
+    await this.assertActiveDevice(eventId, deviceId);
+
     const attendee = await this.attendeeRepository.findOne({
       where: {
         id: attendeeId,
@@ -316,6 +319,32 @@ export class OnsiteService {
     };
   }
 
+
+  async printBadge(
+    tenantId: string,
+    eventId: string,
+    attendeeId: string,
+    deviceId: string,
+  ): Promise<BadgePrintResult> {
+    await this.assertActiveDevice(eventId, deviceId);
+
+    const attendee = await this.attendeeRepository.findOne({
+      where: {
+        id: attendeeId,
+        tenantId,
+        eventId,
+      },
+    });
+
+    if (!attendee) {
+      throw new NotFoundException(
+        `Attendee ${attendeeId} was not found for the provided tenant and event.`,
+      );
+    }
+
+    return this.badgePrintingService.printBadge(attendeeId, eventId);
+  }
+
   async scanSessionCheckIn(
     tenantId: string,
     eventId: string,
@@ -335,16 +364,8 @@ export class OnsiteService {
       throw new NotFoundException(`Session ${sessionId} was not found for the provided tenant and event.`);
     }
 
-    const device = await this.scanningDeviceRepository.findOne({
-      where: {
-        deviceId,
-        eventId,
-      },
-    });
+    await this.assertActiveDevice(eventId, deviceId);
 
-    if (!device || device.status.toLowerCase() !== 'active') {
-      throw new ForbiddenException('Scanning device is not registered as active for this event.');
-    }
 
     if (attendee.status !== AttendeeStatus.CHECKED_IN) {
       throw new ForbiddenException('Attendee must complete event check-in before session scanning.');
@@ -434,6 +455,20 @@ export class OnsiteService {
       sessionCheckIn,
       accessGranted: sessionCheckIn.accessGranted,
     };
+  }
+
+
+  private async assertActiveDevice(eventId: string, deviceId: string): Promise<void> {
+    const device = await this.scanningDeviceRepository.findOne({
+      where: {
+        deviceId,
+        eventId,
+      },
+    });
+
+    if (!device || device.status.toLowerCase() !== 'active') {
+      throw new ForbiddenException('Scanning device is not registered as active for this event.');
+    }
   }
 
   private resolveDenialReason(
