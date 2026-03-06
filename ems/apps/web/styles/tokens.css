@@ -1,0 +1,76 @@
+/* ============================================================
+   EMS Design Tokens — Single Source of Truth
+   Source: ems/design-language/design-language.html
+   DO NOT add, remove, or alter token values.
+   ============================================================ */
+
+:root {
+  /* ── Neutrals ─────────────────────────────────────────── */
+  --white:         #FFFFFF;
+  --off:           #FAFAF9;
+  --surface:       #F5F4F1;
+  --border:        #E8E6E1;
+  --border-strong: #D4D0C8;
+  --ink:           #0F0F0E;
+  --ink-2:         #3D3D3A;
+  --ink-3:         #8A8880;
+  --ink-4:         #C4C2BC;
+
+  /* ── Forest — health / positive ──────────────────────── */
+  --f-dk:     #166534;
+  --f-md:     #16A34A;
+  --f-lt:     #DCFCE7;
+  --f-border: rgba(22, 101, 52, 0.15);
+
+  /* ── Amber — warning / pending ───────────────────────── */
+  --a-dk:     #92400E;
+  --a-md:     #D97706;
+  --a-lt:     #FEF3C7;
+  --a-border: rgba(146, 64, 14, 0.15);
+
+  /* ── Brick — danger / error / cancel ─────────────────── */
+  --b-dk:     #991B1B;
+  --b-md:     #DC2626;
+  --b-lt:     #FEE2E2;
+  --b-border: rgba(153, 27, 27, 0.15);
+
+  /* ── Indigo — data / navigation / primary ────────────── */
+  --i-dk:     #1E1B4B;
+  --i-md:     #4F46E5;
+  --i-lt:     #EEF2FF;
+  --i-border: rgba(79, 70, 229, 0.15);
+
+  /* ── Gold — finance / revenue / commerce ─────────────── */
+  --g-dk:     #78350F;
+  --g-md:     #F59E0B;
+  --g-lt:     #FFFBEB;
+  --g-border: rgba(120, 53, 15, 0.15);
+
+  /* ── Teal — sync / live / real-time ──────────────────── */
+  --t-dk:     #134E4A;
+  --t-md:     #0D9488;
+  --t-lt:     #CCFBF1;
+  --t-border: rgba(13, 78, 74, 0.15);
+
+  /* ── Typography ───────────────────────────────────────── */
+  --font:      'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+
+  /* ── Radius ───────────────────────────────────────────── */
+  --radius:    8px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* ── Shadows ──────────────────────────────────────────── */
+  --shadow-sm:           0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:           0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --shadow-lg:           0 12px 40px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --shadow-xl:           0 24px 64px rgba(0,0,0,.16), 0 8px 24px rgba(0,0,0,.08);
+  --shadow-color-forest: 0 8px 24px rgba(22, 163, 74, 0.18);
+  --shadow-color-indigo: 0 8px 24px rgba(79, 70, 229, 0.18);
+
+  /* ── Transitions ──────────────────────────────────────── */
+  --transition-fast:   0.12s ease;
+  --transition-base:   0.2s ease;
+  --transition-slow:   0.4s ease;
+}
