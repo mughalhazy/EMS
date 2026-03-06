@@ -1,1 +1,6 @@
+export { AnalyticsEventsConsumer } from './analytics-events.consumer';
+export { AnalyticsMetricsService } from './analytics-metrics.service';
+export { AnalyticsModule } from './analytics.module';
 export { EventAnalyticsEntity } from './entities/event-analytics.entity';
+export { ExhibitorAnalyticsEntity } from './entities/exhibitor-analytics.entity';
+export { SessionAnalyticsEntity } from './entities/session-analytics.entity';
