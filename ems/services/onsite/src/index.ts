@@ -1,1 +1,11 @@
+export { OnsiteModule } from './onsite.module';
+export { OnsiteController } from './onsite.controller';
+export { OnsiteService } from './onsite.service';
+export { BadgePrintingService } from './badge-printing.service';
+export { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
+export { BadgeEntity } from './entities/badge.entity';
 export { CheckInEntity } from './entities/check-in.entity';
+export { ScanningDeviceEntity } from './entities/scanning-device.entity';
+export { CreateBadgesTable1723000000000 } from './migrations/1723000000000-CreateBadgesTable';
+export { CreateCheckInsTable1723000000001 } from './migrations/1723000000001-CreateCheckInsTable';
+export { AddUniqueBadgePerAttendee1723000000002 } from './migrations/1723000000002-AddUniqueBadgePerAttendee';
