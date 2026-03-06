@@ -1,0 +1,38 @@
+.shell {
+  min-height: 100vh;
+  background: var(--off);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.wordmark {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 40px 32px;
+}
+
+@media (max-width: 900px) {
+  .main {
+    padding: 24px 16px;
+  }
+}
