@@ -16,10 +16,12 @@ import { AssignExhibitorBoothDto } from './dto/assign-exhibitor-booth.dto';
 import { CaptureLeadDto } from './dto/capture-lead.dto';
 import { CreateBoothDto } from './dto/create-booth.dto';
 import { CreateExhibitorDto } from './dto/create-exhibitor.dto';
-import { UpdateExhibitorDto } from './dto/update-exhibitor.dto';
 import { CreateSponsorProfileDto } from './dto/create-sponsor-profile.dto';
+import { RecordBoothInteractionDto } from './dto/record-booth-interaction.dto';
+import { UpdateExhibitorDto } from './dto/update-exhibitor.dto';
 import { UpdateSponsorProfileDto } from './dto/update-sponsor-profile.dto';
 import { BoothEntity } from './entities/booth.entity';
+import { BoothInteractionEntity } from './entities/booth-interaction.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
@@ -28,7 +30,6 @@ import { ExhibitorManagementService } from './exhibitor-management.service';
 @Controller('api/v1/tenants/:tenantId/events/:eventId')
 export class ExhibitorManagementController {
   constructor(private readonly exhibitorManagementService: ExhibitorManagementService) {}
-
 
   @Post('sponsors')
   @HttpCode(HttpStatus.CREATED)
@@ -56,6 +57,14 @@ export class ExhibitorManagementController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
   ): Promise<SponsorProfileEntity[]> {
     return this.exhibitorManagementService.listSponsorProfiles(tenantId, eventId);
+  }
+
+  @Get('sponsors/roi-report')
+  async getSponsorRoiReport(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<Array<Record<string, unknown>>> {
+    return this.exhibitorManagementService.getSponsorRoiReport(tenantId, eventId);
   }
 
   @Patch('sponsors/:sponsorProfileId')
@@ -222,6 +231,27 @@ export class ExhibitorManagementController {
       exhibitorId,
       attendeeId: payload.attendeeId,
       capturedAt: payload.capturedAt ? new Date(payload.capturedAt) : undefined,
+    });
+  }
+
+  @Post('exhibitors/:exhibitorId/booths/:boothId/interactions')
+  @HttpCode(HttpStatus.CREATED)
+  async recordBoothInteraction(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('exhibitorId', ParseUUIDPipe) exhibitorId: string,
+    @Param('boothId', ParseUUIDPipe) boothId: string,
+    @Body() payload: RecordBoothInteractionDto,
+  ): Promise<BoothInteractionEntity> {
+    return this.exhibitorManagementService.recordBoothInteraction({
+      tenantId,
+      eventId,
+      exhibitorId,
+      boothId,
+      attendeeId: payload.attendeeId,
+      interactionType: payload.interactionType,
+      metadata: payload.metadata,
+      interactedAt: payload.interactedAt ? new Date(payload.interactedAt) : undefined,
     });
   }
 }
