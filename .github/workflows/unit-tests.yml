@@ -1,0 +1,103 @@
+name: Unit Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  discover-test-packages:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      count: ${{ steps.discover.outputs.count }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Discover package.json files with test scripts
+        id: discover
+        run: |
+          set -euo pipefail
+
+          matrix_json=$(node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const root = process.cwd();
+          const found = [];
+
+          const walk = (dir) => {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'dist') {
+                continue;
+              }
+
+              const fullPath = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                walk(fullPath);
+                continue;
+              }
+
+              if (entry.isFile() && entry.name === 'package.json') {
+                try {
+                  const pkg = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+                  if (pkg.scripts && pkg.scripts.test && pkg.scripts.test !== 'echo "Error: no test specified" && exit 1') {
+                    found.push({ packageDir: path.relative(root, path.dirname(fullPath)) || '.' });
+                  }
+                } catch (error) {
+                  console.warn(`Unable to parse ${fullPath}: ${error.message}`);
+                }
+              }
+            }
+          };
+
+          walk(root);
+          process.stdout.write(JSON.stringify(found));
+          NODE
+          )
+
+          echo "matrix=$matrix_json" >> "$GITHUB_OUTPUT"
+          echo "count=$(node -e "console.log(JSON.parse(process.argv[1]).length)" "$matrix_json")" >> "$GITHUB_OUTPUT"
+
+  run-unit-tests:
+    needs: discover-test-packages
+    if: ${{ needs.discover-test-packages.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.discover-test-packages.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.packageDir }}
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run unit tests
+        working-directory: ${{ matrix.packageDir }}
+        run: npm test
+
+  no-test-packages-found:
+    needs: discover-test-packages
+    if: ${{ needs.discover-test-packages.outputs.count == '0' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report missing test packages
+        run: |
+          echo "No package.json files with a test script were found."
+          echo "Add unit test scripts to service packages to activate CI test execution."
