@@ -62,9 +62,13 @@
 - ✅ components/nav/TopBar.tsx + module.css
 
 ### Layouts
-- ✅ layouts/AppLayout.tsx + module.css   — operational, dark sidebar nav
-- ✅ layouts/PortalLayout.tsx + module.css — executive digest, centered
-- ✅ layouts/AuthLayout.tsx + module.css  — auth pages, minimal card
+- ✅ layouts/AppLayout.tsx + module.css      — app shell: sidebar + main col, height:100vh, no external scroll
+- ✅ layouts/DashboardLayout.tsx + module.css — TopBar + banner + two-col (content | 320px panel)
+- ✅ layouts/EventLayout.tsx + module.css    — TopBar + optional subnav tabs + optional filter bar + content
+- ✅ layouts/AdminLayout.tsx + module.css    — portal surface: dark ink header, horizontal tabs, centered 1200px body
+- ✅ layouts/PortalLayout.tsx + module.css   — executive digest, centered
+- ✅ layouts/AuthLayout.tsx + module.css     — auth pages, minimal card
+- ✅ layouts/index.ts                        — barrel export for all layouts
 
 ### App (Pages)
 - ✅ app/layout.tsx             — root layout, Plus Jakarta Sans, global styles

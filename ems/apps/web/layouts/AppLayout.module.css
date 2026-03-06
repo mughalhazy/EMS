@@ -1,9 +1,17 @@
+/* ============================================================
+   AppLayout — Operational app shell
+   Design surface: app (dark sidebar + off-white body)
+   ============================================================ */
+
+/* Shell: sidebar + main; full viewport height, no external scroll */
 .shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: var(--off);
 }
 
+/* Main column: flexes to fill remaining width, internal scroll only */
 .main {
   flex: 1;
   min-width: 0;
@@ -12,14 +20,11 @@
   overflow: hidden;
 }
 
-.content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-}
-
+/* ── Responsive ─────────────────────────────────────────────── */
+/* Below md (900px): sidebar auto-collapses to 56px icon strip.
+   The Sidebar component handles its own width via its own CSS. */
 @media (max-width: 900px) {
   .shell {
-    flex-direction: column;
+    /* sidebar collapses internally — no layout change needed here */
   }
 }

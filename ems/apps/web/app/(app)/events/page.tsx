@@ -1,16 +1,14 @@
 import type { Metadata } from 'next'
-import { TopBar } from '@/components/nav/TopBar'
-import styles from './events.module.css'
+import { EventLayout } from '@/layouts/EventLayout'
 
 export const metadata: Metadata = { title: 'Events' }
 
 export default function EventsPage() {
   return (
-    <div className={styles.page}>
-      <TopBar title="Events" />
-      <div className={styles.content}>
-        <p className={styles.placeholder}>Events — wiring pending.</p>
-      </div>
-    </div>
+    <EventLayout title="Events">
+      <p style={{ color: 'var(--ink-3)', fontSize: 13, fontWeight: 600 }}>
+        Events — wiring pending.
+      </p>
+    </EventLayout>
   )
 }

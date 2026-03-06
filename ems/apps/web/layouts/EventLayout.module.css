@@ -1,0 +1,72 @@
+/* ============================================================
+   EventLayout — Event list + event detail content container
+   Used inside AppLayout's main column.
+   Wireframe ref: ems/design-language/wireframes/events.html
+   ============================================================ */
+
+/* Root: full height of the main column */
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Sub-navigation tabs (event detail): Sessions, Speakers, Attendees… */
+.subnav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  /* Horizontal scroll on mobile instead of wrap */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.subnav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Filter bar: search + selects + count chip */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 24px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Main scrollable content area */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .filters {
+    padding: 10px 16px;
+    gap: 6px;
+  }
+
+  .content {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .subnav {
+    padding: 0 16px;
+  }
+}
