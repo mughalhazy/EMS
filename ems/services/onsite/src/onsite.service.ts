@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AttendeeEntity, AttendeeStatus } from '../../attendee/src/entities/attendee.entity';
+import { AuditService } from '../../audit/src/audit.service';
 import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
 import { SessionEntity, SessionStatus } from '../../agenda/src/entities/session.entity';
 import { BadgePrintingService } from './badge-printing.service';
@@ -58,6 +59,7 @@ export class OnsiteService {
     private readonly scanningDeviceRepository: Repository<ScanningDeviceEntity>,
     private readonly badgePrintingService: BadgePrintingService,
     private readonly onsiteEventsPublisher: OnsiteEventsPublisher,
+    private readonly auditService: AuditService,
   ) {}
 
 
@@ -244,6 +246,22 @@ export class OnsiteService {
     const badge = await this.badgePrintingService.getOrCreateBadge(attendeeId, eventId);
 
     if (existingCheckIn) {
+      await this.auditService.trackOnsiteChange({
+        tenantId,
+        targetUserId: attendee.userId,
+        action: 'onsite.attendee.check_in.duplicate_scan',
+        before: null,
+        after: {
+          checkInId: existingCheckIn.id,
+          checkedInAt: existingCheckIn.checkedInAt,
+        },
+        metadata: {
+          eventId,
+          attendeeId,
+          deviceId,
+        },
+      });
+
       return {
         checkIn: existingCheckIn,
         badge,
@@ -273,6 +291,23 @@ export class OnsiteService {
       attendee.status = AttendeeStatus.CHECKED_IN;
       await this.attendeeRepository.save(attendee);
     }
+
+    await this.auditService.trackOnsiteChange({
+      tenantId,
+      targetUserId: attendee.userId,
+      action: 'onsite.attendee.checked_in',
+      before: null,
+      after: {
+        checkInId: savedCheckIn.id,
+        checkedInAt: savedCheckIn.checkedInAt,
+      },
+      metadata: {
+        eventId,
+        attendeeId,
+        deviceId,
+        badgeId: badge.id,
+      },
+    });
 
     return {
       checkIn: savedCheckIn,
@@ -338,6 +373,25 @@ export class OnsiteService {
     });
 
     if (existingScan) {
+      await this.auditService.trackOnsiteChange({
+        tenantId,
+        targetUserId: attendee.userId,
+        action: 'onsite.session_scan.duplicate_scan',
+        before: null,
+        after: {
+          sessionCheckInId: existingScan.id,
+          scannedAt: existingScan.scannedAt,
+          accessGranted: existingScan.accessGranted,
+          denialReason: existingScan.denialReason,
+        },
+        metadata: {
+          eventId,
+          attendeeId,
+          sessionId,
+          deviceId,
+        },
+      });
+
       return {
         sessionCheckIn: existingScan,
         accessGranted: existingScan.accessGranted,
@@ -356,6 +410,25 @@ export class OnsiteService {
         scannedAt: new Date(),
       }),
     );
+
+    await this.auditService.trackOnsiteChange({
+      tenantId,
+      targetUserId: attendee.userId,
+      action: sessionCheckIn.accessGranted ? 'onsite.session_scan.access_granted' : 'onsite.session_scan.access_denied',
+      before: null,
+      after: {
+        sessionCheckInId: sessionCheckIn.id,
+        scannedAt: sessionCheckIn.scannedAt,
+        accessGranted: sessionCheckIn.accessGranted,
+        denialReason: sessionCheckIn.denialReason,
+      },
+      metadata: {
+        eventId,
+        attendeeId,
+        sessionId,
+        deviceId,
+      },
+    });
 
     return {
       sessionCheckIn,

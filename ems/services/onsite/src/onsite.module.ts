@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
 import { SessionEntity } from '../../agenda/src/entities/session.entity';
 import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
+import { AuditModule } from '../../audit/src/audit.module';
 import { BadgePrintingService } from './badge-printing.service';
 import { BadgeEntity } from './entities/badge.entity';
 import { CheckInEntity } from './entities/check-in.entity';
@@ -15,18 +16,7 @@ import { OnsiteEventsPublisher } from './onsite-events.publisher';
 import { OnsiteService } from './onsite.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      AttendeeEntity,
-      AttendeeScheduleEntity,
-      BadgeEntity,
-      CheckInEntity,
-      ScanningDeviceEntity,
-      SessionAttendanceEntity,
-      SessionCheckInEntity,
-      SessionEntity,
-    ]),
-  ],
+  imports: [AuditModule, TypeOrmModule.forFeature([AttendeeEntity, AttendeeScheduleEntity, SessionEntity, BadgeEntity, CheckInEntity, ScanningDeviceEntity, SessionAttendanceEntity, SessionCheckInEntity])],
   controllers: [OnsiteController],
   providers: [OnsiteService, BadgePrintingService, OnsiteEventsPublisher],
   exports: [OnsiteService, BadgePrintingService],
