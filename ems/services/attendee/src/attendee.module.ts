@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RegistrantProfileEntity } from '../../registration/src/entities/registrant-profile.entity';
 import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
+import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
+import { SessionEntity } from '../../agenda/src/entities/session.entity';
+import { AttendeeConnectionEntity } from '../../networking/src/entities/attendee-connection.entity';
 import { AttendeeController } from './attendee.controller';
 import { AttendeeDirectorySearchIndexService } from './attendee-directory-search-index.service';
 import { AttendeeEventsConsumer } from './attendee-events.consumer';
@@ -19,6 +22,9 @@ import { AttendeeEntity } from './entities/attendee.entity';
       RegistrantProfileEntity,
       UserEntity,
       AttendeeProfileEntity,
+      AttendeeConnectionEntity,
+      AttendeeScheduleEntity,
+      SessionEntity,
     ]),
   ],
   controllers: [AttendeeController],
