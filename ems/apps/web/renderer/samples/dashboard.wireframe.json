@@ -1,0 +1,138 @@
+{
+  "id": "dashboard-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Dashboard",
+    "route": "/dashboard",
+    "description": "Operational event management dashboard",
+    "roles": ["admin", "manager", "operator"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "top-nav",
+          "type": "top_navigation",
+          "order": 0
+        },
+        {
+          "id": "breadcrumb",
+          "type": "breadcrumbs",
+          "order": 1,
+          "annotations": {
+            "aria-label": "Page breadcrumb"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "page-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Dashboard",
+            "subtitle": "Event operations overview"
+          }
+        },
+        {
+          "id": "kpi-total-events",
+          "type": "metric_tile",
+          "order": 1,
+          "span": 3,
+          "props": {
+            "label": "Total Events",
+            "value": "--"
+          },
+          "states": {
+            "loading": { "id": "kpi-total-events", "type": "loading_placeholder" }
+          }
+        },
+        {
+          "id": "kpi-active-events",
+          "type": "metric_tile",
+          "order": 2,
+          "span": 3,
+          "props": {
+            "label": "Active Events",
+            "value": "--"
+          },
+          "states": {
+            "loading": { "id": "kpi-active-events", "type": "loading_placeholder" }
+          }
+        },
+        {
+          "id": "kpi-total-registrations",
+          "type": "metric_tile",
+          "order": 3,
+          "span": 3,
+          "props": {
+            "label": "Registrations",
+            "value": "--"
+          },
+          "states": {
+            "loading": { "id": "kpi-total-registrations", "type": "loading_placeholder" }
+          }
+        },
+        {
+          "id": "kpi-revenue",
+          "type": "metric_tile",
+          "order": 4,
+          "span": 3,
+          "props": {
+            "label": "Revenue",
+            "value": "--"
+          },
+          "states": {
+            "loading": { "id": "kpi-revenue", "type": "loading_placeholder" }
+          }
+        },
+        {
+          "id": "live-alert",
+          "type": "error_banner",
+          "order": 5,
+          "span": 12,
+          "annotations": {
+            "aria-live": "polite"
+          }
+        },
+        {
+          "id": "events-table",
+          "type": "list_table",
+          "order": 6,
+          "span": 12,
+          "props": {
+            "pageSize": 10
+          },
+          "states": {
+            "loading": { "id": "events-table", "type": "loading_placeholder" },
+            "empty": { "id": "events-table", "type": "empty_placeholder" }
+          }
+        }
+      ]
+    },
+    "secondary": {
+      "layout": "stack",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "quick-create",
+          "type": "primary_cta",
+          "order": 0,
+          "props": {
+            "label": "Create Event"
+          },
+          "annotations": {
+            "aria-label": "Create a new event"
+          }
+        }
+      ]
+    }
+  }
+}

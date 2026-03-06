@@ -109,6 +109,48 @@
 - ✅ attendee-portal.html       — website surface, QR pass, personal agenda, event info
 - ✅ admin-console.html         — portal surface, tenants, users, health, feature flags
 
+## Phase 2.6 — UI Renderer (`ems/apps/web/renderer/`) ✅ COMPLETE
+
+### Types
+- ✅ types/wireframe.ts       — WireframeDocument, 27 BlockTypes, 5 RegionNames, Breakpoints
+- ✅ types/component.ts       — CanonicalComponent union, DEFAULT_SPANS, CatalogEntry, ComponentCatalogMap
+- ✅ types/output.ts          — RenderedNode, 8 ValidationCategories, RenderResult, PipelineContext
+
+### Catalog
+- ✅ catalog/ComponentCatalog.ts — full 27-entry catalog + getCatalogEntry() with unknown fallback
+
+### Core
+- ✅ core/WireframeParser.ts   — parse, validate, flatten blocks in REGION_ORDER
+- ✅ core/ComponentResolver.ts — block → component, annotation overrides, a11y warnings
+- ✅ core/LayoutEngine.ts      — 12-col grid, span heuristics, responsive map
+- ✅ core/TokenResolver.ts     — token validation (no literals), semantic token derivation
+- ✅ core/Validator.ts         — 8-category constraint enforcement
+- ✅ core/RendererEngine.ts    — public render() + validateOnly() API
+
+### Pipeline (7 steps)
+- ✅ pipeline/steps/step1-normalize.ts
+- ✅ pipeline/steps/step2-resolve-components.ts
+- ✅ pipeline/steps/step3-apply-layout.ts
+- ✅ pipeline/steps/step4-responsive-transform.ts
+- ✅ pipeline/steps/step5-apply-tokens.ts
+- ✅ pipeline/steps/step6-validate.ts
+- ✅ pipeline/steps/step7-produce-output.ts
+- ✅ pipeline/Pipeline.ts      — 7-step orchestrator
+
+### React Components
+- ✅ components/RenderedBlock.tsx  — single node → React element
+- ✅ components/RenderedRegion.tsx — region group with 12-col grid
+- ✅ components/RenderedPage.tsx   — top-level, runs pipeline, debug overlay
+
+### Public API
+- ✅ index.ts                 — barrel export of all public types + functions
+- ✅ renderer.css             — layout primitives (12-col grid, regions, responsive)
+
+### Samples
+- ✅ samples/dashboard.wireframe.json — full dashboard wireframe document
+
+---
+
 ## Phase 3 — Backend Wiring
 ⏳ Not started — awaiting task prompts per module
 
@@ -118,7 +160,8 @@
 ---
 
 ## Last Checkpoint
-Phase 2 scaffold 100% complete. All services, components, layouts, and pages created.
+Phase 2.6 UI Renderer 100% complete. 7-step pipeline: normalize → resolve → layout → responsive → tokens → validate → output. Deterministic, token-enforced, a11y-validated.
+
 Next: Phase 3 — wire each page to its backend service (task prompts per module).
 
 ## Resume Command
