@@ -19,12 +19,21 @@ export enum AttendeeConnectionStatus {
 }
 
 @Entity({ name: 'attendee_connections' })
-@Index('uq_attendee_connections_pair', ['attendeeAId', 'attendeeBId'], { unique: true })
+@Index('uq_attendee_connections_tenant_event_pair', ['tenantId', 'eventId', 'attendeeAId', 'attendeeBId'], {
+  unique: true,
+})
+@Index('idx_attendee_connections_tenant_event', ['tenantId', 'eventId'])
 @Index('idx_attendee_connections_attendee_a', ['attendeeAId'])
 @Index('idx_attendee_connections_attendee_b', ['attendeeBId'])
 export class AttendeeConnectionEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column({ type: 'uuid', name: 'tenant_id' })
+  tenantId!: string;
+
+  @Column({ type: 'uuid', name: 'event_id' })
+  eventId!: string;
 
   @Column({ type: 'uuid', name: 'attendee_a_id' })
   attendeeAId!: string;

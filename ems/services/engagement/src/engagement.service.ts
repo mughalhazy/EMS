@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { SessionQnaEntity } from '../../agenda/src/entities/session-qna.entity';
 import { SessionEntity } from '../../agenda/src/entities/session.entity';
+import { AuditService } from '../../audit/src/audit.service';
 import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { SurveyEntity } from '../../event/src/entities/survey.entity';
 import { CreatePollDto } from './dto/create-poll.dto';
@@ -12,6 +13,7 @@ import { CreateSurveyDto } from './dto/create-survey.dto';
 import { UpdatePollDto } from './dto/update-poll.dto';
 import { UpdateSurveyDto } from './dto/update-survey.dto';
 import { PollEntity } from './entities/poll.entity';
+import { EngagementEventsPublisher } from './engagement-events.publisher';
 
 @Injectable()
 export class EngagementService {
@@ -26,6 +28,8 @@ export class EngagementService {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(AttendeeEntity)
     private readonly attendeeRepository: Repository<AttendeeEntity>,
+    private readonly engagementEventsPublisher: EngagementEventsPublisher,
+    private readonly auditService: AuditService,
   ) {}
 
   async createPoll(tenantId: string, eventId: string, payload: CreatePollDto): Promise<PollEntity> {
@@ -51,6 +55,43 @@ export class EngagementService {
       where: { tenantId, eventId },
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async submitPoll(
+    tenantId: string,
+    eventId: string,
+    pollId: string,
+    payload: { attendeeId: string; option: string },
+  ): Promise<{ status: string }> {
+    const poll = await this.pollRepository.findOne({ where: { id: pollId, tenantId, eventId } });
+    if (!poll) {
+      throw new NotFoundException('Poll not found.');
+    }
+
+    const attendee = await this.attendeeRepository.findOne({
+      where: { id: payload.attendeeId, tenantId, eventId },
+    });
+    if (!attendee) {
+      throw new NotFoundException('Attendee not found for the provided tenant and event.');
+    }
+
+    if (!poll.options.includes(payload.option)) {
+      throw new BadRequestException('Selected poll option is invalid.');
+    }
+
+    await this.engagementEventsPublisher.publishPollSubmitted(poll, {
+      attendeeId: payload.attendeeId,
+      option: payload.option,
+    });
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      actorUserId: attendee.userId,
+      action: 'engagement.poll.submitted',
+      after: { pollId: poll.id, attendeeId: attendee.id, option: payload.option, sessionId: poll.sessionId },
+    });
+
+    return { status: 'submitted' };
   }
 
   async updatePoll(tenantId: string, eventId: string, pollId: string, payload: UpdatePollDto): Promise<PollEntity> {
@@ -115,7 +156,15 @@ export class EngagementService {
       question: payload.question.trim(),
     });
 
-    return this.questionRepository.save(question);
+    const savedQuestion = await this.questionRepository.save(question);
+    await this.auditService.trackEventChange({
+      tenantId,
+      actorUserId: attendee.userId,
+      action: 'engagement.question.asked',
+      after: { questionId: savedQuestion.id, sessionId: savedQuestion.sessionId, attendeeId: savedQuestion.attendeeId },
+    });
+
+    return savedQuestion;
   }
 
   async listQuestions(tenantId: string, eventId: string, sessionId?: string): Promise<SessionQnaEntity[]> {
@@ -175,6 +224,41 @@ export class EngagementService {
     });
 
     return this.surveyRepository.save(survey);
+  }
+
+  async completeSurvey(
+    tenantId: string,
+    eventId: string,
+    surveyId: string,
+    payload: { attendeeId: string },
+  ): Promise<{ status: string }> {
+    const survey = await this.surveyRepository.findOne({ where: { id: surveyId, tenantId, eventId } });
+    if (!survey) {
+      throw new NotFoundException('Survey not found.');
+    }
+
+    const attendee = await this.attendeeRepository.findOne({
+      where: { id: payload.attendeeId, tenantId, eventId },
+    });
+    if (!attendee) {
+      throw new NotFoundException('Attendee not found for the provided tenant and event.');
+    }
+
+    await this.engagementEventsPublisher.publishSurveyCompleted({
+      tenantId,
+      eventId,
+      surveyId,
+      attendeeId: attendee.id,
+    });
+
+    await this.auditService.trackEventChange({
+      tenantId,
+      actorUserId: attendee.userId,
+      action: 'engagement.survey.completed',
+      after: { surveyId: survey.id, attendeeId: attendee.id },
+    });
+
+    return { status: 'completed' };
   }
 
   async listSurveys(tenantId: string, eventId: string): Promise<SurveyEntity[]> {
