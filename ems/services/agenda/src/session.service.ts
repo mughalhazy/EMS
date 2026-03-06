@@ -3,8 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
+import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { SpeakerEntity } from '../../speaker/src/entities/speaker.entity';
 import { RoomEntity } from '../../event/src/entities/room.entity';
+import { AttendeeScheduleEntity } from './entities/attendee-schedule.entity';
 import { SessionEntity, SessionStatus } from './entities/session.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
@@ -16,6 +18,10 @@ export class SessionService {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(SessionSpeakerEntity)
     private readonly sessionSpeakerRepository: Repository<SessionSpeakerEntity>,
+    @InjectRepository(AttendeeScheduleEntity)
+    private readonly attendeeScheduleRepository: Repository<AttendeeScheduleEntity>,
+    @InjectRepository(AttendeeEntity)
+    private readonly attendeeRepository: Repository<AttendeeEntity>,
     @InjectRepository(SpeakerEntity)
     private readonly speakerRepository: Repository<SpeakerEntity>,
     @InjectRepository(RoomEntity)
@@ -100,6 +106,79 @@ export class SessionService {
       after: { sessionId: input.sessionId, speakerId: input.speakerId },
     });
     return assignment;
+  }
+
+  async addToSchedule(input: { tenantId: string; eventId: string; sessionId: string; attendeeId: string }, actorUserId?: string): Promise<AttendeeScheduleEntity> {
+    const session = await this.sessionRepository.findOne({ where: { id: input.sessionId, tenantId: input.tenantId, eventId: input.eventId } });
+    if (!session) throw new NotFoundException('Session not found in tenant event.');
+    if (session.status !== SessionStatus.SCHEDULED) {
+      throw new BadRequestException('Only scheduled sessions can be bookmarked.');
+    }
+
+    const attendee = await this.attendeeRepository.findOne({ where: { id: input.attendeeId, tenantId: input.tenantId, eventId: input.eventId } });
+    if (!attendee) throw new NotFoundException('Attendee not found in tenant event.');
+
+    const existing = await this.attendeeScheduleRepository.findOne({
+      where: {
+        tenantId: input.tenantId,
+        eventId: input.eventId,
+        attendeeId: input.attendeeId,
+        sessionId: input.sessionId,
+      },
+    });
+    if (existing) return existing;
+
+    const overlap = await this.attendeeScheduleRepository.createQueryBuilder('schedule')
+      .innerJoin('schedule.session', 'session')
+      .where('schedule.tenant_id = :tenantId', { tenantId: input.tenantId })
+      .andWhere('schedule.event_id = :eventId', { eventId: input.eventId })
+      .andWhere('schedule.attendee_id = :attendeeId', { attendeeId: input.attendeeId })
+      .andWhere('session.start_time < :endTime', { endTime: session.endTime.toISOString() })
+      .andWhere('session.end_time > :startTime', { startTime: session.startTime.toISOString() })
+      .getOne();
+    if (overlap) {
+      throw new ConflictException('Attendee has an overlapping bookmarked session.');
+    }
+
+    const schedule = await this.attendeeScheduleRepository.save(this.attendeeScheduleRepository.create(input));
+    await this.auditService.trackEventChange({
+      tenantId: input.tenantId,
+      actorUserId,
+      action: 'agenda.session.bookmarked',
+      after: {
+        attendeeId: input.attendeeId,
+        sessionId: input.sessionId,
+      },
+    });
+    return schedule;
+  }
+
+  async listSchedule(tenantId: string, eventId: string, attendeeId: string): Promise<AttendeeScheduleEntity[]> {
+    return this.attendeeScheduleRepository.find({
+      where: { tenantId, eventId, attendeeId },
+      relations: { session: true },
+      order: { session: { startTime: 'ASC' } },
+    });
+  }
+
+  async removeFromSchedule(tenantId: string, eventId: string, attendeeId: string, sessionId: string, actorUserId?: string): Promise<boolean> {
+    const existing = await this.attendeeScheduleRepository.findOne({
+      where: { tenantId, eventId, attendeeId, sessionId },
+    });
+
+    if (!existing) return false;
+
+    await this.attendeeScheduleRepository.remove(existing);
+    await this.auditService.trackEventChange({
+      tenantId,
+      actorUserId,
+      action: 'agenda.session.bookmark.removed',
+      before: {
+        attendeeId,
+        sessionId,
+      },
+    });
+    return true;
   }
 
   private async ensureNoRoomConflict(tenantId: string, eventId: string, roomId: string, startTime: Date, endTime: Date, excludingSessionId?: string): Promise<void> {
