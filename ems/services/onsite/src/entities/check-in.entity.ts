@@ -13,6 +13,7 @@ import { EventEntity } from '../../../event/src/entities/event.entity';
 @Entity({ name: 'check_ins' })
 @Index('idx_check_ins_attendee_id', ['attendeeId'])
 @Index('idx_check_ins_event_id', ['eventId'])
+@Index('uq_check_ins_attendee_event', ['attendeeId', 'eventId'], { unique: true })
 export class CheckInEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
