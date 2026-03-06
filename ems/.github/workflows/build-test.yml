@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build, Lint, Type-check, and Unit Tests
 
 on:
   push:
@@ -8,58 +8,34 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Run build checks
+        run: ems/infra/scripts/ci/build.sh
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: |
-            **/package-lock.json
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run lint checks
+        run: ems/infra/scripts/ci/lint.sh
 
-      - name: Build and test all Node.js projects
-        shell: bash
-        run: |
-          set -euo pipefail
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run type checks
+        run: ems/infra/scripts/ci/type-check.sh
 
-          mapfile -t manifests < <(find ems -name package.json -not -path '*/node_modules/*' | sort)
-
-          if [ ${#manifests[@]} -eq 0 ]; then
-            echo "No package.json files found under ems/. Skipping build and test."
-            exit 0
-          fi
-
-          for manifest in "${manifests[@]}"; do
-            project_dir="$(dirname "$manifest")"
-            echo "::group::Processing $project_dir"
-            pushd "$project_dir" >/dev/null
-
-            if [ -f package-lock.json ]; then
-              npm ci
-            elif [ -f npm-shrinkwrap.json ]; then
-              npm ci
-            else
-              npm install
-            fi
-
-            if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then
-              npm run build
-            else
-              echo "No build script found in $project_dir/package.json. Skipping build."
-            fi
-
-            if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then
-              npm test
-            else
-              echo "No test script found in $project_dir/package.json. Skipping test."
-            fi
-
-            popd >/dev/null
-            echo "::endgroup::"
-          done
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run unit tests
+        run: ems/infra/scripts/ci/test.sh

@@ -1,17 +1,17 @@
 # syntax=docker/dockerfile:1.7
 
 ARG NODE_VERSION=20-alpine
-ARG APP_DIR=ems/apps/web
+ARG SERVICE_DIR=ems/services
 
 FROM node:${NODE_VERSION} AS base
 WORKDIR /app
 
 FROM base AS deps
-ARG APP_DIR
-COPY ${APP_DIR}/package.json ./package.json
-COPY ${APP_DIR}/package-lock.json* ./
-COPY ${APP_DIR}/yarn.lock* ./
-COPY ${APP_DIR}/pnpm-lock.yaml* ./
+ARG SERVICE_DIR
+COPY ${SERVICE_DIR}/package.json ./package.json
+COPY ${SERVICE_DIR}/package-lock.json* ./
+COPY ${SERVICE_DIR}/yarn.lock* ./
+COPY ${SERVICE_DIR}/pnpm-lock.yaml* ./
 RUN set -eux; \
     if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
     elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
@@ -19,10 +19,9 @@ RUN set -eux; \
     else npm install; fi
 
 FROM base AS builder
-ARG APP_DIR
-ENV NEXT_TELEMETRY_DISABLED=1
+ARG SERVICE_DIR
 COPY --from=deps /app/node_modules ./node_modules
-COPY ${APP_DIR}/ ./
+COPY ${SERVICE_DIR}/ ./
 RUN set -eux; \
     if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm run build; \
     elif [ -f yarn.lock ]; then yarn build; \
@@ -31,11 +30,8 @@ RUN set -eux; \
 FROM node:${NODE_VERSION} AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-USER nextjs
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "dist/main.js"]

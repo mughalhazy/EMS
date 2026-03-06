@@ -3,3 +3,15 @@ kind: Kustomization
 
 resources:
   - ../../base
+
+nameSuffix: -prod
+namespace: ems
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: ems-config
+    patch: |-
+      - op: replace
+        path: /data/APP_ENV
+        value: production
