@@ -1,7 +1,8 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 
 import { SearchAttendeeDirectoryQueryDto } from './dto/search-attendee-directory-query.dto';
 import {
+  AttendeeCheckInResult,
   AttendeeConnectionView,
   AttendeeDirectoryEntry,
   AttendeePortalProfile,
@@ -22,6 +23,16 @@ export class AttendeeController {
     const limit = query.limit ? Number.parseInt(query.limit, 10) : undefined;
 
     return this.attendeeService.searchDirectory(tenantId, eventId, query.q ?? '', limit);
+  }
+
+
+  @Post(':attendeeId/check-ins')
+  async checkInAttendee(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('attendeeId', ParseUUIDPipe) attendeeId: string,
+  ): Promise<AttendeeCheckInResult> {
+    return this.attendeeService.checkInAttendee(tenantId, eventId, attendeeId);
   }
 
   @Get(':attendeeId/profile')

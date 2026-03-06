@@ -7,6 +7,7 @@ import { UserEntity } from '../../user/src/entities/user.entity';
 import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
 import { SessionEntity } from '../../agenda/src/entities/session.entity';
 import { AttendeeConnectionEntity } from '../../networking/src/entities/attendee-connection.entity';
+import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { AttendeeController } from './attendee.controller';
 import { AttendeeDirectorySearchIndexService } from './attendee-directory-search-index.service';
 import { AttendeeEventsConsumer } from './attendee-events.consumer';
@@ -25,6 +26,7 @@ import { AttendeeEntity } from './entities/attendee.entity';
       AttendeeConnectionEntity,
       AttendeeScheduleEntity,
       SessionEntity,
+      CheckInEntity,
     ]),
   ],
   controllers: [AttendeeController],
