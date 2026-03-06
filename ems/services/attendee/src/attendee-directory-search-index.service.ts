@@ -28,7 +28,7 @@ export class AttendeeDirectorySearchIndexService {
     const node = process.env.OPENSEARCH_NODE;
     if (!node) {
       this.client = null;
-      this.logger.warn('OPENSEARCH_NODE is not set. Attendee directory search indexing is disabled.');
+      this.logger.warn(JSON.stringify({ event: 'attendee_search.disabled', reason: 'missing_opensearch_node' }));
       return;
     }
 
@@ -76,7 +76,7 @@ export class AttendeeDirectorySearchIndexService {
         refresh: true,
       });
     } catch (error) {
-      this.logger.warn(`Failed to index attendee '${attendee.id}'. ${(error as Error).message}`);
+      this.logger.warn(JSON.stringify({ event: 'attendee_search.index_failed', attendeeId: attendee.id, error: (error as Error).message }));
     }
   }
 
@@ -94,7 +94,7 @@ export class AttendeeDirectorySearchIndexService {
         refresh: true,
       });
     } catch (error) {
-      this.logger.warn(`Failed to delete indexed attendee '${attendeeId}'. ${(error as Error).message}`);
+      this.logger.warn(JSON.stringify({ event: 'attendee_search.delete_failed', attendeeId, error: (error as Error).message }));
     }
   }
 
@@ -131,7 +131,7 @@ export class AttendeeDirectorySearchIndexService {
         .map((hit) => hit._source?.attendeeId)
         .filter((attendeeId): attendeeId is string => Boolean(attendeeId));
     } catch (error) {
-      this.logger.warn(`Failed to search attendees in OpenSearch. ${(error as Error).message}`);
+      this.logger.warn(JSON.stringify({ event: 'attendee_search.query_failed', error: (error as Error).message }));
       return null;
     }
   }
@@ -168,7 +168,7 @@ export class AttendeeDirectorySearchIndexService {
       this.indexReady = true;
     } catch (error) {
       this.logger.warn(
-        `Failed to ensure OpenSearch index '${this.indexName}'. ${(error as Error).message}`,
+        JSON.stringify({ event: 'attendee_search.ensure_index_failed', indexName: this.indexName, error: (error as Error).message }),
       );
     }
   }

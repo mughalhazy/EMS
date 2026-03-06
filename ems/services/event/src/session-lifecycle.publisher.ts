@@ -48,7 +48,12 @@ export class SessionLifecyclePublisher {
 
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${SESSION_LIFECYCLE_TOPIC}' for session '${session.id}'.`,
+        JSON.stringify({
+          event: 'event.session_lifecycle.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: SESSION_LIFECYCLE_TOPIC,
+          sessionId: session.id,
+        }),
       );
       return;
     }

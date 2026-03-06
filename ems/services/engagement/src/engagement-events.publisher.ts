@@ -26,7 +26,12 @@ export class EngagementEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${POLL_SUBMITTED_TOPIC}' for poll '${poll.id}'.`,
+        JSON.stringify({
+          event: 'engagement.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: POLL_SUBMITTED_TOPIC,
+          pollId: poll.id,
+        }),
       );
       return;
     }
@@ -51,7 +56,12 @@ export class EngagementEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${QUESTION_ASKED_TOPIC}' for question '${question.id}'.`,
+        JSON.stringify({
+          event: 'engagement.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: QUESTION_ASKED_TOPIC,
+          questionId: question.id,
+        }),
       );
       return;
     }
@@ -77,7 +87,12 @@ export class EngagementEventsPublisher {
   }): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${SURVEY_COMPLETED_TOPIC}' for survey '${metadata.surveyId}'.`,
+        JSON.stringify({
+          event: 'engagement.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: SURVEY_COMPLETED_TOPIC,
+          surveyId: metadata.surveyId,
+        }),
       );
       return;
     }

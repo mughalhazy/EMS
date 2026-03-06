@@ -27,7 +27,12 @@ export class AnalyticsEventsConsumer {
   ): Promise<void> {
     await this.analyticsMetricsService.handleRegistrationConfirmed(payload);
     this.logger.debug(
-      `Processed registration confirmation metric for tenant '${payload.tenant_id}' and event '${payload.event_id_ref}'.`,
+      JSON.stringify({
+        event: 'analytics.metric.processed',
+        metricType: 'registration.confirmed',
+        tenantId: payload.tenant_id,
+        eventId: payload.event_id_ref,
+      }),
     );
   }
 
@@ -35,7 +40,12 @@ export class AnalyticsEventsConsumer {
   async handleAttendeeCheckedIn(@Payload() payload: AttendeeCheckedInMetricEvent): Promise<void> {
     await this.analyticsMetricsService.handleAttendeeCheckedIn(payload);
     this.logger.debug(
-      `Processed attendee check-in metric for tenant '${payload.tenant_id}' and event '${payload.event_id_ref}'.`,
+      JSON.stringify({
+        event: 'analytics.metric.processed',
+        metricType: 'attendee.checked_in',
+        tenantId: payload.tenant_id,
+        eventId: payload.event_id_ref,
+      }),
     );
   }
 
@@ -43,7 +53,13 @@ export class AnalyticsEventsConsumer {
   async handleSessionAttended(@Payload() payload: SessionAttendedMetricEvent): Promise<void> {
     await this.analyticsMetricsService.handleSessionAttended(payload);
     this.logger.debug(
-      `Processed session attendance metric for tenant '${payload.tenant_id}', event '${payload.event_id_ref}', and session '${payload.session_id}'.`,
+      JSON.stringify({
+        event: 'analytics.metric.processed',
+        metricType: 'session.attended',
+        tenantId: payload.tenant_id,
+        eventId: payload.event_id_ref,
+        sessionId: payload.session_id,
+      }),
     );
   }
 
@@ -51,7 +67,13 @@ export class AnalyticsEventsConsumer {
   async handlePollSubmitted(@Payload() payload: SessionEngagementMetricEvent): Promise<void> {
     await this.analyticsMetricsService.handlePollSubmitted(payload);
     this.logger.debug(
-      `Processed poll engagement metric for tenant '${payload.tenant_id}', event '${payload.event_id_ref}', and session '${payload.session_id}'.`,
+      JSON.stringify({
+        event: 'analytics.metric.processed',
+        metricType: 'poll.submitted',
+        tenantId: payload.tenant_id,
+        eventId: payload.event_id_ref,
+        sessionId: payload.session_id,
+      }),
     );
   }
 
@@ -59,7 +81,13 @@ export class AnalyticsEventsConsumer {
   async handleQuestionAsked(@Payload() payload: SessionEngagementMetricEvent): Promise<void> {
     await this.analyticsMetricsService.handleQuestionAsked(payload);
     this.logger.debug(
-      `Processed question engagement metric for tenant '${payload.tenant_id}', event '${payload.event_id_ref}', and session '${payload.session_id}'.`,
+      JSON.stringify({
+        event: 'analytics.metric.processed',
+        metricType: 'question.asked',
+        tenantId: payload.tenant_id,
+        eventId: payload.event_id_ref,
+        sessionId: payload.session_id,
+      }),
     );
   }
 
@@ -67,7 +95,13 @@ export class AnalyticsEventsConsumer {
   async handleLeadCaptured(@Payload() payload: LeadCapturedMetricEvent): Promise<void> {
     await this.analyticsMetricsService.handleLeadCaptured(payload);
     this.logger.debug(
-      `Processed lead capture metric for tenant '${payload.tenant_id}', event '${payload.event_id_ref}', and exhibitor '${payload.exhibitor_id}'.`,
+      JSON.stringify({
+        event: 'analytics.metric.processed',
+        metricType: 'lead.captured',
+        tenantId: payload.tenant_id,
+        eventId: payload.event_id_ref,
+        exhibitorId: payload.exhibitor_id,
+      }),
     );
   }
 }

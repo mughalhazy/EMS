@@ -24,7 +24,13 @@ export class SessionAttendancePublisher {
   }): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${SESSION_ATTENDED_TOPIC}' for session '${payload.sessionId}' and attendee '${payload.attendeeId}'.`,
+        JSON.stringify({
+          event: 'agenda.session_attendance.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: SESSION_ATTENDED_TOPIC,
+          sessionId: payload.sessionId,
+          attendeeId: payload.attendeeId,
+        }),
       );
       return;
     }

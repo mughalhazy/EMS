@@ -23,7 +23,12 @@ export class RegistrationEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${REGISTRATION_CREATED_TOPIC}' for registration '${registration.id}'.`,
+        JSON.stringify({
+          event: 'registration.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: REGISTRATION_CREATED_TOPIC,
+          registrationId: registration.id,
+        }),
       );
       return;
     }
@@ -45,7 +50,12 @@ export class RegistrationEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${REGISTRATION_CONFIRMED_TOPIC}' for registration '${registration.id}'.`,
+        JSON.stringify({
+          event: 'registration.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: REGISTRATION_CONFIRMED_TOPIC,
+          registrationId: registration.id,
+        }),
       );
       return;
     }

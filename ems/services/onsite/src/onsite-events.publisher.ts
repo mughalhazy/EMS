@@ -26,7 +26,12 @@ export class OnsiteEventsPublisher {
   }): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${ATTENDEE_CHECKED_IN_TOPIC}' for attendee '${payload.attendeeId}'.`,
+        JSON.stringify({
+          event: 'onsite.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: ATTENDEE_CHECKED_IN_TOPIC,
+          attendeeId: payload.attendeeId,
+        }),
       );
       return;
     }
@@ -54,7 +59,12 @@ export class OnsiteEventsPublisher {
   }): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${SESSION_ATTENDED_TOPIC}' for attendee '${payload.attendeeId}'.`,
+        JSON.stringify({
+          event: 'onsite.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: SESSION_ATTENDED_TOPIC,
+          attendeeId: payload.attendeeId,
+        }),
       );
       return;
     }
