@@ -15,4 +15,36 @@ export class RevenueReportingController {
   ): Promise<EventRevenueReport> {
     return this.revenueReportingService.generateEventRevenueReport(tenantId, eventId, query);
   }
+
+  @Get('report/export.json')
+  async exportRevenueReportJson(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query() query: RevenueReportQueryDto,
+  ): Promise<EventRevenueReport> {
+    return this.revenueReportingService.generateEventRevenueReport(tenantId, eventId, query);
+  }
+
+  @Get('report/export.csv')
+  async exportRevenueReportCsv(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query() query: RevenueReportQueryDto,
+  ): Promise<string> {
+    const report = await this.revenueReportingService.generateEventRevenueReport(tenantId, eventId, query);
+
+    return [
+      'metric,value',
+      `ordersCount,${report.ticketSales.ordersCount}`,
+      `ticketsSoldCount,${report.ticketSales.ticketsSoldCount}`,
+      `grossSalesAmount,${report.ticketSales.grossSalesAmount}`,
+      `paymentCount,${report.payments.paymentCount}`,
+      `succeededAmount,${report.payments.succeededAmount}`,
+      `refundedAmount,${report.payments.refundedAmount}`,
+      `pendingAmount,${report.payments.pendingAmount}`,
+      `failedCount,${report.payments.failedCount}`,
+      `netAmount,${report.payments.netAmount}`,
+      `currency,${report.payments.currency}`,
+    ].join('\n');
+  }
 }

@@ -5,6 +5,7 @@ import { SelectQueryBuilder, Repository } from 'typeorm';
 import { OrderStatus } from '../../commerce/src/entities/order.entity';
 import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
 import { PaymentEntity, PaymentStatus } from '../../commerce/src/entities/payment.entity';
+import { EventEntity } from '../../event/src/entities/event.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { RevenueReportQueryDto } from './dto/revenue-report-query.dto';
 
@@ -53,6 +54,8 @@ export class RevenueReportingService {
     private readonly orderItemRepository: Repository<OrderItemEntity>,
     @InjectRepository(PaymentEntity)
     private readonly paymentRepository: Repository<PaymentEntity>,
+    @InjectRepository(EventEntity)
+    private readonly eventRepository: Repository<EventEntity>,
   ) {}
 
   async generateEventRevenueReport(
@@ -60,6 +63,16 @@ export class RevenueReportingService {
     eventId: string,
     query: RevenueReportQueryDto,
   ): Promise<EventRevenueReport> {
+    await this.eventRepository.findOneOrFail({
+      where: {
+        id: eventId,
+        tenantId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
     const ticketSalesAggregation = await this.getTicketSalesAggregation(tenantId, eventId, query);
     const paymentAggregation = await this.getPaymentAggregation(tenantId, eventId, query);
 

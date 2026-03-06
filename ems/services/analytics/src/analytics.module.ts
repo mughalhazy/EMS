@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
 import { PaymentEntity } from '../../commerce/src/entities/payment.entity';
 import { BoothEntity } from '../../exhibitor/src/entities/booth.entity';
+import { EventEntity } from '../../event/src/entities/event.entity';
 import { AttendeeConnectionEntity } from '../../networking/src/entities/attendee-connection.entity';
 import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
@@ -31,6 +32,7 @@ import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
       CheckInEntity,
       AttendeeConnectionEntity,
       TicketEntity,
+      EventEntity,
     ]),
   ],
   controllers: [AnalyticsController, RevenueReportingController],
