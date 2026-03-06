@@ -4,7 +4,19 @@ metadata:
   name: ems-config
   namespace: ems
 data:
-  APP_ENV: development
+  APP_ENV: production
   LOG_FORMAT: json
   METRICS_ENABLED: "true"
+  METRICS_PATH: /metrics
   TRACING_ENABLED: "true"
+  HEALTHCHECK_PATH: /health
+  API_RATE_LIMIT_ENABLED: "true"
+  API_RATE_LIMIT_WINDOW_MS: "60000"
+  API_RATE_LIMIT_MAX: "120"
+  API_INPUT_VALIDATION_ENABLED: "true"
+  API_REQUEST_SIZE_LIMIT: "1mb"
+  DB_POOL_MIN: "5"
+  DB_POOL_MAX: "50"
+  REDIS_CACHE_ENABLED: "true"
+  REDIS_CACHE_DEFAULT_TTL_SECONDS: "300"
+  SHUTDOWN_GRACE_PERIOD_SECONDS: "30"

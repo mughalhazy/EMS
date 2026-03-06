@@ -11,13 +11,15 @@ spec.loader.exec_module(qc_validator)
 
 class QcValidatorTests(unittest.TestCase):
     def test_all_checks_pass(self):
-        qc_validator.run_all_checks()
+        scores = qc_validator.run_all_checks()
+        self.assertTrue(scores)
+        self.assertTrue(all(score == 10 for score in scores.values()))
 
-    def test_required_compose_services_present(self):
-        qc_validator.validate_compose_stack()
+    def test_api_protection_markers_present(self):
+        qc_validator.validate_api_protection()
 
-    def test_observability_markers_present(self):
-        qc_validator.validate_observability_and_secrets()
+    def test_infrastructure_resilience_markers_present(self):
+        qc_validator.validate_infrastructure_resilience()
 
 
 if __name__ == '__main__':
