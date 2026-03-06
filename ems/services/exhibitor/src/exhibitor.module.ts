@@ -6,6 +6,7 @@ import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { EventEntity } from '../../event/src/entities/event.entity';
 import { VenueEntity } from '../../event/src/entities/venue.entity';
 import { BoothEntity } from './entities/booth.entity';
+import { BoothInteractionEntity } from './entities/booth-interaction.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
@@ -22,6 +23,7 @@ import { ExhibitorManagementService } from './exhibitor-management.service';
       AttendeeEntity,
       ExhibitorEntity,
       ExhibitorLeadCaptureEntity,
+      BoothInteractionEntity,
       BoothEntity,
       SponsorProfileEntity,
     ]),
