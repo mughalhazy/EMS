@@ -78,10 +78,9 @@ export class OnsiteService {
     deviceId: string,
     status: string,
   ): Promise<ScanningDeviceResult> {
-    void tenantId;
-
     const existingDevice = await this.scanningDeviceRepository.findOne({
       where: {
+        tenantId,
         deviceId,
         eventId,
       },
@@ -98,6 +97,7 @@ export class OnsiteService {
 
     const device = await this.scanningDeviceRepository.save(
       this.scanningDeviceRepository.create({
+        tenantId,
         deviceId,
         eventId,
         status: status.toLowerCase(),
@@ -116,10 +116,9 @@ export class OnsiteService {
     deviceId: string,
     status: string,
   ): Promise<ScanningDeviceResult> {
-    void tenantId;
-
     const device = await this.scanningDeviceRepository.findOne({
       where: {
+        tenantId,
         deviceId,
         eventId,
       },
@@ -147,6 +146,7 @@ export class OnsiteService {
   ): Promise<DeviceMonitorResult[]> {
     const devices = await this.scanningDeviceRepository.find({
       where: {
+        tenantId,
         eventId,
       },
       order: {
@@ -228,7 +228,7 @@ export class OnsiteService {
     attendeeId: string,
     deviceId: string,
   ): Promise<CheckInResult> {
-    await this.assertActiveDevice(eventId, deviceId);
+    await this.assertActiveDevice(tenantId, eventId, deviceId);
 
     const attendee = await this.attendeeRepository.findOne({
       where: {
@@ -336,7 +336,7 @@ export class OnsiteService {
     attendeeId: string,
     deviceId: string,
   ): Promise<BadgePrintResult> {
-    await this.assertActiveDevice(eventId, deviceId);
+    await this.assertActiveDevice(tenantId, eventId, deviceId);
 
     const attendee = await this.attendeeRepository.findOne({
       where: {
@@ -393,7 +393,7 @@ export class OnsiteService {
       throw new NotFoundException(`Session ${sessionId} was not found for the provided tenant and event.`);
     }
 
-    await this.assertActiveDevice(eventId, deviceId);
+    await this.assertActiveDevice(tenantId, eventId, deviceId);
 
     this.qrTicketValidationService.assertValidTicket({
       qrTicketCode,
@@ -512,9 +512,10 @@ export class OnsiteService {
   }
 
 
-  private async assertActiveDevice(eventId: string, deviceId: string): Promise<void> {
+  private async assertActiveDevice(tenantId: string, eventId: string, deviceId: string): Promise<void> {
     const device = await this.scanningDeviceRepository.findOne({
       where: {
+        tenantId,
         deviceId,
         eventId,
       },
