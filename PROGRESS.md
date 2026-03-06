@@ -164,7 +164,14 @@
 ---
 
 ## Last Checkpoint
-Phase 2.6 UI Renderer 100% complete. 7-step pipeline: normalize → resolve → layout → responsive → tokens → validate → output. Deterministic, token-enforced, a11y-validated.
+Layouts complete. 4 layouts built and committed:
+- AppLayout — sidebar shell, height:100vh, internal scroll only
+- DashboardLayout — TopBar + banner slot + two-col (main | 320px panel)
+- EventLayout — TopBar + optional subnav + optional filter bar + content
+- AdminLayout — portal surface, dark ink header, horizontal tab nav, centered 1200px body
+- layouts/index.ts barrel export added
+
+dashboard/page.tsx and events/page.tsx migrated to new layouts.
 
 Next: Phase 3 — wire each page to its backend service (task prompts per module).
 
