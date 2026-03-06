@@ -1,7 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 
+import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
+import { SessionEntity } from '../../agenda/src/entities/session.entity';
+import {
+  AttendeeConnectionEntity,
+  AttendeeConnectionStatus,
+} from '../../networking/src/entities/attendee-connection.entity';
 import { RegistrantProfileEntity } from '../../registration/src/entities/registrant-profile.entity';
 import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
@@ -29,6 +35,47 @@ export type AttendeeDirectoryEntry = {
   interests: string[];
 };
 
+export type AttendeePortalProfile = {
+  attendeeId: string;
+  tenantId: string;
+  eventId: string;
+  userId: string | null;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  badgeName: string | null;
+  bio: string | null;
+  interests: string[];
+  status: AttendeeStatus;
+};
+
+export type AttendeeConnectionView = {
+  connectionId: string;
+  status: AttendeeConnectionStatus;
+  attendee: {
+    attendeeId: string;
+    firstName: string;
+    lastName: string;
+    badgeName: string | null;
+    email: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type AttendeeScheduleItem = {
+  scheduleId: string;
+  sessionId: string;
+  title: string;
+  description: string | null;
+  startTime: Date;
+  endTime: Date;
+  roomId: string;
+  status: SessionEntity['status'];
+  agendaOrder: number;
+};
+
 @Injectable()
 export class AttendeeService {
   private readonly logger = new Logger(AttendeeService.name);
@@ -44,8 +91,119 @@ export class AttendeeService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(AttendeeProfileEntity)
     private readonly attendeeProfileRepository: Repository<AttendeeProfileEntity>,
+    @InjectRepository(AttendeeConnectionEntity)
+    private readonly attendeeConnectionRepository: Repository<AttendeeConnectionEntity>,
+    @InjectRepository(AttendeeScheduleEntity)
+    private readonly attendeeScheduleRepository: Repository<AttendeeScheduleEntity>,
     private readonly attendeeDirectorySearchIndexService: AttendeeDirectorySearchIndexService,
   ) {}
+
+  async getPortalProfile(tenantId: string, eventId: string, attendeeId: string): Promise<AttendeePortalProfile> {
+    const attendee = await this.getAttendeeInEventOrThrow(tenantId, eventId, attendeeId);
+
+    const attendeeProfile = attendee.userId
+      ? await this.attendeeProfileRepository.findOne({
+          where: { tenantId, eventId, userId: attendee.userId },
+        })
+      : null;
+
+    return {
+      attendeeId: attendee.id,
+      tenantId: attendee.tenantId,
+      eventId: attendee.eventId,
+      userId: attendee.userId,
+      firstName: attendee.firstName,
+      lastName: attendee.lastName,
+      email: attendee.email,
+      phone: attendee.phone,
+      badgeName: attendee.badgeName,
+      bio: attendeeProfile?.bio ?? null,
+      interests: attendeeProfile?.interests ?? [],
+      status: attendee.status,
+    };
+  }
+
+  async listPortalConnections(tenantId: string, eventId: string, attendeeId: string): Promise<AttendeeConnectionView[]> {
+    await this.getAttendeeInEventOrThrow(tenantId, eventId, attendeeId);
+
+    const connections = await this.attendeeConnectionRepository
+      .createQueryBuilder('connection')
+      .where('connection.attendee_a_id = :attendeeId', { attendeeId })
+      .orWhere('connection.attendee_b_id = :attendeeId', { attendeeId })
+      .orderBy('connection.updated_at', 'DESC')
+      .getMany();
+
+    if (!connections.length) {
+      return [];
+    }
+
+    const connectedAttendeeIds = Array.from(
+      new Set(
+        connections.map((connection) =>
+          connection.attendeeAId === attendeeId ? connection.attendeeBId : connection.attendeeAId,
+        ),
+      ),
+    );
+
+    const connectedAttendees = await this.attendeeRepository.find({
+      where: connectedAttendeeIds.map((connectedAttendeeId) => ({
+        id: connectedAttendeeId,
+        tenantId,
+        eventId,
+      })),
+    });
+
+    const connectedAttendeesById = new Map(
+      connectedAttendees.map((connectedAttendee) => [connectedAttendee.id, connectedAttendee]),
+    );
+
+    return connections
+      .map((connection) => {
+        const connectedAttendeeId =
+          connection.attendeeAId === attendeeId ? connection.attendeeBId : connection.attendeeAId;
+        const connectedAttendee = connectedAttendeesById.get(connectedAttendeeId);
+        if (!connectedAttendee) {
+          return null;
+        }
+
+        return {
+          connectionId: connection.id,
+          status: connection.status,
+          attendee: {
+            attendeeId: connectedAttendee.id,
+            firstName: connectedAttendee.firstName,
+            lastName: connectedAttendee.lastName,
+            badgeName: connectedAttendee.badgeName,
+            email: connectedAttendee.email,
+          },
+          createdAt: connection.createdAt,
+          updatedAt: connection.updatedAt,
+        };
+      })
+      .filter((connection): connection is AttendeeConnectionView => Boolean(connection));
+  }
+
+  async listPortalSchedule(tenantId: string, eventId: string, attendeeId: string): Promise<AttendeeScheduleItem[]> {
+    await this.getAttendeeInEventOrThrow(tenantId, eventId, attendeeId);
+
+    const schedules = await this.attendeeScheduleRepository.find({
+      where: { tenantId, eventId, attendeeId },
+      relations: { session: true },
+      order: { session: { startTime: 'ASC' } },
+    });
+
+    return schedules.map((schedule) => ({
+      scheduleId: schedule.id,
+      sessionId: schedule.sessionId,
+      title: schedule.session.title,
+      description: schedule.session.description,
+      startTime: schedule.session.startTime,
+      endTime: schedule.session.endTime,
+      roomId: schedule.session.roomId,
+      status: schedule.session.status,
+      agendaOrder: schedule.session.agendaOrder,
+    }));
+  }
 
   async createFromConfirmedRegistration(
     payload: ConfirmedRegistrationEventPayload,
@@ -250,5 +408,21 @@ export class AttendeeService {
     });
 
     return new Map(profiles.map((profile) => [profile.userId, profile]));
+  }
+
+  private async getAttendeeInEventOrThrow(
+    tenantId: string,
+    eventId: string,
+    attendeeId: string,
+  ): Promise<AttendeeEntity> {
+    const attendee = await this.attendeeRepository.findOne({
+      where: { id: attendeeId, tenantId, eventId },
+    });
+
+    if (!attendee) {
+      throw new NotFoundException('Attendee not found in tenant event.');
+    }
+
+    return attendee;
   }
 }
