@@ -11,6 +11,7 @@ import {
 import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
+import { EventEntity } from '../../event/src/entities/event.entity';
 import { EventAnalyticsEntity } from './entities/event-analytics.entity';
 import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
 import { ExhibitorAnalyticsEntity } from './entities/exhibitor-analytics.entity';
@@ -59,6 +60,42 @@ export interface EventDashboardExhibitorAnalytics {
   boothVisitsCount: number;
 }
 
+export interface AttendeeEngagementReport {
+  tenantId: string;
+  eventId: string;
+  generatedAt: string;
+  totals: {
+    sessionsTracked: number;
+    checkedInAttendees: number;
+    engagementActions: number;
+    averageEngagementScore: string;
+  };
+  topSessions: EventDashboardSessionAnalytics[];
+}
+
+export interface SponsorRoiReportItem {
+  exhibitorId: string;
+  leadCapturesCount: number;
+  boothVisitsCount: number;
+  estimatedPipelineValue: string;
+}
+
+export interface SponsorRoiReport {
+  tenantId: string;
+  eventId: string;
+  generatedAt: string;
+  assumptions: {
+    estimatedValuePerLead: string;
+  };
+  totals: {
+    exhibitorsTracked: number;
+    totalLeads: number;
+    totalBoothVisits: number;
+    estimatedPipelineValue: string;
+  };
+  exhibitors: SponsorRoiReportItem[];
+}
+
 @Injectable()
 export class AnalyticsService {
   constructor(
@@ -76,6 +113,8 @@ export class AnalyticsService {
     private readonly attendeeConnectionRepository: Repository<AttendeeConnectionEntity>,
     @InjectRepository(ExhibitorAnalyticsEntity)
     private readonly exhibitorAnalyticsRepository: Repository<ExhibitorAnalyticsEntity>,
+    @InjectRepository(EventEntity)
+    private readonly eventRepository: Repository<EventEntity>,
   ) {}
 
   async aggregateEventAnalytics(
@@ -83,6 +122,8 @@ export class AnalyticsService {
     eventId: string,
     snapshotDate?: string,
   ): Promise<AggregateEventAnalyticsResult> {
+    await this.assertTenantEventAccess(tenantId, eventId);
+
     const effectiveSnapshotDate = snapshotDate ?? new Date().toISOString().slice(0, 10);
 
     const registrationsCount = await this.registrationRepository
@@ -191,6 +232,7 @@ export class AnalyticsService {
     eventId: string,
     snapshotDate?: string,
   ): Promise<EventDashboardOverview> {
+    await this.assertTenantEventAccess(tenantId, eventId);
     const aggregate = await this.aggregateEventAnalytics(tenantId, eventId, snapshotDate);
 
     return {
@@ -205,6 +247,7 @@ export class AnalyticsService {
     startDate?: string,
     endDate?: string,
   ): Promise<EventDashboardTrendPoint[]> {
+    await this.assertTenantEventAccess(tenantId, eventId);
     const queryBuilder = this.eventAnalyticsRepository
       .createQueryBuilder('eventAnalytics')
       .where('eventAnalytics.tenantId = :tenantId', { tenantId })
@@ -234,6 +277,7 @@ export class AnalyticsService {
     eventId: string,
     limit: number,
   ): Promise<EventDashboardSessionAnalytics[]> {
+    await this.assertTenantEventAccess(tenantId, eventId);
     const sessions = await this.sessionAnalyticsRepository.find({
       where: {
         tenantId,
@@ -264,6 +308,7 @@ export class AnalyticsService {
     eventId: string,
     limit: number,
   ): Promise<EventDashboardExhibitorAnalytics[]> {
+    await this.assertTenantEventAccess(tenantId, eventId);
     const rows = await this.exhibitorAnalyticsRepository
       .createQueryBuilder('analytics')
       .select('analytics.exhibitorId', 'exhibitorId')
@@ -286,5 +331,115 @@ export class AnalyticsService {
       leadCapturesCount: Number.parseInt(row.leadCapturesCount ?? '0', 10),
       boothVisitsCount: Number.parseInt(row.boothVisitsCount ?? '0', 10),
     }));
+  }
+
+  async getAttendeeEngagementReport(
+    tenantId: string,
+    eventId: string,
+    limit = 10,
+  ): Promise<AttendeeEngagementReport> {
+    await this.assertTenantEventAccess(tenantId, eventId);
+    const sessions = await this.sessionAnalyticsRepository.find({
+      where: {
+        tenantId,
+        eventId,
+      },
+      order: {
+        engagementScore: 'DESC',
+      },
+    });
+
+    const checkedInAttendees = sessions.reduce((sum, session) => sum + session.checkedInAttendees, 0);
+    const engagementActions = sessions.reduce((sum, session) => sum + session.totalEngagementActions, 0);
+
+    const averageEngagementScore =
+      sessions.length > 0
+        ? (
+            sessions.reduce((sum, session) => sum + Number.parseFloat(session.engagementScore), 0) /
+            sessions.length
+          ).toFixed(2)
+        : '0.00';
+
+    return {
+      tenantId,
+      eventId,
+      generatedAt: new Date().toISOString(),
+      totals: {
+        sessionsTracked: sessions.length,
+        checkedInAttendees,
+        engagementActions,
+        averageEngagementScore,
+      },
+      topSessions: sessions.slice(0, Math.max(1, Math.min(limit, 50))).map((session) => ({
+        sessionId: session.sessionId,
+        registeredAttendees: session.registeredAttendees,
+        checkedInAttendees: session.checkedInAttendees,
+        noShowAttendees: session.noShowAttendees,
+        pollResponses: session.pollResponses,
+        questionsAsked: session.questionsAsked,
+        reactions: session.reactions,
+        totalEngagementActions: session.totalEngagementActions,
+        engagementScore: session.engagementScore,
+      })),
+    };
+  }
+
+  async getSponsorRoiReport(
+    tenantId: string,
+    eventId: string,
+    estimatedValuePerLead = '150.00',
+  ): Promise<SponsorRoiReport> {
+    await this.assertTenantEventAccess(tenantId, eventId);
+    const exhibitors = await this.getTopExhibitorsForDashboard(tenantId, eventId, 1000);
+    const valuePerLead = Number.parseFloat(estimatedValuePerLead);
+
+    const normalizedValuePerLead = Number.isFinite(valuePerLead) ? valuePerLead : 150;
+
+    const sponsorRows = exhibitors.map((item) => ({
+      ...item,
+      estimatedPipelineValue: (item.leadCapturesCount * normalizedValuePerLead).toFixed(2),
+    }));
+
+    const totals = sponsorRows.reduce(
+      (acc, row) => {
+        acc.totalLeads += row.leadCapturesCount;
+        acc.totalBoothVisits += row.boothVisitsCount;
+        acc.estimatedPipelineValue += Number.parseFloat(row.estimatedPipelineValue);
+        return acc;
+      },
+      {
+        totalLeads: 0,
+        totalBoothVisits: 0,
+        estimatedPipelineValue: 0,
+      },
+    );
+
+    return {
+      tenantId,
+      eventId,
+      generatedAt: new Date().toISOString(),
+      assumptions: {
+        estimatedValuePerLead: normalizedValuePerLead.toFixed(2),
+      },
+      totals: {
+        exhibitorsTracked: sponsorRows.length,
+        totalLeads: totals.totalLeads,
+        totalBoothVisits: totals.totalBoothVisits,
+        estimatedPipelineValue: totals.estimatedPipelineValue.toFixed(2),
+      },
+      exhibitors: sponsorRows,
+    };
+  }
+
+  private async assertTenantEventAccess(tenantId: string, eventId: string): Promise<void> {
+    await this.eventRepository.findOneOrFail({
+      where: {
+        id: eventId,
+        tenantId,
+      },
+      select: {
+        id: true,
+      },
+    });
   }
 }
