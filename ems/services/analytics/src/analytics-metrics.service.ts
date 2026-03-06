@@ -113,7 +113,12 @@ export class AnalyticsMetricsService {
 
     if (!booth) {
       this.logger.warn(
-        `Lead capture metric skipped because no booth was found for exhibitor '${event.exhibitor_id}' in event '${event.event_id_ref}'.`,
+        JSON.stringify({
+          event: 'analytics.lead_capture.skipped',
+          reason: 'booth_not_found',
+          exhibitorId: event.exhibitor_id,
+          eventId: event.event_id_ref,
+        }),
       );
       return;
     }

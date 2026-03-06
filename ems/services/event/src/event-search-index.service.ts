@@ -23,7 +23,7 @@ export class EventSearchIndexService {
     const node = process.env.OPENSEARCH_NODE;
     if (!node) {
       this.client = null;
-      this.logger.warn('OPENSEARCH_NODE is not set. Event search indexing is disabled.');
+      this.logger.warn(JSON.stringify({ event: 'event_search.disabled', reason: 'missing_opensearch_node' }));
       return;
     }
 
@@ -66,7 +66,7 @@ export class EventSearchIndexService {
         refresh: true,
       });
     } catch (error) {
-      this.logger.warn(`Failed to index event '${event.id}'. ${(error as Error).message}`);
+      this.logger.warn(JSON.stringify({ event: 'event_search.index_failed', eventId: event.id, error: (error as Error).message }));
     }
   }
 
@@ -84,7 +84,7 @@ export class EventSearchIndexService {
         refresh: true,
       });
     } catch (error) {
-      this.logger.warn(`Failed to delete indexed event '${eventId}'. ${(error as Error).message}`);
+      this.logger.warn(JSON.stringify({ event: 'event_search.delete_failed', eventId, error: (error as Error).message }));
     }
   }
 
@@ -115,7 +115,7 @@ export class EventSearchIndexService {
       this.indexReady = true;
     } catch (error) {
       this.logger.warn(
-        `Failed to ensure OpenSearch index '${this.indexName}'. ${(error as Error).message}`,
+        JSON.stringify({ event: 'event_search.ensure_index_failed', indexName: this.indexName, error: (error as Error).message }),
       );
     }
   }

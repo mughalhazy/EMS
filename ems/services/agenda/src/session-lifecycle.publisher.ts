@@ -27,7 +27,14 @@ export class SessionLifecyclePublisher {
     trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
-      this.logger.warn(`Kafka unavailable. Skipping ${eventType} for session ${session.id}.`);
+      this.logger.warn(
+        JSON.stringify({
+          event: 'agenda.session_lifecycle.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          lifecycleEventType: eventType,
+          sessionId: session.id,
+        }),
+      );
       return;
     }
 

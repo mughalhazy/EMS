@@ -21,13 +21,21 @@ export class AttendeeEventsConsumer {
 
     if (!attendee) {
       this.logger.warn(
-        `No attendee generated for registration '${payload.registration_id}' from topic '${REGISTRATION_CONFIRMED_TOPIC}'.`,
+        JSON.stringify({
+          event: 'attendee.generation.skipped',
+          registrationId: payload.registration_id,
+          topic: REGISTRATION_CONFIRMED_TOPIC,
+        }),
       );
       return;
     }
 
     this.logger.log(
-      `Generated attendee '${attendee.id}' for confirmed registration '${payload.registration_id}'${trace?.trace_id ? ` (trace_id=${trace.trace_id})` : ''}.`,
+      JSON.stringify({
+        event: 'attendee.generated',
+        attendeeId: attendee.id,
+        registrationId: payload.registration_id,
+      }),
     );
   }
 }

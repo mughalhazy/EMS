@@ -27,7 +27,12 @@ export class CommerceEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${ORDER_CREATED_TOPIC}' for order '${order.id}'.`,
+        JSON.stringify({
+          event: 'commerce.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: ORDER_CREATED_TOPIC,
+          orderId: order.id,
+        }),
       );
       return;
     }
@@ -48,7 +53,12 @@ export class CommerceEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${PAYMENT_COMPLETED_TOPIC}' for payment '${payment.id}'.`,
+        JSON.stringify({
+          event: 'commerce.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: PAYMENT_COMPLETED_TOPIC,
+          paymentId: payment.id,
+        }),
       );
       return;
     }

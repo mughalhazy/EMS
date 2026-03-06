@@ -59,7 +59,13 @@ export class EventLifecyclePublisher {
 
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${EVENT_LIFECYCLE_TOPIC}' for aggregate '${aggregate.id}'.`,
+        JSON.stringify({
+          event: 'event.lifecycle.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: EVENT_LIFECYCLE_TOPIC,
+          aggregateId: aggregate.id,
+          aggregateType,
+        }),
       );
       return;
     }
