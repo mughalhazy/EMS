@@ -19,3 +19,4 @@ export * from './entities/permission.entity';
 export * from './entities/role.entity';
 export * from './entities/role-permission.entity';
 export * from './entities/user-role-assignment.entity';
+export * from './secrets-provider.service';
