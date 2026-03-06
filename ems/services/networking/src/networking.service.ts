@@ -12,6 +12,7 @@ import {
   AttendeeConnectionEntity,
   AttendeeConnectionStatus,
 } from './entities/attendee-connection.entity';
+import { NetworkingEventsPublisher } from './networking-events.publisher';
 
 @Injectable()
 export class NetworkingService {
@@ -20,6 +21,7 @@ export class NetworkingService {
     private readonly connectionRepository: Repository<AttendeeConnectionEntity>,
     @InjectRepository(AttendeeEntity)
     private readonly attendeeRepository: Repository<AttendeeEntity>,
+    private readonly networkingEventsPublisher: NetworkingEventsPublisher,
   ) {}
 
   async sendConnectionRequest(
@@ -97,7 +99,13 @@ export class NetworkingService {
     }
 
     connection.status = AttendeeConnectionStatus.ACCEPTED;
-    return this.connectionRepository.save(connection);
+    const acceptedConnection = await this.connectionRepository.save(connection);
+    await this.networkingEventsPublisher.publishAttendeeConnected(acceptedConnection, {
+      tenantId,
+      eventId,
+    });
+
+    return acceptedConnection;
   }
 
   private async assertAttendeeInEvent(
