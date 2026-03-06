@@ -1,0 +1,10 @@
+{
+  "name": "ems-hardening-qc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production hardening quality gates for EMS",
+  "scripts": {
+    "qc:validate": "python3 ems/infra/scripts/ci/qc_validator.py",
+    "qc:load": "python3 ems/infra/scripts/ci/load_test.py"
+  }
+}

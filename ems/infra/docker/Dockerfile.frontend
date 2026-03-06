@@ -16,7 +16,7 @@ RUN set -eux; \
     if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
     elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
-    else npm install; fi
+    else echo "Missing lockfile: require pnpm-lock.yaml, yarn.lock, or package-lock.json" >&2; exit 1; fi
 
 FROM base AS builder
 ARG APP_DIR

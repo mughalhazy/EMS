@@ -25,8 +25,11 @@ export class JwtTokenService {
 
   constructor(private readonly secretsProvider: SecretsProviderService) {
     this.secret =
-      this.secretsProvider.getSecret('JWT_SECRET', 'local-dev-secret-change-me') ||
-      'local-dev-secret-change-me';
+      this.secretsProvider.getSecret('JWT_SECRET');
+
+    if (!this.secret) {
+      throw new Error('JWT_SECRET is required for token signing');
+    }
   }
 
   signAccessToken(userId: string, tenantId: string): { token: string; expiresAt: Date } {
