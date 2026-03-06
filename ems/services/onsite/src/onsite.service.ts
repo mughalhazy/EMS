@@ -42,6 +42,7 @@ export class OnsiteService {
     @InjectRepository(ScanningDeviceEntity)
     private readonly scanningDeviceRepository: Repository<ScanningDeviceEntity>,
     private readonly badgePrintingService: BadgePrintingService,
+    private readonly onsiteEventsPublisher: OnsiteEventsPublisher,
   ) {}
 
   async checkInAttendee(
@@ -92,6 +93,15 @@ export class OnsiteService {
     });
 
     const savedCheckIn = await this.checkInRepository.save(checkIn);
+
+    await this.onsiteEventsPublisher.publishAttendeeCheckedIn({
+      tenantId,
+      eventId,
+      attendeeId,
+      checkInId: savedCheckIn.id,
+      deviceId,
+      checkedInAt: savedCheckIn.checkedInAt,
+    });
 
     if (attendee.status !== AttendeeStatus.CHECKED_IN) {
       attendee.status = AttendeeStatus.CHECKED_IN;
