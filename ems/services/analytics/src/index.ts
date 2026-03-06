@@ -4,3 +4,5 @@ export { AnalyticsModule } from './analytics.module';
 export { EventAnalyticsEntity } from './entities/event-analytics.entity';
 export { ExhibitorAnalyticsEntity } from './entities/exhibitor-analytics.entity';
 export { SessionAnalyticsEntity } from './entities/session-analytics.entity';
+export { RevenueReportingController } from './revenue-reporting.controller';
+export { RevenueReportingService } from './revenue-reporting.service';
