@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AttendeeScheduleEntity } from '../../agenda/src/entities/attendee-schedule.entity';
+import { SessionEntity } from '../../agenda/src/entities/session.entity';
 import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { BadgePrintingService } from './badge-printing.service';
 import { BadgeEntity } from './entities/badge.entity';
