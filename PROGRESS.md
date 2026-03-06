@@ -41,7 +41,22 @@
 
 ---
 
-## [5] Base Layouts — `ems/apps/web/layouts/`
+## [5] Reusable UI Components — `ems/apps/web/components/ui/`
+
+| Component | File | Status |
+|-----------|------|--------|
+| Button | Button.tsx + module.css | pre-existing, kept as is |
+| Badge | Badge.tsx + module.css | pre-existing, kept as is |
+| Input | Input.tsx + module.css | pre-existing, kept as is |
+| Card | Card.tsx + module.css | new — header (title + actions slot), body, flush variant |
+| Modal | Modal.tsx + module.css | new — backdrop, dialog (sm/md/lg), header, scrollable body, footer slot, ESC + click-outside close, body scroll lock, focus, mobile bottom sheet |
+| Avatar | Avatar.tsx + module.css | new — initials or img, 6 color variants, 3 sizes (sm/md/lg) |
+| DataTable | DataTable.tsx + module.css | enhanced — skeleton fixed (no gradient literals), footer slot added |
+| index.ts | — | updated with Card, Modal, Avatar exports |
+
+---
+
+## [6] Base Layouts — `ems/apps/web/layouts/`
 - AppLayout.tsx + module.css — enhanced: height:100vh, overflow:hidden shell
 - DashboardLayout.tsx + module.css — TopBar + banner slot + two-col (1fr | 320px panel)
 - EventLayout.tsx + module.css — TopBar + optional subnav + optional filter bar + content

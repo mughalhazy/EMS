@@ -1,0 +1,38 @@
+/* ============================================================
+   Avatar — user initials or photo
+   Wireframe ref: .avatar in _base.css
+   Default: 28×28, indigo colors
+   ============================================================ */
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-family: var(--font);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* ── Sizes ───────────────────────────────────────────────────── */
+.sm { width: 24px; height: 24px; font-size: 10px; }
+.md { width: 28px; height: 28px; font-size: 11px; }
+.lg { width: 36px; height: 36px; font-size: 13px; }
+
+/* ── Color variants ──────────────────────────────────────────── */
+.indigo  { background: var(--i-lt); color: var(--i-dk); }
+.forest  { background: var(--f-lt); color: var(--f-dk); }
+.amber   { background: var(--a-lt); color: var(--a-dk); }
+.brick   { background: var(--b-lt); color: var(--b-dk); }
+.gold    { background: var(--g-lt); color: var(--g-dk); }
+.teal    { background: var(--t-lt); color: var(--t-dk); }
+.neutral { background: var(--surface); color: var(--ink-2); border: 1px solid var(--border); }
+
+/* ── Image variant ───────────────────────────────────────────── */
+.img {
+  object-fit: cover;
+  background: var(--surface);
+}

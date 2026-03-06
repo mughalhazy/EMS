@@ -1,11 +1,21 @@
+/* ============================================================
+   DataTable — generic data grid
+   Wireframe ref: .table-wrap / table / thead / tbody in _base.css
+   ============================================================ */
+
 .wrapper {
   width: 100%;
-  overflow-x: auto;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--white);
+  overflow: hidden;
 }
 
+.scroll {
+  overflow-x: auto;
+}
+
+/* ── Table ───────────────────────────────────────────────────── */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -37,7 +47,7 @@
   transition: background var(--transition-fast);
 }
 
-.table tbody tr:hover {
+.table tbody tr:hover td {
   background: var(--surface);
 }
 
@@ -49,6 +59,7 @@
   cursor: pointer;
 }
 
+/* ── Empty state ─────────────────────────────────────────────── */
 .empty {
   padding: 48px 24px;
   text-align: center;
@@ -57,6 +68,8 @@
   font-weight: 600;
 }
 
+/* ── Loading skeleton ────────────────────────────────────────── */
+/* Uses only token colors — pulse opacity, no gradient literals */
 .skeletonRows {
   padding: 8px 16px;
   display: flex;
@@ -67,12 +80,22 @@
 .skeletonRow {
   height: 36px;
   border-radius: var(--radius);
-  background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  animation: pulse 1.4s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@keyframes pulse {
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Footer strip ────────────────────────────────────────────── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--white);
 }

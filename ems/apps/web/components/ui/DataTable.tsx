@@ -15,6 +15,8 @@ export interface DataTableProps<T> {
   emptyMessage?: string
   loading?: boolean
   onRowClick?: (row: T) => void
+  /** Optional footer slot — pagination strip, row count, etc. */
+  footer?: React.ReactNode
 }
 
 export function DataTable<T extends Record<string, unknown>>({
@@ -24,62 +26,63 @@ export function DataTable<T extends Record<string, unknown>>({
   emptyMessage = 'No records found.',
   loading = false,
   onRowClick,
+  footer,
 }: DataTableProps<T>) {
-  if (loading) {
-    return (
-      <div className={styles.wrapper}>
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.scroll}>
         <table className={styles.table}>
           <thead>
             <tr>
               {columns.map((col) => (
-                <th key={String(col.key)} style={{ width: col.width }}>{col.header}</th>
+                <th key={String(col.key)} style={{ width: col.width }}>
+                  {col.header}
+                </th>
               ))}
             </tr>
           </thead>
-        </table>
-        <div className={styles.skeletonRows}>
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className={styles.skeletonRow} />
-          ))}
-        </div>
-      </div>
-    )
-  }
 
-  if (!rows.length) {
-    return (
-      <div className={styles.empty}>{emptyMessage}</div>
-    )
-  }
-
-  return (
-    <div className={styles.wrapper}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <th key={String(col.key)} style={{ width: col.width }}>{col.header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr
-              key={String(row[keyField])}
-              onClick={() => onRowClick?.(row)}
-              className={onRowClick ? styles.clickable : ''}
-            >
-              {columns.map((col) => (
-                <td key={String(col.key)}>
-                  {col.render
-                    ? col.render(row)
-                    : String(row[col.key as keyof T] ?? '—')}
-                </td>
+          {!loading && rows.length > 0 && (
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={String(row[keyField])}
+                  onClick={() => onRowClick?.(row)}
+                  className={onRowClick ? styles.clickable : ''}
+                >
+                  {columns.map((col) => (
+                    <td key={String(col.key)}>
+                      {col.render
+                        ? col.render(row)
+                        : String(row[col.key as keyof T] ?? '—')}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          )}
+        </table>
+
+        {loading && (
+          <div className={styles.skeletonRows} aria-busy="true" aria-label="Loading">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={styles.skeletonRow} />
+            ))}
+          </div>
+        )}
+
+        {!loading && rows.length === 0 && (
+          <div className={styles.empty} role="status">
+            {emptyMessage}
+          </div>
+        )}
+      </div>
+
+      {footer && (
+        <div className={styles.footer}>
+          {footer}
+        </div>
+      )}
     </div>
   )
 }
