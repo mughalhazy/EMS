@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
@@ -13,6 +14,8 @@ import { AnalyticsController } from './analytics.controller';
 import { AnalyticsEventsConsumer } from './analytics-events.consumer';
 import { AnalyticsMetricsService } from './analytics-metrics.service';
 import { AnalyticsService } from './analytics.service';
+import { RequestMetricsInterceptor } from './request-metrics.interceptor';
+import { RequestMetricsService } from './request-metrics.service';
 import { RevenueReportingController } from './revenue-reporting.controller';
 import { RevenueReportingService } from './revenue-reporting.service';
 import { EventAnalyticsEntity } from './entities/event-analytics.entity';
@@ -36,7 +39,17 @@ import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
     ]),
   ],
   controllers: [AnalyticsController, RevenueReportingController],
-  providers: [AnalyticsMetricsService, AnalyticsEventsConsumer, AnalyticsService, RevenueReportingService],
-  exports: [AnalyticsMetricsService, AnalyticsService, RevenueReportingService],
+  providers: [
+    AnalyticsMetricsService,
+    AnalyticsEventsConsumer,
+    AnalyticsService,
+    RevenueReportingService,
+    RequestMetricsService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestMetricsInterceptor,
+    },
+  ],
+  exports: [AnalyticsMetricsService, AnalyticsService, RevenueReportingService, RequestMetricsService],
 })
 export class AnalyticsModule {}

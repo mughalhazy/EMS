@@ -6,3 +6,5 @@ export { ExhibitorAnalyticsEntity } from './entities/exhibitor-analytics.entity'
 export { SessionAnalyticsEntity } from './entities/session-analytics.entity';
 export { RevenueReportingController } from './revenue-reporting.controller';
 export { RevenueReportingService } from './revenue-reporting.service';
+export { RequestMetricsInterceptor } from './request-metrics.interceptor';
+export { RequestMetricsService } from './request-metrics.service';
