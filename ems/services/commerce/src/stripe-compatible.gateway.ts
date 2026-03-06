@@ -7,6 +7,7 @@ import {
   StripeCompatiblePaymentResult,
 } from './payment-gateway.interface';
 import { PaymentStatus } from './entities/payment.entity';
+import { environmentConfig } from '../../shared/src/environment-config';
 
 interface StripeCompatiblePaymentIntentResponse {
   id: string;
@@ -15,8 +16,8 @@ interface StripeCompatiblePaymentIntentResponse {
 
 @Injectable()
 export class StripeCompatibleGateway implements PaymentGateway {
-  private readonly baseUrl = process.env.STRIPE_COMPAT_BASE_URL;
-  private readonly apiKey = process.env.STRIPE_COMPAT_API_KEY;
+  private readonly baseUrl = environmentConfig.get('STRIPE_COMPAT_BASE_URL');
+  private readonly apiKey = environmentConfig.get('STRIPE_COMPAT_API_KEY');
 
   async createPaymentIntent(
     input: CreateStripeCompatiblePaymentInput,

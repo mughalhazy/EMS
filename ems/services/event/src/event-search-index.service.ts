@@ -3,6 +3,7 @@ import { Client } from '@opensearch-project/opensearch';
 
 import { EventEntity } from './entities/event.entity';
 import { VenueEntity } from './entities/venue.entity';
+import { environmentConfig } from '../../shared/src/environment-config';
 
 type IndexedEventDocument = {
   tenantId: string;
@@ -15,12 +16,12 @@ type IndexedEventDocument = {
 @Injectable()
 export class EventSearchIndexService {
   private readonly logger = new Logger(EventSearchIndexService.name);
-  private readonly indexName = process.env.EVENT_SEARCH_INDEX_NAME ?? 'events';
+  private readonly indexName = environmentConfig.getOrDefault('EVENT_SEARCH_INDEX_NAME', 'events');
   private readonly client: Client | null;
   private indexReady = false;
 
   constructor() {
-    const node = process.env.OPENSEARCH_NODE;
+    const node = environmentConfig.get('OPENSEARCH_NODE');
     if (!node) {
       this.client = null;
       this.logger.warn(JSON.stringify({ event: 'event_search.disabled', reason: 'missing_opensearch_node' }));
@@ -30,14 +31,14 @@ export class EventSearchIndexService {
     this.client = new Client({
       node,
       auth:
-        process.env.OPENSEARCH_USERNAME && process.env.OPENSEARCH_PASSWORD
+        environmentConfig.get('OPENSEARCH_USERNAME') && environmentConfig.get('OPENSEARCH_PASSWORD')
           ? {
-              username: process.env.OPENSEARCH_USERNAME,
-              password: process.env.OPENSEARCH_PASSWORD,
+              username: environmentConfig.getOrDefault('OPENSEARCH_USERNAME', ''),
+              password: environmentConfig.getOrDefault('OPENSEARCH_PASSWORD', ''),
             }
           : undefined,
       ssl:
-        process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED === 'false'
+        !environmentConfig.getBoolean('OPENSEARCH_TLS_REJECT_UNAUTHORIZED', true)
           ? { rejectUnauthorized: false }
           : undefined,
     });

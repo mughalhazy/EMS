@@ -3,6 +3,7 @@ import { Client } from '@opensearch-project/opensearch';
 
 import { AttendeeProfileEntity } from './entities/attendee-profile.entity';
 import { AttendeeEntity } from './entities/attendee.entity';
+import { environmentConfig } from '../../shared/src/environment-config';
 
 export type IndexedAttendeeDocument = {
   tenantId: string;
@@ -20,12 +21,12 @@ export type IndexedAttendeeDocument = {
 @Injectable()
 export class AttendeeDirectorySearchIndexService {
   private readonly logger = new Logger(AttendeeDirectorySearchIndexService.name);
-  private readonly indexName = process.env.ATTENDEE_DIRECTORY_SEARCH_INDEX_NAME ?? 'attendee-directory';
+  private readonly indexName = environmentConfig.getOrDefault('ATTENDEE_DIRECTORY_SEARCH_INDEX_NAME', 'attendee-directory');
   private readonly client: Client | null;
   private indexReady = false;
 
   constructor() {
-    const node = process.env.OPENSEARCH_NODE;
+    const node = environmentConfig.get('OPENSEARCH_NODE');
     if (!node) {
       this.client = null;
       this.logger.warn(JSON.stringify({ event: 'attendee_search.disabled', reason: 'missing_opensearch_node' }));
@@ -35,14 +36,14 @@ export class AttendeeDirectorySearchIndexService {
     this.client = new Client({
       node,
       auth:
-        process.env.OPENSEARCH_USERNAME && process.env.OPENSEARCH_PASSWORD
+        environmentConfig.get('OPENSEARCH_USERNAME') && environmentConfig.get('OPENSEARCH_PASSWORD')
           ? {
-              username: process.env.OPENSEARCH_USERNAME,
-              password: process.env.OPENSEARCH_PASSWORD,
+              username: environmentConfig.getOrDefault('OPENSEARCH_USERNAME', ''),
+              password: environmentConfig.getOrDefault('OPENSEARCH_PASSWORD', ''),
             }
           : undefined,
       ssl:
-        process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED === 'false'
+        !environmentConfig.getBoolean('OPENSEARCH_TLS_REJECT_UNAUTHORIZED', true)
           ? { rejectUnauthorized: false }
           : undefined,
     });
