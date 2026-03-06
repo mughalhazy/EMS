@@ -6,3 +6,5 @@ export {
 export { AttendeeService } from './attendee.service';
 export { AttendeeEventsConsumer } from './attendee-events.consumer';
 export { CreateAttendeesTable1716000000000 } from './migrations/1716000000000-CreateAttendeesTable';
+
+export { AttendeeProfileEntity } from './entities/attendee-profile.entity';
