@@ -12,6 +12,7 @@ import { RoomEntity } from './room.entity';
 import { RegistrationQuestionEntity } from './registration-question.entity';
 import { SessionEntity } from './session.entity';
 import { SpeakerEntity } from './speaker.entity';
+import { SurveyEntity } from './survey.entity';
 import { VenueEntity } from './venue.entity';
 
 export enum EventStatus {
@@ -74,6 +75,9 @@ export class EventEntity {
 
   @OneToMany(() => SpeakerEntity, (speaker) => speaker.event)
   speakers!: SpeakerEntity[];
+
+  @OneToMany(() => SurveyEntity, (survey) => survey.event)
+  surveys!: SurveyEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
