@@ -1,0 +1,11 @@
+# Default values for EMS Helm deployment.
+replicaCount: 1
+
+image:
+  repository: ems/backend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 3000
