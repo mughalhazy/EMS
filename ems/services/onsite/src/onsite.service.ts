@@ -28,6 +28,20 @@ export interface SessionScanResult {
   accessGranted: boolean;
 }
 
+
+export interface ScanningDeviceResult {
+  device: ScanningDeviceEntity;
+  isNewRegistration: boolean;
+}
+
+export interface DeviceMonitorResult {
+  deviceId: string;
+  status: string;
+  totalEventCheckIns: number;
+  totalSessionScans: number;
+  lastSeenAt: Date | null;
+}
+
 @Injectable()
 export class OnsiteService {
   constructor(
@@ -47,6 +61,157 @@ export class OnsiteService {
     private readonly onsiteEventsPublisher: OnsiteEventsPublisher,
     private readonly auditService: AuditService,
   ) {}
+
+
+  async registerScanningDevice(
+    tenantId: string,
+    eventId: string,
+    deviceId: string,
+    status: string,
+  ): Promise<ScanningDeviceResult> {
+    void tenantId;
+
+    const existingDevice = await this.scanningDeviceRepository.findOne({
+      where: {
+        deviceId,
+        eventId,
+      },
+    });
+
+    if (existingDevice) {
+      existingDevice.status = status.toLowerCase();
+      const updatedDevice = await this.scanningDeviceRepository.save(existingDevice);
+      return {
+        device: updatedDevice,
+        isNewRegistration: false,
+      };
+    }
+
+    const device = await this.scanningDeviceRepository.save(
+      this.scanningDeviceRepository.create({
+        deviceId,
+        eventId,
+        status: status.toLowerCase(),
+      }),
+    );
+
+    return {
+      device,
+      isNewRegistration: true,
+    };
+  }
+
+  async updateScanningDeviceStatus(
+    tenantId: string,
+    eventId: string,
+    deviceId: string,
+    status: string,
+  ): Promise<ScanningDeviceResult> {
+    void tenantId;
+
+    const device = await this.scanningDeviceRepository.findOne({
+      where: {
+        deviceId,
+        eventId,
+      },
+    });
+
+    if (!device) {
+      throw new NotFoundException(
+        `Scanning device ${deviceId} was not found for the provided event.`,
+      );
+    }
+
+    device.status = status.toLowerCase();
+
+    const updatedDevice = await this.scanningDeviceRepository.save(device);
+
+    return {
+      device: updatedDevice,
+      isNewRegistration: false,
+    };
+  }
+
+  async monitorScanningDevices(
+    tenantId: string,
+    eventId: string,
+  ): Promise<DeviceMonitorResult[]> {
+    const devices = await this.scanningDeviceRepository.find({
+      where: {
+        eventId,
+      },
+      order: {
+        deviceId: 'ASC',
+      },
+    });
+
+    if (devices.length === 0) {
+      return [];
+    }
+
+    const eventCheckInRows = await this.checkInRepository
+      .createQueryBuilder('checkIn')
+      .select('checkIn.deviceId', 'deviceId')
+      .addSelect('COUNT(checkIn.id)', 'totalEventCheckIns')
+      .addSelect('MAX(checkIn.checkedInAt)', 'lastEventCheckInAt')
+      .where('checkIn.eventId = :eventId', { eventId })
+      .groupBy('checkIn.deviceId')
+      .getRawMany<{
+        deviceId: string;
+        totalEventCheckIns: string;
+        lastEventCheckInAt: Date | null;
+      }>();
+
+    const sessionScanRows = await this.sessionCheckInRepository
+      .createQueryBuilder('sessionCheckIn')
+      .select('sessionCheckIn.deviceId', 'deviceId')
+      .addSelect('COUNT(sessionCheckIn.id)', 'totalSessionScans')
+      .addSelect('MAX(sessionCheckIn.scannedAt)', 'lastSessionScanAt')
+      .where('sessionCheckIn.tenantId = :tenantId', { tenantId })
+      .andWhere('sessionCheckIn.eventId = :eventId', { eventId })
+      .groupBy('sessionCheckIn.deviceId')
+      .getRawMany<{
+        deviceId: string;
+        totalSessionScans: string;
+        lastSessionScanAt: Date | null;
+      }>();
+
+    const eventStatsByDeviceId = new Map(
+      eventCheckInRows.map((row) => [
+        row.deviceId,
+        {
+          totalEventCheckIns: Number.parseInt(row.totalEventCheckIns, 10),
+          lastEventCheckInAt: row.lastEventCheckInAt,
+        },
+      ]),
+    );
+
+    const sessionStatsByDeviceId = new Map(
+      sessionScanRows.map((row) => [
+        row.deviceId,
+        {
+          totalSessionScans: Number.parseInt(row.totalSessionScans, 10),
+          lastSessionScanAt: row.lastSessionScanAt,
+        },
+      ]),
+    );
+
+    return devices.map((device) => {
+      const eventStats = eventStatsByDeviceId.get(device.deviceId);
+      const sessionStats = sessionStatsByDeviceId.get(device.deviceId);
+      const timestamps = [eventStats?.lastEventCheckInAt, sessionStats?.lastSessionScanAt]
+        .filter((value): value is Date => value !== null && value !== undefined)
+        .map((value) => new Date(value));
+
+      return {
+        deviceId: device.deviceId,
+        status: device.status,
+        totalEventCheckIns: eventStats?.totalEventCheckIns ?? 0,
+        totalSessionScans: sessionStats?.totalSessionScans ?? 0,
+        lastSeenAt: timestamps.length > 0 ? timestamps.sort((a, b) => b.getTime() - a.getTime())[0] : null,
+      };
+    });
+  }
 
   async checkInAttendee(
     tenantId: string,
