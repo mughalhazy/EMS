@@ -273,14 +273,24 @@ export class AttendeeService {
 
     if (registration && registration.eventId !== payload.event_id_ref) {
       this.logger.warn(
-        `Skipping attendee generation for registration '${payload.registration_id}' because payload event '${payload.event_id_ref}' does not match registration event '${registration.eventId}'.`,
+        JSON.stringify({
+          event: 'attendee.generation.skipped',
+          reason: 'event_mismatch',
+          registrationId: payload.registration_id,
+          payloadEventId: payload.event_id_ref,
+          registrationEventId: registration.eventId,
+        }),
       );
       return null;
     }
 
     if (!registration || registration.status !== RegistrationStatus.CONFIRMED) {
       this.logger.warn(
-        `Skipping attendee generation for registration '${payload.registration_id}' because it is missing or not confirmed.`,
+        JSON.stringify({
+          event: 'attendee.generation.skipped',
+          reason: 'registration_missing_or_unconfirmed',
+          registrationId: payload.registration_id,
+        }),
       );
       return null;
     }
@@ -303,7 +313,11 @@ export class AttendeeService {
 
     if (!normalizedEmail) {
       this.logger.warn(
-        `Skipping attendee generation for confirmed registration '${registration.id}' because no email is available.`,
+        JSON.stringify({
+          event: 'attendee.generation.skipped',
+          reason: 'missing_email',
+          registrationId: registration.id,
+        }),
       );
       return null;
     }

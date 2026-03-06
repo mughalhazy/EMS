@@ -25,7 +25,12 @@ export class NetworkingEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${ATTENDEE_CONNECTION_REQUESTED_TOPIC}' for connection '${connection.id}'.`,
+        JSON.stringify({
+          event: 'networking.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: ATTENDEE_CONNECTION_REQUESTED_TOPIC,
+          connectionId: connection.id,
+        }),
       );
       return;
     }
@@ -48,7 +53,12 @@ export class NetworkingEventsPublisher {
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
-        `Kafka client unavailable. Skipping publish to topic '${ATTENDEE_CONNECTED_TOPIC}' for connection '${connection.id}'.`,
+        JSON.stringify({
+          event: 'networking.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: ATTENDEE_CONNECTED_TOPIC,
+          connectionId: connection.id,
+        }),
       );
       return;
     }
