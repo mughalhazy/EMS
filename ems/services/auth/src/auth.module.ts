@@ -6,6 +6,7 @@ import { UserEntity } from '../../user/src/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtTokenService } from './jwt-token.service';
+import { SecretsProviderService } from './secrets-provider.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
 import { RbacService } from './rbac.service';
 import { RolesController } from './roles.controller';
@@ -40,7 +41,15 @@ import { RbacGuard } from './guards/rbac.guard';
     ]),
   ],
   controllers: [AuthController, RolesController],
-  providers: [AuthService, JwtTokenService, RbacService, JwtAuthGuard, RbacGuard, TenantIsolationMiddleware],
+  providers: [
+    AuthService,
+    JwtTokenService,
+    SecretsProviderService,
+    RbacService,
+    JwtAuthGuard,
+    RbacGuard,
+    TenantIsolationMiddleware,
+  ],
   exports: [AuthService, JwtTokenService, RbacService, JwtAuthGuard, RbacGuard],
 })
 export class AuthModule implements NestModule {

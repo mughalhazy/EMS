@@ -103,3 +103,15 @@ These policies enforce that reads/writes are limited to the current tenant.
 - `allow_pii_access` controls whether analytics queries that require PII are permitted.
 
 Analytics endpoints should call `auth_require_tenant_analytics_access(...)` to enforce tenant policy + RBAC in one guard.
+
+
+## Secrets management integration placeholder
+
+`JwtTokenService` now reads signing material through `SecretsProviderService`, which currently resolves from environment variables and provides a stub interface for a managed secret-store backend.
+
+### Placeholder environment flags
+- `SECRETS_BACKEND`: currently supports `env` only. Non-`env` values log a warning and fall back to env resolution.
+- `JWT_SECRET`: JWT signing secret (still required until a managed backend is implemented).
+
+### Next integration step
+- Replace `SecretsProviderService.getSecret(...)` with provider-specific lookups (AWS Secrets Manager / Vault / GCP Secret Manager) while keeping the same call site contract.
