@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 import { OrderEntity } from './entities/order.entity';
 import { PaymentEntity } from './entities/payment.entity';
 
@@ -19,7 +21,10 @@ export class CommerceEventsPublisher {
     private readonly kafkaClient?: ClientKafka,
   ) {}
 
-  async publishOrderCreated(order: Pick<OrderEntity, 'id' | 'tenantId' | 'status' | 'totals'>): Promise<void> {
+  async publishOrderCreated(
+    order: Pick<OrderEntity, 'id' | 'tenantId' | 'status' | 'totals'>,
+    trace?: DistributedTraceCarrier,
+  ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
         `Kafka client unavailable. Skipping publish to topic '${ORDER_CREATED_TOPIC}' for order '${order.id}'.`,
@@ -27,18 +32,19 @@ export class CommerceEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(ORDER_CREATED_TOPIC, {
+    await this.kafkaClient.emit(ORDER_CREATED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: order.tenantId,
       order_id: order.id,
       status: order.status,
       totals: order.totals,
-    });
+    }, trace));
   }
 
   async publishPaymentCompleted(
     payment: Pick<PaymentEntity, 'id' | 'tenantId' | 'orderId' | 'status' | 'amountMinor' | 'currency'>,
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -47,7 +53,7 @@ export class CommerceEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(PAYMENT_COMPLETED_TOPIC, {
+    await this.kafkaClient.emit(PAYMENT_COMPLETED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: payment.tenantId,
@@ -56,7 +62,7 @@ export class CommerceEventsPublisher {
       status: payment.status,
       amount_minor: payment.amountMinor,
       currency: payment.currency,
-    });
+    }, trace));
   }
 }
 

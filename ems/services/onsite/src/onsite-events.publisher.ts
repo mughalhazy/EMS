@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 export const ONSITE_EVENTS_KAFKA_CLIENT = 'ONSITE_EVENTS_KAFKA_CLIENT';
 export const ATTENDEE_CHECKED_IN_TOPIC = 'attendee.checked_in';
 export const SESSION_ATTENDED_TOPIC = 'session.attended';
@@ -23,7 +25,7 @@ export class OnsiteEventsPublisher {
     checkInId: string;
     deviceId: string;
     checkedInAt: Date;
-  }): Promise<void> {
+  }, trace?: DistributedTraceCarrier): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
         `Kafka client unavailable. Skipping publish to topic '${ATTENDEE_CHECKED_IN_TOPIC}' for attendee '${payload.attendeeId}'.`,
@@ -31,7 +33,7 @@ export class OnsiteEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(ATTENDEE_CHECKED_IN_TOPIC, {
+    await this.kafkaClient.emit(ATTENDEE_CHECKED_IN_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: payload.tenantId,
@@ -40,7 +42,7 @@ export class OnsiteEventsPublisher {
       check_in_id: payload.checkInId,
       device_id: payload.deviceId,
       checked_in_at: payload.checkedInAt.toISOString(),
-    });
+    }, trace));
   }
 
   async publishSessionAttended(payload: {
@@ -51,7 +53,7 @@ export class OnsiteEventsPublisher {
     sessionCheckInId: string;
     deviceId: string;
     scannedAt: Date;
-  }): Promise<void> {
+  }, trace?: DistributedTraceCarrier): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
         `Kafka client unavailable. Skipping publish to topic '${SESSION_ATTENDED_TOPIC}' for attendee '${payload.attendeeId}'.`,
@@ -59,7 +61,7 @@ export class OnsiteEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(SESSION_ATTENDED_TOPIC, {
+    await this.kafkaClient.emit(SESSION_ATTENDED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: payload.tenantId,
@@ -69,6 +71,6 @@ export class OnsiteEventsPublisher {
       session_check_in_id: payload.sessionCheckInId,
       device_id: payload.deviceId,
       scanned_at: payload.scannedAt.toISOString(),
-    });
+    }, trace));
   }
 }

@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 import { RegistrationEntity } from './entities/registration.entity';
 
 export const REGISTRATION_EVENTS_KAFKA_CLIENT = 'REGISTRATION_EVENTS_KAFKA_CLIENT';
@@ -20,6 +22,7 @@ export class RegistrationEventsPublisher {
 
   async publishRegistrationCreated(
     registration: Pick<RegistrationEntity, 'id' | 'tenantId' | 'eventId' | 'userId' | 'ticketId' | 'status'>,
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -28,7 +31,7 @@ export class RegistrationEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(REGISTRATION_CREATED_TOPIC, {
+    await this.kafkaClient.emit(REGISTRATION_CREATED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: registration.tenantId,
@@ -37,11 +40,12 @@ export class RegistrationEventsPublisher {
       user_id: registration.userId,
       ticket_id: registration.ticketId,
       status: registration.status,
-    });
+    }, trace));
   }
 
   async publishRegistrationConfirmed(
     registration: Pick<RegistrationEntity, 'id' | 'tenantId' | 'eventId' | 'userId' | 'ticketId'>,
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -50,7 +54,7 @@ export class RegistrationEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(REGISTRATION_CONFIRMED_TOPIC, {
+    await this.kafkaClient.emit(REGISTRATION_CONFIRMED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: registration.tenantId,
@@ -59,6 +63,6 @@ export class RegistrationEventsPublisher {
       user_id: registration.userId,
       ticket_id: registration.ticketId,
       status: 'confirmed',
-    });
+    }, trace));
   }
 }

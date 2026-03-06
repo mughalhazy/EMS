@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 import { EventEntity } from './entities/event.entity';
 import { SessionEntity } from './entities/session.entity';
 
@@ -41,6 +43,7 @@ export class EventLifecyclePublisher {
     eventType: EventLifecycleChangeType,
     aggregate: Pick<EventEntity, 'id' | 'tenantId'> | Pick<SessionEntity, 'id' | 'tenantId'>,
     payload: Record<string, unknown>,
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     const aggregateType = eventType.startsWith('session.') ? 'session' : 'event';
     const envelope: EventLifecycleEnvelope = {
@@ -61,6 +64,6 @@ export class EventLifecyclePublisher {
       return;
     }
 
-    await this.kafkaClient.emit(EVENT_LIFECYCLE_TOPIC, envelope);
+    await this.kafkaClient.emit(EVENT_LIFECYCLE_TOPIC, attachDistributedTrace(envelope, trace));
   }
 }

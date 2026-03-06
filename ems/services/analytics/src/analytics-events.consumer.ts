@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
+import { readDistributedTrace } from '../../audit/src/distributed-tracing';
+
 import { QUESTION_ASKED_TOPIC, POLL_SUBMITTED_TOPIC } from '../../engagement/src/engagement-events.publisher';
 import { LEAD_CAPTURED_TOPIC } from '../../exhibitor/src/exhibitor-events.publisher';
 import { ATTENDEE_CHECKED_IN_TOPIC } from '../../onsite/src/onsite-events.publisher';
@@ -25,17 +27,19 @@ export class AnalyticsEventsConsumer {
   async handleRegistrationConfirmed(
     @Payload() payload: RegistrationConfirmedMetricEvent,
   ): Promise<void> {
+    const trace = readDistributedTrace(payload as Record<string, unknown>);
     await this.analyticsMetricsService.handleRegistrationConfirmed(payload);
     this.logger.debug(
-      `Processed registration confirmation metric for tenant '${payload.tenant_id}' and event '${payload.event_id_ref}'.`,
+      `Processed registration confirmation metric for tenant '${payload.tenant_id}' and event '${payload.event_id_ref}'${trace?.trace_id ? ` (trace_id=${trace.trace_id})` : ''}.`,
     );
   }
 
   @EventPattern(ATTENDEE_CHECKED_IN_TOPIC)
   async handleAttendeeCheckedIn(@Payload() payload: AttendeeCheckedInMetricEvent): Promise<void> {
+    const trace = readDistributedTrace(payload as Record<string, unknown>);
     await this.analyticsMetricsService.handleAttendeeCheckedIn(payload);
     this.logger.debug(
-      `Processed attendee check-in metric for tenant '${payload.tenant_id}' and event '${payload.event_id_ref}'.`,
+      `Processed attendee check-in metric for tenant '${payload.tenant_id}' and event '${payload.event_id_ref}'${trace?.trace_id ? ` (trace_id=${trace.trace_id})` : ''}.`,
     );
   }
 
