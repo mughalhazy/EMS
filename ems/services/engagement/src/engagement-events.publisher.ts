@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 import { SessionQnaEntity } from '../../agenda/src/entities/session-qna.entity';
 import { PollEntity } from './entities/poll.entity';
 
@@ -23,6 +25,7 @@ export class EngagementEventsPublisher {
   async publishPollSubmitted(
     poll: Pick<PollEntity, 'id' | 'tenantId' | 'eventId' | 'sessionId'>,
     payload: { attendeeId: string; option: string; submittedAt?: Date },
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -36,7 +39,7 @@ export class EngagementEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(POLL_SUBMITTED_TOPIC, {
+    await this.kafkaClient.emit(POLL_SUBMITTED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: poll.tenantId,
@@ -46,13 +49,14 @@ export class EngagementEventsPublisher {
       attendee_id: payload.attendeeId,
       selected_option: payload.option,
       submitted_at: (payload.submittedAt ?? new Date()).toISOString(),
-    });
+    }, trace));
   }
 
 
   async publishQuestionAsked(
     question: Pick<SessionQnaEntity, 'id' | 'sessionId' | 'attendeeId' | 'createdAt'>,
     metadata: { tenantId: string; eventId: string },
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -66,7 +70,7 @@ export class EngagementEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(QUESTION_ASKED_TOPIC, {
+    await this.kafkaClient.emit(QUESTION_ASKED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: metadata.tenantId,
@@ -75,7 +79,7 @@ export class EngagementEventsPublisher {
       session_id: question.sessionId,
       attendee_id: question.attendeeId,
       asked_at: question.createdAt.toISOString(),
-    });
+    }, trace));
   }
 
   async publishSurveyCompleted(metadata: {
@@ -84,7 +88,7 @@ export class EngagementEventsPublisher {
     surveyId: string;
     attendeeId: string;
     completedAt?: Date;
-  }): Promise<void> {
+  }, trace?: DistributedTraceCarrier): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
         JSON.stringify({
@@ -97,7 +101,7 @@ export class EngagementEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(SURVEY_COMPLETED_TOPIC, {
+    await this.kafkaClient.emit(SURVEY_COMPLETED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: metadata.tenantId,
@@ -105,6 +109,6 @@ export class EngagementEventsPublisher {
       survey_id: metadata.surveyId,
       attendee_id: metadata.attendeeId,
       completed_at: (metadata.completedAt ?? new Date()).toISOString(),
-    });
+    }, trace));
   }
 }

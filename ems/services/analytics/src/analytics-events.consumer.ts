@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
+import { readDistributedTrace } from '../../audit/src/distributed-tracing';
+
 import { QUESTION_ASKED_TOPIC, POLL_SUBMITTED_TOPIC } from '../../engagement/src/engagement-events.publisher';
 import { LEAD_CAPTURED_TOPIC } from '../../exhibitor/src/exhibitor-events.publisher';
 import { ATTENDEE_CHECKED_IN_TOPIC } from '../../onsite/src/onsite-events.publisher';
@@ -25,6 +27,7 @@ export class AnalyticsEventsConsumer {
   async handleRegistrationConfirmed(
     @Payload() payload: RegistrationConfirmedMetricEvent,
   ): Promise<void> {
+    const trace = readDistributedTrace(payload as Record<string, unknown>);
     await this.analyticsMetricsService.handleRegistrationConfirmed(payload);
     this.logger.debug(
       JSON.stringify({
@@ -38,6 +41,7 @@ export class AnalyticsEventsConsumer {
 
   @EventPattern(ATTENDEE_CHECKED_IN_TOPIC)
   async handleAttendeeCheckedIn(@Payload() payload: AttendeeCheckedInMetricEvent): Promise<void> {
+    const trace = readDistributedTrace(payload as Record<string, unknown>);
     await this.analyticsMetricsService.handleAttendeeCheckedIn(payload);
     this.logger.debug(
       JSON.stringify({

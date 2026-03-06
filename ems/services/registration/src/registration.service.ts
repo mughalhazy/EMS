@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
+import { buildDistributedTraceContext } from '../../audit/src/distributed-tracing';
 import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
 import { OrderEntity } from '../../commerce/src/entities/order.entity';
 import { EventSettingEntity } from '../../event/src/entities/event-setting.entity';
@@ -107,10 +108,12 @@ export class RegistrationService {
       });
       await registrantProfileRepo.save(profile);
 
-      await this.registrationEventsPublisher.publishRegistrationCreated(savedRegistration);
+      const registrationTrace = buildDistributedTraceContext();
+
+      await this.registrationEventsPublisher.publishRegistrationCreated(savedRegistration, registrationTrace);
 
       if (savedRegistration.status === RegistrationStatus.CONFIRMED) {
-        await this.registrationEventsPublisher.publishRegistrationConfirmed(savedRegistration);
+        await this.registrationEventsPublisher.publishRegistrationConfirmed(savedRegistration, registrationTrace);
       }
 
       await this.auditService.trackRegistrationChange({
@@ -125,6 +128,9 @@ export class RegistrationService {
           eventId: savedRegistration.eventId,
           ticketId: savedRegistration.ticketId,
           orderId: savedRegistration.orderId,
+          traceId: registrationTrace.trace_id,
+          spanId: registrationTrace.span_id,
+          parentSpanId: registrationTrace.parent_span_id ?? null,
         },
       });
 

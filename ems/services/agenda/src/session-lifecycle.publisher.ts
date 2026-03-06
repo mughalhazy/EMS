@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 import { SessionEntity } from './entities/session.entity';
 
 export const SESSION_LIFECYCLE_TOPIC = 'session.lifecycle';
@@ -19,7 +21,11 @@ export class SessionLifecyclePublisher {
     private readonly kafkaClient?: ClientKafka,
   ) {}
 
-  async publish(eventType: SessionLifecycleChangeType, session: SessionEntity): Promise<void> {
+  async publish(
+    eventType: SessionLifecycleChangeType,
+    session: SessionEntity,
+    trace?: DistributedTraceCarrier,
+  ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
         JSON.stringify({
@@ -32,7 +38,7 @@ export class SessionLifecyclePublisher {
       return;
     }
 
-    await this.kafkaClient.emit(SESSION_LIFECYCLE_TOPIC, {
+    await this.kafkaClient.emit(SESSION_LIFECYCLE_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       event_type: eventType,
       occurred_at: new Date().toISOString(),
@@ -47,6 +53,6 @@ export class SessionLifecyclePublisher {
         capacity: session.capacity,
         agenda_order: session.agendaOrder,
       },
-    });
+    }, trace));
   }
 }

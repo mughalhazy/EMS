@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
+import { readDistributedTrace } from '../../audit/src/distributed-tracing';
+
 import { REGISTRATION_CONFIRMED_TOPIC } from '../../registration/src/registration-events.publisher';
 import { AttendeeService, ConfirmedRegistrationEventPayload } from './attendee.service';
 
@@ -14,6 +16,7 @@ export class AttendeeEventsConsumer {
   async handleRegistrationConfirmed(
     @Payload() payload: ConfirmedRegistrationEventPayload,
   ): Promise<void> {
+    const trace = readDistributedTrace(payload as Record<string, unknown>);
     const attendee = await this.attendeeService.createFromConfirmedRegistration(payload);
 
     if (!attendee) {

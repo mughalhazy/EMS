@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 export const SESSION_ATTENDANCE_KAFKA_CLIENT = 'SESSION_ATTENDANCE_KAFKA_CLIENT';
 export const SESSION_ATTENDED_TOPIC = 'session.attended';
 
@@ -21,7 +23,7 @@ export class SessionAttendancePublisher {
     sessionId: string;
     attendeeId: string;
     attendedAt?: Date;
-  }): Promise<void> {
+  }, trace?: DistributedTraceCarrier): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
         JSON.stringify({
@@ -35,7 +37,7 @@ export class SessionAttendancePublisher {
       return;
     }
 
-    await this.kafkaClient.emit(SESSION_ATTENDED_TOPIC, {
+    await this.kafkaClient.emit(SESSION_ATTENDED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: payload.tenantId,
@@ -43,6 +45,6 @@ export class SessionAttendancePublisher {
       session_id: payload.sessionId,
       attendee_id: payload.attendeeId,
       attended_at: (payload.attendedAt ?? new Date()).toISOString(),
-    });
+    }, trace));
   }
 }

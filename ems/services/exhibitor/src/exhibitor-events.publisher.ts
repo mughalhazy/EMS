@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 
+import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 
@@ -21,6 +23,7 @@ export class ExhibitorEventsPublisher {
 
   async publishExhibitorCreated(
     exhibitor: Pick<ExhibitorEntity, 'id' | 'tenantId' | 'eventId' | 'name'>,
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -34,19 +37,20 @@ export class ExhibitorEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(EXHIBITOR_CREATED_TOPIC, {
+    await this.kafkaClient.emit(EXHIBITOR_CREATED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: exhibitor.tenantId,
       event_id_ref: exhibitor.eventId,
       exhibitor_id: exhibitor.id,
       exhibitor_name: exhibitor.name,
-    });
+    }, trace));
   }
 
   async publishLeadCaptured(
     lead: Pick<ExhibitorLeadCaptureEntity, 'attendeeId' | 'exhibitorId' | 'capturedAt'>,
     metadata: { tenantId: string; eventId: string },
+    trace?: DistributedTraceCarrier,
   ): Promise<void> {
     if (!this.kafkaClient) {
       this.logger.warn(
@@ -61,7 +65,7 @@ export class ExhibitorEventsPublisher {
       return;
     }
 
-    await this.kafkaClient.emit(LEAD_CAPTURED_TOPIC, {
+    await this.kafkaClient.emit(LEAD_CAPTURED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: metadata.tenantId,
@@ -69,6 +73,6 @@ export class ExhibitorEventsPublisher {
       exhibitor_id: lead.exhibitorId,
       attendee_id: lead.attendeeId,
       captured_at: lead.capturedAt.toISOString(),
-    });
+    }, trace));
   }
 }
