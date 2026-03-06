@@ -4,10 +4,15 @@ import { Repository } from 'typeorm';
 
 import { OrderStatus } from '../../commerce/src/entities/order.entity';
 import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
+import {
+  AttendeeConnectionEntity,
+  AttendeeConnectionStatus,
+} from '../../networking/src/entities/attendee-connection.entity';
 import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { EventAnalyticsEntity } from './entities/event-analytics.entity';
+import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
 
 export interface AggregateEventAnalyticsResult {
   tenantId: string;
@@ -17,6 +22,10 @@ export interface AggregateEventAnalyticsResult {
   ticketsSoldCount: number;
   ticketSalesAmount: string;
   attendeesCheckedInCount: number;
+  pollResponsesCount: number;
+  questionsAskedCount: number;
+  networkingConnectionsCount: number;
+  totalEngagementActionsCount: number;
 }
 
 @Injectable()
@@ -30,6 +39,10 @@ export class AnalyticsService {
     private readonly orderItemRepository: Repository<OrderItemEntity>,
     @InjectRepository(CheckInEntity)
     private readonly checkInRepository: Repository<CheckInEntity>,
+    @InjectRepository(SessionAnalyticsEntity)
+    private readonly sessionAnalyticsRepository: Repository<SessionAnalyticsEntity>,
+    @InjectRepository(AttendeeConnectionEntity)
+    private readonly attendeeConnectionRepository: Repository<AttendeeConnectionEntity>,
   ) {}
 
   async aggregateEventAnalytics(
@@ -72,6 +85,30 @@ export class AnalyticsService {
       .where('checkIn.eventId = :eventId', { eventId })
       .getCount();
 
+    const engagementStats = await this.sessionAnalyticsRepository
+      .createQueryBuilder('sessionAnalytics')
+      .select('COALESCE(SUM(sessionAnalytics.pollResponses), 0)', 'pollResponsesCount')
+      .addSelect('COALESCE(SUM(sessionAnalytics.questionsAsked), 0)', 'questionsAskedCount')
+      .where('sessionAnalytics.tenantId = :tenantId', { tenantId })
+      .andWhere('sessionAnalytics.eventId = :eventId', { eventId })
+      .getRawOne<{
+        pollResponsesCount: string;
+        questionsAskedCount: string;
+      }>();
+
+    const networkingConnectionsCount = await this.attendeeConnectionRepository
+      .createQueryBuilder('connection')
+      .where('connection.tenantId = :tenantId', { tenantId })
+      .andWhere('connection.eventId = :eventId', { eventId })
+      .andWhere('connection.status = :status', {
+        status: AttendeeConnectionStatus.ACCEPTED,
+      })
+      .getCount();
+
+    const pollResponsesCount = Number.parseInt(engagementStats?.pollResponsesCount ?? '0', 10);
+    const questionsAskedCount = Number.parseInt(engagementStats?.questionsAskedCount ?? '0', 10);
+    const totalEngagementActionsCount = pollResponsesCount + questionsAskedCount + networkingConnectionsCount;
+
     const aggregate = {
       tenantId,
       eventId,
@@ -80,6 +117,10 @@ export class AnalyticsService {
       ticketsSoldCount: Number.parseInt(commerceStats?.ticketsSoldCount ?? '0', 10),
       ticketSalesAmount: commerceStats?.ticketSalesAmount ?? '0.00',
       attendeesCheckedInCount,
+      pollResponsesCount,
+      questionsAskedCount,
+      networkingConnectionsCount,
+      totalEngagementActionsCount,
     };
 
     const existingSnapshot = await this.eventAnalyticsRepository.findOne({
@@ -105,6 +146,10 @@ export class AnalyticsService {
       ticketsSoldCount: savedSnapshot.ticketsSoldCount,
       ticketSalesAmount: savedSnapshot.ticketSalesAmount,
       attendeesCheckedInCount: savedSnapshot.attendeesCheckedInCount,
+      pollResponsesCount,
+      questionsAskedCount,
+      networkingConnectionsCount,
+      totalEngagementActionsCount,
     };
   }
 }
