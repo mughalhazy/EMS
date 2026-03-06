@@ -7,20 +7,11 @@ import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { SurveyEntity } from '../../event/src/entities/survey.entity';
 import { EngagementController } from './engagement.controller';
 import { PollEntity } from './entities/poll.entity';
-import { EngagementService } from './engagement.service';
+import { EngagementEventsPublisher } from './engagement-events.publisher';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      PollEntity,
-      SessionQnaEntity,
-      SurveyEntity,
-      SessionEntity,
-      AttendeeEntity,
-    ]),
-  ],
-  controllers: [EngagementController],
-  providers: [EngagementService],
-  exports: [EngagementService, TypeOrmModule],
+  imports: [TypeOrmModule.forFeature([PollEntity])],
+  providers: [EngagementEventsPublisher],
+  exports: [TypeOrmModule, EngagementEventsPublisher],
 })
 export class EngagementModule {}
