@@ -157,6 +157,7 @@ export class EngagementService {
     });
 
     const savedQuestion = await this.questionRepository.save(question);
+    await this.engagementEventsPublisher.publishQuestionAsked(savedQuestion, { tenantId, eventId });
     await this.auditService.trackEventChange({
       tenantId,
       actorUserId: attendee.userId,

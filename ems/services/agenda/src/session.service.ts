@@ -67,6 +67,8 @@ export class SessionService {
     await this.ensureRoomExists(tenantId, eventId, nextRoomId);
     await this.ensureNoRoomConflict(tenantId, eventId, nextRoomId, nextStart, nextEnd, sessionId);
 
+    const before = this.auditSession(existing);
+
     Object.assign(existing, input);
     if (input.capacity !== undefined) {
       const allocated = existing.capacity - existing.remainingSeats;
@@ -82,7 +84,7 @@ export class SessionService {
       tenantId,
       actorUserId,
       action: 'agenda.session.updated',
-      before: this.auditSession(existing),
+      before,
       after: this.auditSession(updated),
     });
     return updated;

@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto';
 import { AttendeeConnectionEntity } from './entities/attendee-connection.entity';
 
 export const NETWORKING_EVENTS_KAFKA_CLIENT = 'NETWORKING_EVENTS_KAFKA_CLIENT';
+export const ATTENDEE_CONNECTION_REQUESTED_TOPIC = 'attendee.connection.requested';
 export const ATTENDEE_CONNECTED_TOPIC = 'attendee.connected';
 
 @Injectable()
@@ -16,6 +17,30 @@ export class NetworkingEventsPublisher {
     @Inject(NETWORKING_EVENTS_KAFKA_CLIENT)
     private readonly kafkaClient?: ClientKafka,
   ) {}
+
+
+  async publishConnectionRequested(
+    connection: Pick<AttendeeConnectionEntity, 'id' | 'attendeeAId' | 'attendeeBId' | 'createdAt'>,
+    metadata: { tenantId: string; eventId: string },
+  ): Promise<void> {
+    if (!this.kafkaClient) {
+      this.logger.warn(
+        `Kafka client unavailable. Skipping publish to topic '${ATTENDEE_CONNECTION_REQUESTED_TOPIC}' for connection '${connection.id}'.`,
+      );
+      return;
+    }
+
+    await this.kafkaClient.emit(ATTENDEE_CONNECTION_REQUESTED_TOPIC, {
+      event_id: randomUUID(),
+      occurred_at: new Date().toISOString(),
+      tenant_id: metadata.tenantId,
+      event_id_ref: metadata.eventId,
+      connection_id: connection.id,
+      attendee_a_id: connection.attendeeAId,
+      attendee_b_id: connection.attendeeBId,
+      requested_at: connection.createdAt.toISOString(),
+    });
+  }
 
   async publishAttendeeConnected(
     connection: Pick<AttendeeConnectionEntity, 'id' | 'attendeeAId' | 'attendeeBId' | 'updatedAt'>,

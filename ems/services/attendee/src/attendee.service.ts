@@ -216,6 +216,13 @@ export class AttendeeService {
       },
     });
 
+    if (registration && registration.eventId !== payload.event_id_ref) {
+      this.logger.warn(
+        `Skipping attendee generation for registration '${payload.registration_id}' because payload event '${payload.event_id_ref}' does not match registration event '${registration.eventId}'.`,
+      );
+      return null;
+    }
+
     if (!registration || registration.status !== RegistrationStatus.CONFIRMED) {
       this.logger.warn(
         `Skipping attendee generation for registration '${payload.registration_id}' because it is missing or not confirmed.`,
@@ -262,6 +269,7 @@ export class AttendeeService {
         existingAttendee.status = AttendeeStatus.REGISTERED;
       }
       const savedAttendee = await this.attendeeRepository.save(existingAttendee);
+      await this.upsertAttendeeProfileForUser(savedAttendee.tenantId, savedAttendee.eventId, savedAttendee.userId);
       await this.indexAttendee(savedAttendee);
       return savedAttendee;
     }
@@ -282,6 +290,7 @@ export class AttendeeService {
     });
 
     const savedAttendee = await this.attendeeRepository.save(attendee);
+    await this.upsertAttendeeProfileForUser(savedAttendee.tenantId, savedAttendee.eventId, savedAttendee.userId);
     await this.indexAttendee(savedAttendee);
     return savedAttendee;
   }
@@ -331,6 +340,34 @@ export class AttendeeService {
         interests: attendeeProfile?.interests ?? [],
       };
     });
+  }
+
+  private async upsertAttendeeProfileForUser(
+    tenantId: string,
+    eventId: string,
+    userId: string | null,
+  ): Promise<void> {
+    if (!userId) {
+      return;
+    }
+
+    const existingProfile = await this.attendeeProfileRepository.findOne({
+      where: { tenantId, eventId, userId },
+    });
+
+    if (existingProfile) {
+      return;
+    }
+
+    await this.attendeeProfileRepository.save(
+      this.attendeeProfileRepository.create({
+        tenantId,
+        eventId,
+        userId,
+        bio: null,
+        interests: [],
+      }),
+    );
   }
 
   private async indexAttendee(attendee: AttendeeEntity): Promise<void> {
