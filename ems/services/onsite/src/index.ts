@@ -2,9 +2,11 @@ export { OnsiteModule } from './onsite.module';
 export { OnsiteController } from './onsite.controller';
 export { OnsiteService } from './onsite.service';
 export { BadgePrintingService } from './badge-printing.service';
+export { QrTicketValidationService } from './qr-ticket-validation.service';
 export { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
 export { RegisterScanningDeviceDto } from './dto/register-scanning-device.dto';
 export { ScanSessionCheckInDto } from './dto/scan-session-check-in.dto';
+export { PrintBadgeDto } from './dto/print-badge.dto';
 export { UpdateScanningDeviceStatusDto } from './dto/update-scanning-device-status.dto';
 export { BadgeEntity } from './entities/badge.entity';
 export { CheckInEntity } from './entities/check-in.entity';
@@ -15,3 +17,4 @@ export { CreateCheckInsTable1723000000001 } from './migrations/1723000000001-Cre
 export { AddUniqueBadgePerAttendee1723000000002 } from './migrations/1723000000002-AddUniqueBadgePerAttendee';
 
 export { SessionAttendanceEntity } from './entities/session-attendance.entity';
+export { CreateSessionAttendanceTable1723000000004 } from './migrations/1723000000004-CreateSessionAttendanceTable';

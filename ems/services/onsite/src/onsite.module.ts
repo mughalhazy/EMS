@@ -14,11 +14,12 @@ import { SessionCheckInEntity } from './entities/session-check-in.entity';
 import { OnsiteController } from './onsite.controller';
 import { OnsiteEventsPublisher } from './onsite-events.publisher';
 import { OnsiteService } from './onsite.service';
+import { QrTicketValidationService } from './qr-ticket-validation.service';
 
 @Module({
   imports: [AuditModule, TypeOrmModule.forFeature([AttendeeEntity, AttendeeScheduleEntity, SessionEntity, BadgeEntity, CheckInEntity, ScanningDeviceEntity, SessionAttendanceEntity, SessionCheckInEntity])],
   controllers: [OnsiteController],
-  providers: [OnsiteService, BadgePrintingService, OnsiteEventsPublisher],
+  providers: [OnsiteService, BadgePrintingService, OnsiteEventsPublisher, QrTicketValidationService],
   exports: [OnsiteService, BadgePrintingService],
 })
 export class OnsiteModule {}

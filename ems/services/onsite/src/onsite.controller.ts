@@ -14,7 +14,9 @@ import { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
 import { RegisterScanningDeviceDto } from './dto/register-scanning-device.dto';
 import { ScanSessionCheckInDto } from './dto/scan-session-check-in.dto';
 import { UpdateScanningDeviceStatusDto } from './dto/update-scanning-device-status.dto';
+import { PrintBadgeDto } from './dto/print-badge.dto';
 import {
+  BadgePrintResult,
   CheckInResult,
   DeviceMonitorResult,
   OnsiteService,
@@ -93,6 +95,7 @@ export class OnsiteController {
       sessionId,
       payload.attendeeId,
       payload.deviceId,
+      payload.qrTicketCode,
     );
   }
 
