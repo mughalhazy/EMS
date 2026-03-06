@@ -1,20 +1,68 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
 
 import { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
+import { RegisterScanningDeviceDto } from './dto/register-scanning-device.dto';
 import { ScanSessionCheckInDto } from './dto/scan-session-check-in.dto';
-import { CheckInResult, OnsiteService, SessionScanResult } from './onsite.service';
+import { UpdateScanningDeviceStatusDto } from './dto/update-scanning-device-status.dto';
+import {
+  CheckInResult,
+  DeviceMonitorResult,
+  OnsiteService,
+  ScanningDeviceResult,
+  SessionScanResult,
+} from './onsite.service';
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId/check-ins')
 export class OnsiteController {
   constructor(private readonly onsiteService: OnsiteService) {}
+
+  @Post('devices')
+  @HttpCode(HttpStatus.CREATED)
+  async registerScanningDevice(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() payload: RegisterScanningDeviceDto,
+  ): Promise<ScanningDeviceResult> {
+    return this.onsiteService.registerScanningDevice(
+      tenantId,
+      eventId,
+      payload.deviceId,
+      payload.status,
+    );
+  }
+
+  @Patch('devices/:deviceId/status')
+  async updateScanningDeviceStatus(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('deviceId') deviceId: string,
+    @Body() payload: UpdateScanningDeviceStatusDto,
+  ): Promise<ScanningDeviceResult> {
+    return this.onsiteService.updateScanningDeviceStatus(
+      tenantId,
+      eventId,
+      deviceId,
+      payload.status,
+    );
+  }
+
+  @Get('devices/monitoring')
+  async monitorScanningDevices(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<DeviceMonitorResult[]> {
+    return this.onsiteService.monitorScanningDevices(tenantId, eventId);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
