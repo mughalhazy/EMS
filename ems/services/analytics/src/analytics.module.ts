@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { OrderItemEntity } from '../../commerce/src/entities/order-item.entity';
+import { PaymentEntity } from '../../commerce/src/entities/payment.entity';
 import { BoothEntity } from '../../exhibitor/src/entities/booth.entity';
 import { AnalyticsEventsConsumer } from './analytics-events.consumer';
 import { AnalyticsMetricsService } from './analytics-metrics.service';
+import { RevenueReportingController } from './revenue-reporting.controller';
+import { RevenueReportingService } from './revenue-reporting.service';
 import { EventAnalyticsEntity } from './entities/event-analytics.entity';
 import { ExhibitorAnalyticsEntity } from './entities/exhibitor-analytics.entity';
 import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
@@ -15,9 +19,12 @@ import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
       SessionAnalyticsEntity,
       ExhibitorAnalyticsEntity,
       BoothEntity,
+      OrderItemEntity,
+      PaymentEntity,
     ]),
   ],
-  providers: [AnalyticsMetricsService, AnalyticsEventsConsumer],
-  exports: [AnalyticsMetricsService],
+  controllers: [RevenueReportingController],
+  providers: [AnalyticsMetricsService, AnalyticsEventsConsumer, RevenueReportingService],
+  exports: [AnalyticsMetricsService, RevenueReportingService],
 })
 export class AnalyticsModule {}
