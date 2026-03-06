@@ -12,7 +12,7 @@ import {
 import { AttendeeEntity } from '../../../attendee/src/entities/attendee.entity';
 
 @Entity({ name: 'badges' })
-@Index('idx_badges_attendee_id', ['attendeeId'])
+@Index('uq_badges_attendee_id', ['attendeeId'], { unique: true })
 @Index('uq_badges_badge_id', ['badgeId'], { unique: true })
 export class BadgeEntity {
   @PrimaryGeneratedColumn('uuid')

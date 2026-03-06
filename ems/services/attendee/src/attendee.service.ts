@@ -8,6 +8,7 @@ import {
   AttendeeConnectionEntity,
   AttendeeConnectionStatus,
 } from '../../networking/src/entities/attendee-connection.entity';
+import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { RegistrantProfileEntity } from '../../registration/src/entities/registrant-profile.entity';
 import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
@@ -64,6 +65,13 @@ export type AttendeeConnectionView = {
   updatedAt: Date;
 };
 
+export type AttendeeCheckInResult = {
+  attendeeId: string;
+  status: AttendeeStatus;
+  checkedInAt: Date;
+  duplicate: boolean;
+};
+
 export type AttendeeScheduleItem = {
   scheduleId: string;
   sessionId: string;
@@ -95,6 +103,8 @@ export class AttendeeService {
     private readonly attendeeConnectionRepository: Repository<AttendeeConnectionEntity>,
     @InjectRepository(AttendeeScheduleEntity)
     private readonly attendeeScheduleRepository: Repository<AttendeeScheduleEntity>,
+    @InjectRepository(CheckInEntity)
+    private readonly checkInRepository: Repository<CheckInEntity>,
     private readonly attendeeDirectorySearchIndexService: AttendeeDirectorySearchIndexService,
   ) {}
 
@@ -204,6 +214,51 @@ export class AttendeeService {
       status: schedule.session.status,
       agendaOrder: schedule.session.agendaOrder,
     }));
+  }
+
+
+  async checkInAttendee(tenantId: string, eventId: string, attendeeId: string): Promise<AttendeeCheckInResult> {
+    const attendee = await this.getAttendeeInEventOrThrow(tenantId, eventId, attendeeId);
+
+    const existingCheckIn = await this.checkInRepository.findOne({
+      where: { attendeeId, eventId },
+      order: { checkedInAt: 'DESC' },
+    });
+
+    if (existingCheckIn) {
+      if (attendee.status !== AttendeeStatus.CHECKED_IN) {
+        attendee.status = AttendeeStatus.CHECKED_IN;
+        await this.attendeeRepository.save(attendee);
+      }
+
+      return {
+        attendeeId: attendee.id,
+        status: AttendeeStatus.CHECKED_IN,
+        checkedInAt: existingCheckIn.checkedInAt,
+        duplicate: true,
+      };
+    }
+
+    const checkedInAt = new Date();
+
+    await this.checkInRepository.save(
+      this.checkInRepository.create({
+        attendeeId: attendee.id,
+        eventId,
+        checkedInAt,
+        deviceId: 'api',
+      }),
+    );
+
+    attendee.status = AttendeeStatus.CHECKED_IN;
+    await this.attendeeRepository.save(attendee);
+
+    return {
+      attendeeId: attendee.id,
+      status: attendee.status,
+      checkedInAt,
+      duplicate: false,
+    };
   }
 
   async createFromConfirmedRegistration(

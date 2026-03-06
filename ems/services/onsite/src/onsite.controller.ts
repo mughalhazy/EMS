@@ -9,26 +9,24 @@ import {
 } from '@nestjs/common';
 
 import { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
-import { CheckInEntity } from './entities/check-in.entity';
-import { OnsiteService } from './onsite.service';
+import { CheckInResult, OnsiteService } from './onsite.service';
 
-@Controller('api/v1/tenants/:tenantId/events/:eventId/onsite')
+@Controller('api/v1/tenants/:tenantId/events/:eventId/check-ins')
 export class OnsiteController {
   constructor(private readonly onsiteService: OnsiteService) {}
 
-  @Post('check-ins')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
   async checkInAttendee(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() payload: CheckInAttendeeDto,
-  ): Promise<CheckInEntity> {
-    return this.onsiteService.checkInAttendee({
+  ): Promise<CheckInResult> {
+    return this.onsiteService.checkInAttendee(
       tenantId,
       eventId,
-      attendeeId: payload.attendeeId,
-      qrCode: payload.qrCode,
-      deviceId: payload.deviceId,
-    });
+      payload.attendeeId,
+      payload.deviceId,
+    );
   }
 }

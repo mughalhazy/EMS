@@ -1,5 +1,9 @@
+import { IsString, IsUUID } from 'class-validator';
+
 export class CheckInAttendeeDto {
+  @IsUUID()
   attendeeId!: string;
-  qrCode!: string;
+
+  @IsString()
   deviceId!: string;
 }
