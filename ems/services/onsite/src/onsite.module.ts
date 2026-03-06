@@ -5,11 +5,12 @@ import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import { BadgePrintingService } from './badge-printing.service';
 import { BadgeEntity } from './entities/badge.entity';
 import { CheckInEntity } from './entities/check-in.entity';
+import { SessionAttendanceEntity } from './entities/session-attendance.entity';
 import { OnsiteController } from './onsite.controller';
 import { OnsiteService } from './onsite.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AttendeeEntity, BadgeEntity, CheckInEntity])],
+  imports: [TypeOrmModule.forFeature([AttendeeEntity, BadgeEntity, CheckInEntity, SessionAttendanceEntity])],
   controllers: [OnsiteController],
   providers: [OnsiteService, BadgePrintingService],
   exports: [OnsiteService, BadgePrintingService],

@@ -9,3 +9,5 @@ export { ScanningDeviceEntity } from './entities/scanning-device.entity';
 export { CreateBadgesTable1723000000000 } from './migrations/1723000000000-CreateBadgesTable';
 export { CreateCheckInsTable1723000000001 } from './migrations/1723000000001-CreateCheckInsTable';
 export { AddUniqueBadgePerAttendee1723000000002 } from './migrations/1723000000002-AddUniqueBadgePerAttendee';
+
+export { SessionAttendanceEntity } from './entities/session-attendance.entity';
