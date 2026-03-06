@@ -7,6 +7,7 @@ export * from './entities/venue.entity';
 export * from './entities/session.entity';
 export * from './entities/speaker.entity';
 export * from './entities/session-speaker.entity';
+export * from './entities/survey.entity';
 export * from './event.module';
 export * from './event-setting.service';
 export * from './event.service';
