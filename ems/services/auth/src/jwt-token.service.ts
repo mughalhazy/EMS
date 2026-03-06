@@ -2,6 +2,8 @@ import { createHmac, randomUUID } from 'crypto';
 
 import { Injectable } from '@nestjs/common';
 
+import { environmentConfig } from '../../shared/src/environment-config';
+
 type TokenKind = 'access' | 'refresh';
 
 type JwtPayload = {
@@ -19,7 +21,7 @@ export class JwtTokenService {
   private readonly accessTokenTtlSec = 60 * 15;
   private readonly refreshTokenTtlSec = 60 * 60 * 24 * 14;
 
-  private readonly secret = process.env.JWT_SECRET ?? 'local-dev-secret-change-me';
+  private readonly secret = environmentConfig.getOrDefault('JWT_SECRET', 'local-dev-secret-change-me');
 
   signAccessToken(userId: string, tenantId: string): { token: string; expiresAt: Date } {
     return this.signToken('access', userId, tenantId, this.accessTokenTtlSec);
