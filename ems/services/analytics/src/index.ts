@@ -1,1 +1,1 @@
-export { SessionAnalyticsEntity } from './entities/session-analytics.entity';
+export { EventAnalyticsEntity } from './entities/event-analytics.entity';
