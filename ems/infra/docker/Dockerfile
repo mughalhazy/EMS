@@ -1,69 +1,66 @@
 # syntax=docker/dockerfile:1.7
 
-# Generic multi-stage Dockerfile for EMS NestJS services.
-# Build with:
-#   docker build \
-#     --build-arg SERVICE_PATH=ems/services/event \
-#     --build-arg SERVICE_NAME=event \
-#     -f ems/infra/docker/Dockerfile \
-#     -t ems-event:latest .
+# Multi-stage Dockerfile for a Next.js frontend.
+# Build with repository root as context, optionally overriding APP_DIR:
+#   docker build -f ems/infra/docker/Dockerfile --build-arg APP_DIR=path/to/frontend .
 
-ARG NODE_VERSION=20
+ARG NODE_VERSION=20-alpine
+ARG APP_DIR=ems/frontend
 
-FROM node:${NODE_VERSION}-alpine AS deps
-WORKDIR /workspace
+FROM node:${NODE_VERSION} AS base
+WORKDIR /app
 
-# Install dependencies first to maximize layer caching.
-# Supports npm/pnpm/yarn based on lockfile availability.
-COPY package.json ./
-COPY package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+FROM base AS deps
+ARG APP_DIR
+
+# Copy only package manifests first for better layer caching.
+COPY ${APP_DIR}/package.json ./package.json
+COPY ${APP_DIR}/package-lock.json* ./
+COPY ${APP_DIR}/yarn.lock* ./
+COPY ${APP_DIR}/pnpm-lock.yaml* ./
 
 RUN set -eux; \
-  if [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
-  elif [ -f yarn.lock ]; then corepack enable && yarn install --frozen-lockfile; \
-  else npm install; fi
+    if [ -f pnpm-lock.yaml ]; then \
+      corepack enable && pnpm install --frozen-lockfile; \
+    elif [ -f yarn.lock ]; then \
+      yarn install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then \
+      npm ci; \
+    else \
+      npm install; \
+    fi
 
-FROM deps AS build
-WORKDIR /workspace
+FROM base AS builder
+ARG APP_DIR
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Path to NestJS service in the monorepo (e.g., ems/services/event)
-ARG SERVICE_PATH
-# Name used by npm script convention (e.g., event => build:event / start:prod:event)
-ARG SERVICE_NAME
+COPY --from=deps /app/node_modules ./node_modules
+COPY ${APP_DIR}/ ./
 
-COPY . .
-
-# Build strategy:
-# 1) Prefer service-specific script: build:<service>
-# 2) Fallback to generic Nest build at service path
 RUN set -eux; \
-  if [ -n "${SERVICE_NAME}" ] && npm run | grep -q "build:${SERVICE_NAME}"; then \
-    npm run "build:${SERVICE_NAME}"; \
-  elif [ -n "${SERVICE_PATH}" ]; then \
-    npx nest build "${SERVICE_PATH}"; \
-  else \
-    echo "SERVICE_PATH or SERVICE_NAME must be provided" >&2; \
-    exit 1; \
-  fi
+    if [ -f pnpm-lock.yaml ]; then \
+      corepack enable && pnpm run build; \
+    elif [ -f yarn.lock ]; then \
+      yarn build; \
+    else \
+      npm run build; \
+    fi
 
-FROM node:${NODE_VERSION}-alpine AS runtime
+FROM node:${NODE_VERSION} AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-ARG SERVICE_PATH
-ARG SERVICE_NAME
+# Use unprivileged user.
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
-# Copy production dependencies from deps stage.
-COPY --from=deps /workspace/node_modules ./node_modules
-COPY --from=deps /workspace/package.json ./package.json
+# Expected output of "next build" with output: 'standalone'.
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Copy built artifacts. This handles common NestJS output layouts.
-COPY --from=build /workspace/dist ./dist
-
+USER nextjs
 EXPOSE 3000
+ENV PORT=3000
 
-# Runtime strategy:
-# 1) Prefer service-specific prod script: start:prod:<service>
-# 2) Fallback to dist/<service>/main.js
-CMD ["sh", "-c", "if [ -n \"$SERVICE_NAME\" ] && npm run | grep -q \"start:prod:$SERVICE_NAME\"; then npm run start:prod:$SERVICE_NAME; elif [ -n \"$SERVICE_PATH\" ]; then node dist/${SERVICE_PATH}/src/main.js; else node dist/main.js; fi"]
+CMD ["node", "server.js"]
