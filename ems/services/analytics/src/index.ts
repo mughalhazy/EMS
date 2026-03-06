@@ -1,1 +1,1 @@
-export * from './entities/exhibitor-analytics.entity';
+export { EventAnalyticsEntity } from './entities/event-analytics.entity';
