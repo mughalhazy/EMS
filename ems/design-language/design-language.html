@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMS — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════
+   DESIGN TOKENS
+════════════════════════════════════════════════ */
+:root {
+  /* Base */
+  --white:    #FFFFFF;
+  --off:      #FAFAF9;
+  --surface:  #F5F4F1;
+  --border:   #E8E6E1;
+  --border-strong: #D4D0C8;
+  --ink:      #0F0F0E;
+  --ink-2:    #3D3D3A;
+  --ink-3:    #8A8880;
+  --ink-4:    #C4C2BC;
+
+  /* Forest — health, positive */
+  --f-dk: #166534; --f-md: #16A34A; --f-lt: #DCFCE7; --f-border: rgba(22,101,52,.15);
+  /* Amber — warning */
+  --a-dk: #92400E; --a-md: #D97706; --a-lt: #FEF3C7; --a-border: rgba(146,64,14,.15);
+  /* Brick — danger */
+  --b-dk: #991B1B; --b-md: #DC2626; --b-lt: #FEE2E2; --b-border: rgba(153,27,27,.15);
+  /* Indigo — data, nav */
+  --i-dk: #1E1B4B; --i-md: #4F46E5; --i-lt: #EEF2FF; --i-border: rgba(79,70,229,.15);
+  /* Gold — finance */
+  --g-dk: #78350F; --g-md: #F59E0B; --g-lt: #FFFBEB; --g-border: rgba(120,53,15,.15);
+  /* Teal — sync/live */
+  --t-dk: #134E4A; --t-md: #0D9488; --t-lt: #CCFBF1; --t-border: rgba(13,78,74,.15);
+
+  --font: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --shadow-lg:  0 12px 40px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --shadow-xl:  0 24px 64px rgba(0,0,0,.16), 0 8px 24px rgba(0,0,0,.08);
+  --shadow-color-forest: 0 8px 24px rgba(22,163,74,.18);
+  --shadow-color-indigo: 0 8px 24px rgba(79,70,229,.18);
+
+  --radius:    8px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+}
+
+/* ── RESET + BASE ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--off); color: var(--ink); line-height:1.5; -webkit-font-smoothing: antialiased; }
+
+/* ════════════════════════════════════════════════
+   MASTER NAV
+════════════════════════════════════════════════ */
+.mnav {
+  position: sticky; top: 0; z-index: 500;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 32px; height: 60px;
+  gap: 4px;
+}
+.mnav-logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-right: 24px; text-decoration: none;
+}
+.mnav-logomark {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--f-dk) 0%, var(--f-md) 100%);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-color-forest);
+  flex-shrink: 0;
+}
+.mnav-logomark svg { width: 18px; height: 18px; fill: white; }
+.mnav-wordmark {
+  font-size: 15px; font-weight: 800;
+  letter-spacing: -0.02em; color: var(--ink);
+}
+.mnav-wordmark span { color: var(--f-md); }
+.mnav-tabs { display: flex; gap: 2px; flex: 1; }
+.mnav-tab {
+  padding: 8px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: -0.01em;
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-3); transition: all 0.15s;
+  font-family: var(--font);
+}
+.mnav-tab:hover { background: var(--surface); color: var(--ink-2); }
+.mnav-tab.active { background: var(--ink); color: white; }
+.mnav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.mnav-pill {
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.02em; text-transform: uppercase;
+  border: 1.5px solid;
+}
+.mnav-pill.live { background: var(--t-lt); border-color: var(--t-border); color: var(--t-dk); }
+.mnav-pill.locked { background: var(--i-lt); border-color: var(--i-border); color: var(--i-dk); }
+
+/* ════════════════════════════════════════════════
+   PANELS
+════════════════════════════════════════════════ */
+.panel { display: none; animation: fadein 0.2s ease; }
+.panel.active { display: block; }
+@keyframes fadein { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+/* ════════════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════════════ */
+.page-hero {
+  padding: 72px 48px 56px;
+  background: linear-gradient(160deg, var(--white) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+  position: relative; overflow: hidden;
+}
+.page-hero::before {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(22,163,74,.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px 4px 8px; border-radius: 20px;
+  background: var(--f-lt); border: 1px solid var(--f-border);
+  font-size: 11px; font-weight: 700; color: var(--f-dk);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--f-md); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+.hero-h1 {
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 800; letter-spacing: -0.03em;
+  line-height: 1.05; margin-bottom: 16px;
+}
+.hero-h1 .accent { color: var(--f-md); }
+.hero-desc { font-size: 15px; color: var(--ink-2); line-height: 1.7; max-width: 440px; margin-bottom: 28px; }
+.hero-meta { display: flex; gap: 24px; }
+.hm-item { }
+.hm-val { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+.hm-val.forest { color: var(--f-md); }
+.hm-val.indigo { color: var(--i-md); }
+.hm-val.gold   { color: var(--g-md); }
+.hm-lbl { font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.02em; text-transform: uppercase; margin-top: 2px; }
+.hero-card {
+  background: white; border-radius: var(--radius-xl);
+  padding: 24px; box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.hero-card-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-card-logo {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--f-dk), var(--f-md));
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+}
+.hero-card-logo svg { width: 16px; height: 16px; fill: white; }
+.hero-card-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.hero-card-sub { font-size: 11px; color: var(--ink-3); }
+.hero-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.hkpi {
+  padding: 14px; border-radius: var(--radius);
+  border: 1.5px solid; transition: transform 0.15s;
+}
+.hkpi:hover { transform: translateY(-2px); }
+.hkpi.f { background: var(--f-lt); border-color: var(--f-border); }
+.hkpi.g { background: var(--g-lt); border-color: var(--g-border); }
+.hkpi.a { background: var(--a-lt); border-color: var(--a-border); }
+.hkpi.i { background: var(--i-lt); border-color: var(--i-border); }
+.hkpi-val { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.hkpi.f .hkpi-val { color: var(--f-dk); }
+.hkpi.g .hkpi-val { color: var(--g-dk); }
+.hkpi.a .hkpi-val { color: var(--a-dk); }
+.hkpi.i .hkpi-val { color: var(--i-dk); }
+.hkpi-lbl { font-size: 10px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+.hkpi-delta { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.hkpi.f .hkpi-delta { color: var(--f-md); }
+.hkpi.a .hkpi-delta { color: var(--a-md); }
+.hero-mini-chart {
+  background: var(--i-lt); border: 1.5px solid var(--i-border);
+  border-radius: var(--radius); padding: 12px;
+}
+.hmc-label { font-size: 10px; font-weight: 700; color: var(--i-dk); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.hmc-bars { display: flex; align-items: flex-end; gap: 4px; height: 44px; }
+.hmc-bar { flex: 1; border-radius: 3px; transition: height 0.6s cubic-bezier(.23,1,.32,1); }
+.hmc-bar.lo { background: var(--i-border); }
+.hmc-bar.hi { background: var(--i-md); }
+
+/* ════════════════════════════════════════════════
+   SECTION WRAPPER
+════════════════════════════════════════════════ */
+.section { padding: 48px; border-bottom: 1px solid var(--border); }
+.section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; }
+.section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 6px; }
+.section-title { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+.section-title .accent { color: var(--f-md); }
+.section-note { font-size: 12px; color: var(--ink-3); }
+
+/* ════════════════════════════════════════════════
+   COLOR FAMILIES
+════════════════════════════════════════════════ */
+.color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.cf-card {
+  background: white; border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s; cursor: default;
+}
+.cf-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.cf-top { height: 72px; position: relative; }
+.cf-dk-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 44px; }
+.cf-lt-area { position: absolute; top: 0; left: 0; right: 0; height: 32px; }
+.cf-fill-pill {
+  position: absolute; top: 6px; left: 8px;
+  height: 18px; width: 48px; border-radius: 4px; border: 1.5px solid;
+}
+.cf-body { padding: 12px; }
+.cf-name { font-size: 12px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 2px; }
+.cf-role { font-size: 10px; color: var(--ink-3); font-weight: 500; margin-bottom: 8px; }
+.cf-hexes { display: flex; flex-direction: column; gap: 2px; }
+.cf-hex { font-family: var(--font-mono); font-size: 9px; color: var(--ink-4); }
+
+/* ════════════════════════════════════════════════
+   TYPOGRAPHY SHOWCASE
+════════════════════════════════════════════════ */
+.type-showcase {
+  background: white; border-radius: var(--radius-xl);
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.ts-hero-area {
+  padding: 48px; background: var(--ink);
+  position: relative; overflow: hidden;
+}
+.ts-hero-area::before {
+  content: '';
+  position: absolute; top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(22,163,74,.2) 0%, transparent 70%);
+}
+.ts-hero-word {
+  font-size: 72px; font-weight: 800; letter-spacing: -0.04em;
+  line-height: 0.95; color: white; position: relative;
+}
+.ts-hero-word span { color: var(--f-md); }
+.ts-scale { padding: 32px 48px; display: flex; flex-direction: column; gap: 0; }
+.ts-row {
+  display: flex; align-items: baseline; gap: 20px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.ts-row:last-child { border-bottom: none; }
+.ts-size { font-family: var(--font-mono); font-size: 10px; color: var(--ink-4); width: 28px; flex-shrink: 0; }
+.ts-text { flex: 1; }
+.ts-spec { font-size: 10px; color: var(--ink-4); }
+
+/* ════════════════════════════════════════════════
+   COMPONENTS
+════════════════════════════════════════════════ */
+.comp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.comp-card {
+  background: white; border-radius: var(--radius-lg);
+  border: 1px solid var(--border); padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.comp-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.01em; border: 1.5px solid;
+  margin: 3px; cursor: default; transition: all 0.15s;
+}
+.badge:hover { transform: scale(1.04); }
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; background: currentColor; opacity:.7; }
+.badge.f { background:var(--f-lt); border-color:var(--f-border); color:var(--f-dk); }
+.badge.a { background:var(--a-lt); border-color:var(--a-border); color:var(--a-dk); }
+.badge.b { background:var(--b-lt); border-color:var(--b-border); color:var(--b-dk); }
+.badge.i { background:var(--i-lt); border-color:var(--i-border); color:var(--i-dk); }
+.badge.g { background:var(--g-lt); border-color:var(--g-border); color:var(--g-dk); }
+.badge.t { background:var(--t-lt); border-color:var(--t-border); color:var(--t-dk); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 700; letter-spacing: -0.01em;
+  border: 1.5px solid; cursor: pointer; transition: all 0.15s;
+  font-family: var(--font); margin: 4px;
+}
+.btn-primary { background: var(--ink); color: white; border-color: var(--ink); box-shadow: var(--shadow-sm); }
+.btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-forest { background: var(--f-dk); color: white; border-color: var(--f-dk); box-shadow: var(--shadow-color-forest); }
+.btn-forest:hover { background: var(--f-md); transform: translateY(-1px); }
+.btn-ghost { background: white; color: var(--ink); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.btn-ghost:hover { border-color: var(--ink); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-indigo { background: var(--i-md); color: white; border-color: var(--i-md); box-shadow: var(--shadow-color-indigo); }
+.btn-indigo:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-soft { background: var(--f-lt); color: var(--f-dk); border-color: var(--f-border); }
+.btn-soft:hover { background: var(--f-dk); color: white; transform: translateY(-1px); }
+
+/* Inputs */
+.input-wrap { margin-bottom: 12px; }
+.input-label { font-size: 11px; font-weight: 700; color: var(--ink-2); letter-spacing: 0.02em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.input {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 13px; font-family: var(--font); color: var(--ink);
+  background: white; outline: none; transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.input:focus { border-color: var(--i-md); box-shadow: 0 0 0 3px rgba(79,70,229,.1), var(--shadow-sm); }
+.input.err { border-color: var(--b-md); background: var(--b-lt); box-shadow: 0 0 0 3px rgba(220,38,38,.08); }
+.input-hint { font-size: 11px; color: var(--b-dk); margin-top: 4px; font-weight: 500; }
+
+/* KPI Cards */
+.kpi-card {
+  border-radius: var(--radius-lg); padding: 20px;
+  border: 1.5px solid; cursor: default;
+  transition: all 0.2s; position: relative; overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle at top right, currentColor, transparent 70%);
+  opacity: .06; pointer-events: none;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.kpi-card.f { background: var(--f-lt); border-color: var(--f-border); color: var(--f-md); }
+.kpi-card.g { background: var(--g-lt); border-color: var(--g-border); color: var(--g-md); }
+.kpi-card.b { background: var(--b-lt); border-color: var(--b-border); color: var(--b-md); }
+.kpi-card.i { background: var(--i-lt); border-color: var(--i-border); color: var(--i-md); }
+.kpi-card.a { background: var(--a-lt); border-color: var(--a-border); color: var(--a-md); }
+.kpi-card.t { background: var(--t-lt); border-color: var(--t-border); color: var(--t-md); }
+.kc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.kc-icon { width: 32px; height: 32px; border-radius: 8px; background: currentColor; opacity: .15; }
+.kc-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; background: currentColor; color: white; opacity: .9; }
+.kc-val { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: inherit; }
+.kc-lbl { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 6px; }
+.kc-delta { font-size: 12px; font-weight: 700; margin-top: 6px; color: inherit; }
+
+/* ════════════════════════════════════════════════
+   APP PREVIEW
+════════════════════════════════════════════════ */
+.app-shell {
+  background: var(--off); border-radius: var(--radius-xl);
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.app-topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  height: 56px; display: flex; align-items: center;
+  padding: 0 24px; gap: 16px;
+}
+.app-logo-wrap { display: flex; align-items: center; gap: 8px; }
+.app-logomark {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--f-dk), var(--f-md));
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(22,163,74,.3);
+}
+.app-logomark svg { width: 15px; height: 15px; fill: white; }
+.app-wordmark { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
+.app-wordmark span { color: var(--f-md); }
+.app-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.app-body { display: flex; height: 420px; }
+.app-sidebar {
+  width: 200px; background: white; border-right: 1px solid var(--border);
+  padding: 16px 12px; flex-shrink: 0; overflow-y: auto;
+}
+.app-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-4); padding: 10px 8px 6px; }
+.app-nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 600; color: var(--ink-3);
+  margin-bottom: 1px; cursor: pointer; transition: all 0.12s;
+}
+.app-nav-item:hover { background: var(--surface); color: var(--ink); }
+.app-nav-item.active { background: var(--i-lt); color: var(--i-dk); }
+.app-nav-pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.app-nav-pip.f { background: var(--f-md); }
+.app-nav-pip.i { background: var(--i-md); }
+.app-nav-pip.a { background: var(--a-md); }
+.app-nav-pip.b { background: var(--b-md); }
+.app-nav-pip.g { background: var(--g-md); }
+.app-nav-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+.app-nav-badge.amber { background: var(--a-lt); color: var(--a-dk); }
+.app-nav-badge.brick { background: var(--b-lt); color: var(--b-dk); }
+
+.app-content { flex: 1; padding: 24px; overflow-y: auto; }
+.app-content-title { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi-mini {
+  padding: 16px; border-radius: var(--radius-lg);
+  border: 1.5px solid; transition: all 0.2s; cursor: default; position: relative; overflow: hidden;
+}
+.kpi-mini:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpi-mini.f { background: var(--f-lt); border-color: var(--f-border); }
+.kpi-mini.g { background: var(--g-lt); border-color: var(--g-border); }
+.kpi-mini.a { background: var(--a-lt); border-color: var(--a-border); }
+.kpi-mini.b { background: var(--b-lt); border-color: var(--b-border); }
+.km-val { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.kpi-mini.f .km-val { color: var(--f-dk); }
+.kpi-mini.g .km-val { color: var(--g-dk); }
+.kpi-mini.a .km-val { color: var(--a-dk); }
+.kpi-mini.b .km-val { color: var(--b-dk); }
+.km-lbl { font-size: 10px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 5px; }
+.km-delta { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.kpi-mini.f .km-delta { color: var(--f-md); }
+.kpi-mini.a .km-delta { color: var(--a-md); }
+.kpi-mini.b .km-delta { color: var(--b-md); }
+
+.chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 20px; }
+.chart-card {
+  background: white; border-radius: var(--radius-lg);
+  border: 1px solid var(--border); padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.chart-title { font-size: 12px; font-weight: 700; color: var(--ink-2); letter-spacing: -0.01em; }
+.chart-legend { display: flex; gap: 10px; }
+.cl-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--ink-3); font-weight: 500; }
+.cl-dot { width: 6px; height: 6px; border-radius: 50%; }
+.chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 80px; }
+.cb { flex: 1; border-radius: 3px 3px 0 0; transition: opacity 0.15s; }
+.cb:hover { opacity: .8; }
+
+.alert-card {
+  background: white; border-radius: var(--radius-lg);
+  border: 1.5px solid var(--a-border); padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.alert-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--a-dk); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.alert-dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--a-md); animation: pulse 1.5s infinite; }
+.alert-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px; border-radius: var(--radius); margin-bottom: 4px;
+  transition: background 0.12s; cursor: pointer;
+}
+.alert-item:hover { background: var(--surface); }
+.alert-item:last-child { margin-bottom: 0; }
+.ai-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.ai-dot.amber { background: var(--a-md); }
+.ai-dot.brick { background: var(--b-md); }
+.ai-text { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.4; }
+.ai-time { font-size: 10px; color: var(--ink-3); margin-top: 1px; }
+
+.data-table {
+  background: white; border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.dt-header {
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.dt-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+.dt-action { font-size: 11px; font-weight: 700; color: var(--i-md); cursor: pointer; }
+.dt-head { display: flex; padding: 10px 20px; background: var(--off); border-bottom: 1px solid var(--border); }
+.dt-th { flex: 1; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+.dt-row { display: flex; padding: 12px 20px; border-bottom: 1px solid var(--border); align-items: center; transition: background 0.1s; cursor: pointer; }
+.dt-row:last-child { border-bottom: none; }
+.dt-row:hover { background: var(--off); }
+.dt-td { flex: 1; font-size: 13px; font-weight: 600; color: var(--ink); }
+.dt-td.muted { font-weight: 400; color: var(--ink-3); }
+.status-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; border: 1.5px solid;
+}
+.status-chip::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.status-chip.healthy { background:var(--f-lt); border-color:var(--f-border); color:var(--f-dk); }
+.status-chip.watch   { background:var(--a-lt); border-color:var(--a-border); color:var(--a-dk); }
+.status-chip.alert   { background:var(--b-lt); border-color:var(--b-border); color:var(--b-dk); }
+
+/* ════════════════════════════════════════════════
+   WEBSITE PREVIEW
+════════════════════════════════════════════════ */
+.web-shell {
+  background: white; border-radius: var(--radius-xl);
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.web-nav-bar {
+  padding: 14px 40px; display: flex; align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+}
+.web-logo { display: flex; align-items: center; gap: 8px; }
+.web-logomark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--f-dk), var(--f-md));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-color-forest);
+}
+.web-logomark svg { width: 16px; height: 16px; fill: white; }
+.web-logo-text { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; }
+.web-logo-text span { color: var(--f-md); }
+.web-links { display: flex; gap: 28px; margin: 0 auto; }
+.web-link { font-size: 13px; font-weight: 600; color: var(--ink-3); transition: color 0.12s; cursor: pointer; }
+.web-link:hover { color: var(--ink); }
+.web-nav-ctas { display: flex; gap: 8px; }
+.web-btn-ghost {
+  padding: 8px 16px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 700; color: var(--ink);
+  border: 1.5px solid var(--border); background: white;
+  cursor: pointer; transition: all 0.15s; font-family: var(--font);
+}
+.web-btn-ghost:hover { border-color: var(--ink); transform: translateY(-1px); }
+.web-btn-primary {
+  padding: 8px 16px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 700; color: white;
+  background: var(--f-dk); border: none; cursor: pointer;
+  transition: all 0.15s; font-family: var(--font);
+  box-shadow: var(--shadow-color-forest);
+}
+.web-btn-primary:hover { background: var(--f-md); transform: translateY(-1px); box-shadow: var(--shadow-color-forest); }
+
+.web-hero-section {
+  padding: 80px 40px;
+  background: linear-gradient(160deg, white 0%, var(--f-lt) 60%, var(--i-lt) 100%);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  position: relative; overflow: hidden;
+}
+.web-hero-section::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(79,70,229,.06) 0%, transparent 60%);
+}
+.web-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  background: var(--f-lt); border: 1px solid var(--f-border);
+  font-size: 11px; font-weight: 700; color: var(--f-dk);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.web-h1 {
+  font-size: 52px; font-weight: 800; letter-spacing: -0.04em;
+  line-height: 1.0; margin-bottom: 20px;
+}
+.web-h1 .line2 { color: var(--f-md); }
+.web-h1 .line3 { color: var(--ink-3); font-size: 40px; }
+.web-desc { font-size: 15px; color: var(--ink-2); line-height: 1.7; max-width: 400px; margin-bottom: 28px; }
+.web-cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.web-cta-lg {
+  padding: 12px 24px; border-radius: var(--radius-lg);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; transition: all 0.15s; font-family: var(--font);
+}
+.web-cta-lg.primary { background: var(--ink); color: white; box-shadow: var(--shadow-md); }
+.web-cta-lg.primary:hover { background: var(--ink-2); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.web-cta-lg.forest { background: var(--f-dk); color: white; box-shadow: var(--shadow-color-forest); }
+.web-cta-lg.forest:hover { background: var(--f-md); transform: translateY(-2px); }
+
+.web-app-preview {
+  background: white; border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl); border: 1px solid var(--border);
+  overflow: hidden; position: relative;
+}
+.web-app-preview::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 70%, rgba(255,255,255,.3) 100%);
+  pointer-events: none;
+}
+.wap-bar { background: var(--i-dk); height: 32px; display: flex; align-items: center; padding: 0 14px; gap: 8px; }
+.wap-logo-sm { font-size: 11px; font-weight: 800; color: white; letter-spacing: -0.01em; }
+.wap-logo-sm span { color: var(--f-md); }
+.wap-body { padding: 14px; }
+.wap-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.wap-kpi { padding: 10px; border-radius: var(--radius); border: 1.5px solid; }
+.wap-kpi.f { background: var(--f-lt); border-color: var(--f-border); }
+.wap-kpi.g { background: var(--g-lt); border-color: var(--g-border); }
+.wap-kpi.i { background: var(--i-lt); border-color: var(--i-border); }
+.wap-kpi-val { font-size: 15px; font-weight: 800; letter-spacing: -0.03em; }
+.wap-kpi.f .wap-kpi-val { color: var(--f-dk); }
+.wap-kpi.g .wap-kpi-val { color: var(--g-dk); }
+.wap-kpi.i .wap-kpi-val { color: var(--i-dk); }
+.wap-kpi-lbl { font-size: 9px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.wap-chart { background: var(--i-lt); border: 1.5px solid var(--i-border); border-radius: var(--radius); padding: 10px; }
+.wap-chart-bars { display: flex; align-items: flex-end; gap: 3px; height: 40px; }
+.wcb { flex: 1; border-radius: 2px; }
+
+.web-feat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1.5px solid var(--ink);
+  background: var(--ink);
+  gap: 1px;
+}
+.web-feat {
+  background: white; padding: 28px 32px;
+  transition: background 0.15s; cursor: default;
+}
+.web-feat:hover { background: var(--off); }
+.wf-num { font-size: 36px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin-bottom: 6px; }
+.wf-num.f { color: var(--f-md); }
+.wf-num.i { color: var(--i-md); }
+.wf-num.g { color: var(--g-md); }
+.wf-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); margin-bottom: 6px; }
+.wf-desc { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+/* ════════════════════════════════════════════════
+   PORTAL PREVIEW
+════════════════════════════════════════════════ */
+.portal-shell {
+  background: var(--off); border-radius: var(--radius-xl);
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.portal-topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 14px 32px; display: flex; align-items: center; gap: 12px;
+}
+.portal-logo { display: flex; align-items: center; gap: 8px; }
+.portal-logomark {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--f-dk), var(--f-md));
+  display: flex; align-items: center; justify-content: center;
+}
+.portal-logomark svg { width: 14px; height: 14px; fill: white; }
+.portal-wordmark { font-size: 13px; font-weight: 800; letter-spacing: -0.02em; }
+.portal-wordmark span { color: var(--f-md); }
+.portal-sep { color: var(--ink-4); font-size: 16px; }
+.portal-farm-name { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.portal-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.portal-week {
+  padding: 5px 12px; border-radius: 20px;
+  background: var(--i-lt); border: 1px solid var(--i-border);
+  font-size: 11px; font-weight: 700; color: var(--i-dk);
+  letter-spacing: 0.02em;
+}
+.portal-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--f-lt), var(--i-lt));
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: var(--f-dk);
+}
+.portal-body { padding: 32px; }
+.portal-greeting { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px; }
+.portal-meta { font-size: 12px; color: var(--ink-3); font-weight: 500; margin-bottom: 28px; display: flex; align-items: center; gap: 8px; }
+.portal-meta-dot { width: 4px; height: 4px; background: var(--ink-4); border-radius: 50%; }
+.portal-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.pkpi {
+  background: white; border-radius: var(--radius-lg);
+  padding: 20px; border: 1.5px solid; box-shadow: var(--shadow-sm);
+  transition: all 0.2s; cursor: default; position: relative; overflow: hidden;
+}
+.pkpi::after {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle at top right, currentColor, transparent 70%);
+  opacity: .05;
+}
+.pkpi:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.pkpi.g  { border-color: var(--g-border);  color: var(--g-md); }
+.pkpi.f  { border-color: var(--f-border);  color: var(--f-md); }
+.pkpi.a  { border-color: var(--a-border);  color: var(--a-md); }
+.pkpi.i  { border-color: var(--i-border);  color: var(--i-md); }
+.pkpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); margin-bottom: 10px; }
+.pkpi-val { font-size: 26px; font-weight: 800; letter-spacing: -0.04em; color: inherit; line-height: 1; }
+.pkpi-note { font-size: 11px; font-weight: 700; color: inherit; margin-top: 8px; }
+
+.portal-bottom { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 12px; }
+.pb-card {
+  background: white; border-radius: var(--radius-lg);
+  border: 1.5px solid; padding: 20px; box-shadow: var(--shadow-sm);
+}
+.pb-card.gold { border-color: var(--g-border); }
+.pb-card.forest { border-color: var(--f-border); }
+.pb-card.slate { border-color: var(--i-border); }
+.pb-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+.pb-card.gold .pb-title { color: var(--g-dk); }
+.pb-card.forest .pb-title { color: var(--f-dk); }
+.pb-card.slate .pb-title { color: var(--i-dk); }
+.pb-bars { display: flex; align-items: flex-end; gap: 5px; height: 60px; margin-bottom: 4px; }
+.pbb { flex: 1; border-radius: 3px; }
+.portal-sum-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.portal-sum-row:last-child { border-bottom: none; }
+.psrk { color: var(--ink-3); font-weight: 500; }
+.psrv { font-weight: 800; letter-spacing: -0.01em; color: var(--f-dk); }
+.pb-note { font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+.pb-note strong { color: var(--i-dk); font-weight: 700; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .page-hero { grid-template-columns: 1fr; }
+  .color-grid { grid-template-columns: repeat(3, 1fr); }
+  .comp-grid { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .chart-row { grid-template-columns: 1fr; }
+  .app-body { flex-direction: column; }
+  .app-sidebar { width: 100%; }
+  .web-hero-section { grid-template-columns: 1fr; }
+  .portal-kpis { grid-template-columns: 1fr 1fr; }
+  .portal-bottom { grid-template-columns: 1fr; }
+  .web-feat-grid { grid-template-columns: 1fr; }
+}
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(16px); transition: all 0.4s cubic-bezier(.23,1,.32,1); }
+.reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- LOGO ICON SVG DEF -->
+<svg style="display:none">
+  <symbol id="icon-piq" viewBox="0 0 20 20">
+    <path d="M10 2C7 2 5 4 5 6c0 1.5.7 2.8 1.8 3.6L6 16h8l-.8-6.4C14.3 8.8 15 7.5 15 6c0-2-2-4-5-4zm-2 8l.5-4c.4.3.9.5 1.5.5s1.1-.2 1.5-.5L12 10H8z"/>
+  </symbol>
+</svg>
+
+<!-- MASTER NAV -->
+<nav class="mnav">
+  <div class="mnav-logo">
+    <div class="mnav-logomark">
+      <svg viewBox="0 0 20 20"><use href="#icon-piq"/></svg>
+    </div>
+    <div class="mnav-wordmark">Poultry <span>Works</span></div>
+  </div>
+  <div class="mnav-tabs">
+    <button class="mnav-tab active" onclick="show('dna')">Design DNA</button>
+    <button class="mnav-tab" onclick="show('app')">App</button>
+    <button class="mnav-tab" onclick="show('website')">Website</button>
+    <button class="mnav-tab" onclick="show('portal')">Portal</button>
+  </div>
+  <div class="mnav-right">
+    <div class="mnav-pill live">● Live</div>
+    <div class="mnav-pill locked">Design v1.0</div>
+  </div>
+</nav>
+
+
+<!-- ════════════════ DNA PANEL ════════════════ -->
+<div class="panel active" id="panel-dna">
+
+  <div class="page-hero">
+    <div>
+      <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div> Design Language · Foundation</div>
+      <div class="hero-h1">One <span class="accent">token</span><br>system.<br>Three surfaces.</div>
+      <div class="hero-desc">Color as signal, not decoration. Every family owns a meaning — and never gives it up. Same bones, three personalities.</div>
+      <div class="hero-meta">
+        <div class="hm-item"><div class="hm-val forest">6</div><div class="hm-lbl">Color Families</div></div>
+        <div class="hm-item"><div class="hm-val indigo">2</div><div class="hm-lbl">Tones Each</div></div>
+        <div class="hm-item"><div class="hm-val gold">3</div><div class="hm-lbl">Surfaces</div></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-header">
+        <div class="hero-card-logo"><svg viewBox="0 0 20 20"><use href="#icon-piq"/></svg></div>
+        <div><div class="hero-card-title">Poultry Works · Dashboard</div><div class="hero-card-sub">Live · 3 flocks active</div></div>
+      </div>
+      <div class="hero-kpis">
+        <div class="hkpi f"><div class="hkpi-val">24,800</div><div class="hkpi-lbl">Total Birds</div><div class="hkpi-delta">↑ 3 flocks</div></div>
+        <div class="hkpi g"><div class="hkpi-val">₨ 2.4M</div><div class="hkpi-lbl">Revenue</div></div>
+        <div class="hkpi a"><div class="hkpi-val">1.4%</div><div class="hkpi-lbl">Mortality</div><div class="hkpi-delta">↑ Watch B</div></div>
+        <div class="hkpi i"><div class="hkpi-val">1.82kg</div><div class="hkpi-lbl">Avg Weight</div></div>
+      </div>
+      <div class="hero-mini-chart">
+        <div class="hmc-label">Weight Trend · Batch F-2401</div>
+        <div class="hmc-bars">
+          <div class="hmc-bar lo" style="height:25%"></div>
+          <div class="hmc-bar lo" style="height:38%"></div>
+          <div class="hmc-bar hi" style="height:52%"></div>
+          <div class="hmc-bar lo" style="height:61%"></div>
+          <div class="hmc-bar hi" style="height:74%"></div>
+          <div class="hmc-bar lo" style="height:82%"></div>
+          <div class="hmc-bar hi" style="height:90%"></div>
+          <div class="hmc-bar hi" style="height:96%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Colors -->
+  <div class="section reveal">
+    <div class="section-header">
+      <div><div class="section-label">Color System</div><div class="section-title">Six families. <span class="accent">Earned</span> by data.</div></div>
+      <div class="section-note">Each family: dark ink · light fill · transparent border</div>
+    </div>
+    <div class="color-grid">
+      <div class="cf-card">
+        <div class="cf-top">
+          <div class="cf-lt-area" style="background:var(--f-lt)">
+            <div class="cf-fill-pill" style="background:rgba(22,101,52,.08);border-color:rgba(22,101,52,.2)"></div>
+          </div>
+          <div class="cf-dk-bar" style="background:var(--f-dk)"></div>
+        </div>
+        <div class="cf-body"><div class="cf-name" style="color:var(--f-dk)">Forest</div><div class="cf-role">Health · Brand · Positive</div><div class="cf-hexes"><span class="cf-hex">#166534 · #DCFCE7</span></div></div>
+      </div>
+      <div class="cf-card">
+        <div class="cf-top">
+          <div class="cf-lt-area" style="background:var(--i-lt)">
+            <div class="cf-fill-pill" style="background:rgba(79,70,229,.08);border-color:rgba(79,70,229,.2)"></div>
+          </div>
+          <div class="cf-dk-bar" style="background:var(--i-dk)"></div>
+        </div>
+        <div class="cf-body"><div class="cf-name" style="color:var(--i-dk)">Indigo</div><div class="cf-role">Data · Nav · Neutral</div><div class="cf-hexes"><span class="cf-hex">#1E1B4B · #EEF2FF</span></div></div>
+      </div>
+      <div class="cf-card">
+        <div class="cf-top">
+          <div class="cf-lt-area" style="background:var(--a-lt)">
+            <div class="cf-fill-pill" style="background:rgba(146,64,14,.08);border-color:rgba(146,64,14,.2)"></div>
+          </div>
+          <div class="cf-dk-bar" style="background:var(--a-dk)"></div>
+        </div>
+        <div class="cf-body"><div class="cf-name" style="color:var(--a-dk)">Amber</div><div class="cf-role">Warning · Due · Attention</div><div class="cf-hexes"><span class="cf-hex">#92400E · #FEF3C7</span></div></div>
+      </div>
+      <div class="cf-card">
+        <div class="cf-top">
+          <div class="cf-lt-area" style="background:var(--b-lt)">
+            <div class="cf-fill-pill" style="background:rgba(153,27,27,.08);border-color:rgba(153,27,27,.2)"></div>
+          </div>
+          <div class="cf-dk-bar" style="background:var(--b-dk)"></div>
+        </div>
+        <div class="cf-body"><div class="cf-name" style="color:var(--b-dk)">Brick</div><div class="cf-role">Danger · Mortality · Alert</div><div class="cf-hexes"><span class="cf-hex">#991B1B · #FEE2E2</span></div></div>
+      </div>
+      <div class="cf-card">
+        <div class="cf-top">
+          <div class="cf-lt-area" style="background:var(--g-lt)">
+            <div class="cf-fill-pill" style="background:rgba(120,53,15,.08);border-color:rgba(120,53,15,.2)"></div>
+          </div>
+          <div class="cf-dk-bar" style="background:var(--g-dk)"></div>
+        </div>
+        <div class="cf-body"><div class="cf-name" style="color:var(--g-dk)">Gold</div><div class="cf-role">Finance · Revenue · Value</div><div class="cf-hexes"><span class="cf-hex">#78350F · #FFFBEB</span></div></div>
+      </div>
+      <div class="cf-card">
+        <div class="cf-top">
+          <div class="cf-lt-area" style="background:var(--t-lt)">
+            <div class="cf-fill-pill" style="background:rgba(13,78,74,.08);border-color:rgba(13,78,74,.2)"></div>
+          </div>
+          <div class="cf-dk-bar" style="background:var(--t-dk)"></div>
+        </div>
+        <div class="cf-body"><div class="cf-name" style="color:var(--t-dk)">Teal</div><div class="cf-role">Sync · Live · Connected</div><div class="cf-hexes"><span class="cf-hex">#134E4A · #CCFBF1</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Type -->
+  <div class="section reveal">
+    <div class="section-header">
+      <div><div class="section-label">Typography</div><div class="section-title">Plus Jakarta Sans. <span class="accent">800 weight.</span></div></div>
+    </div>
+    <div class="type-showcase">
+      <div class="ts-hero-area">
+        <div class="ts-hero-word">Poultry<br><span>IQ.</span></div>
+      </div>
+      <div class="ts-scale">
+        <div class="ts-row"><div class="ts-size">52</div><div class="ts-text" style="font-size:52px;font-weight:800;letter-spacing:-0.04em;line-height:1">Dashboard</div><div class="ts-spec">Hero · page title</div></div>
+        <div class="ts-row"><div class="ts-size">28</div><div class="ts-text" style="font-size:28px;font-weight:800;letter-spacing:-0.03em">Flock Performance</div><div class="ts-spec">Section heading</div></div>
+        <div class="ts-row"><div class="ts-size">18</div><div class="ts-text" style="font-size:18px;font-weight:700;letter-spacing:-0.02em">Weekly P&L Report</div><div class="ts-spec">Card heading</div></div>
+        <div class="ts-row"><div class="ts-size">13</div><div class="ts-text" style="font-size:13px;font-weight:600">Regular body copy for descriptions and data labels</div><div class="ts-spec">Body · description</div></div>
+        <div class="ts-row"><div class="ts-size">11</div><div class="ts-text" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">TOTAL BIRDS ACTIVE</div><div class="ts-spec">Label · uppercase</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Components -->
+  <div class="section reveal">
+    <div class="section-header">
+      <div><div class="section-label">Components · Atoms</div><div class="section-title">Built from <span class="accent">tokens.</span></div></div>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card">
+        <div class="comp-card-title">Status Badges</div>
+        <div class="badge f">● Healthy</div>
+        <div class="badge a">● Watch</div>
+        <div class="badge b">● Alert</div>
+        <div class="badge t">● Live Sync</div>
+        <div class="badge g">₨ Revenue</div>
+        <div class="badge i">● Data</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-title">Buttons</div>
+        <button class="btn btn-primary">Save Entry</button>
+        <button class="btn btn-forest">Add Flock</button>
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-indigo">View Data</button>
+        <button class="btn btn-soft">Report</button>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-title">Inputs</div>
+        <div class="input-wrap"><label class="input-label">Flock ID</label><input class="input" value="F-2401" readonly></div>
+        <div class="input-wrap"><label class="input-label">Birds Alive</label><input class="input focus" value="24,800" readonly></div>
+        <div class="input-wrap"><label class="input-label">Mortality</label><input class="input err" value="Required" readonly><div class="input-hint">This field is required</div></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-title">KPI Cards · Forest + Gold</div>
+        <div class="kpi-card f">
+          <div class="kc-top"><div class="kc-icon"></div><div class="kc-badge">+3 flocks</div></div>
+          <div class="kc-val">24,800</div>
+          <div class="kc-lbl">Total Birds Active</div>
+          <div class="kc-delta">↑ On track this batch</div>
+        </div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-title">KPI Cards · Danger + Indigo</div>
+        <div class="kpi-card b">
+          <div class="kc-top"><div class="kc-icon"></div><div class="kc-badge">↑ High</div></div>
+          <div class="kc-val">1.4%</div>
+          <div class="kc-lbl">Mortality Rate</div>
+          <div class="kc-delta">↑ Watch Shed B</div>
+        </div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-card-title">KPI Cards · Amber + Teal</div>
+        <div class="kpi-card a">
+          <div class="kc-top"><div class="kc-icon"></div><div class="kc-badge">Due</div></div>
+          <div class="kc-val">Day 14</div>
+          <div class="kc-lbl">Vaccination Due</div>
+          <div class="kc-delta">↑ F-2402 · Shed B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════ APP PANEL ════════════════ -->
+<div class="panel" id="panel-app">
+
+  <div class="page-hero">
+    <div>
+      <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div> Surface 01 · Farm App</div>
+      <div class="hero-h1">Built for the <span class="accent">shed.</span></div>
+      <div class="hero-desc">High-density. All six color families active. Every status readable before the number is read. Works on 2G. Works offline. Works in direct sunlight on cheap Android.</div>
+      <div class="hero-meta">
+        <div class="hm-item"><div class="hm-val forest">Dense</div><div class="hm-lbl">Layout</div></div>
+        <div class="hm-item"><div class="hm-val indigo">6</div><div class="hm-lbl">Color Signals</div></div>
+        <div class="hm-item"><div class="hm-val gold">Offline</div><div class="hm-lbl">First</div></div>
+      </div>
+    </div>
+    <div class="ph-personality" style="background:var(--i-lt);border:1.5px solid var(--i-border);border-radius:var(--radius-lg);padding:24px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--i-dk);margin-bottom:6px">Personality</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px">OPERATIONAL<br>COMMAND</div>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.6">Indigo nav for structure. Forest for healthy data. Amber for attention states. Brick for danger. Gold for financial data. The color tells you what to do before the number tells you why.</div>
+    </div>
+  </div>
+
+  <div class="section reveal">
+    <div class="section-header"><div><div class="section-label">Full Preview</div><div class="section-title">Dashboard Screen</div></div></div>
+    <div class="app-shell">
+      <div class="app-topbar">
+        <div class="app-logo-wrap">
+          <div class="app-logomark"><svg viewBox="0 0 20 20"><use href="#icon-piq"/></svg></div>
+          <div class="app-wordmark">Poultry <span>Works</span></div>
+        </div>
+        <div class="app-topbar-right">
+          <div class="badge t">● Synced</div>
+          <div class="badge a">3 Alerts</div>
+        </div>
+      </div>
+      <div class="app-body">
+        <div class="app-sidebar">
+          <div class="app-section-label">Main</div>
+          <div class="app-nav-item active"><div class="app-nav-pip i"></div>Dashboard</div>
+          <div class="app-nav-item"><div class="app-nav-pip f"></div>Flocks</div>
+          <div class="app-nav-item"><div class="app-nav-pip i"></div>Daily Log</div>
+          <div class="app-section-label">Health</div>
+          <div class="app-nav-item"><div class="app-nav-pip a"></div>Vaccination<div class="app-nav-badge amber">2</div></div>
+          <div class="app-nav-item"><div class="app-nav-pip b"></div>Mortality<div class="app-nav-badge brick">1</div></div>
+          <div class="app-section-label">Finance</div>
+          <div class="app-nav-item"><div class="app-nav-pip g"></div>P&L Report</div>
+        </div>
+        <div class="app-content">
+          <div class="app-content-title">Dashboard</div>
+          <div class="kpi-row">
+            <div class="kpi-mini f"><div class="km-val">24,800</div><div class="km-lbl">Total Birds</div><div class="km-delta">↑ 3 flocks</div></div>
+            <div class="kpi-mini g"><div class="km-val">₨ 2.4M</div><div class="km-lbl">Revenue</div></div>
+            <div class="kpi-mini a"><div class="km-val">1.4%</div><div class="km-lbl">Mortality</div><div class="km-delta">↑ Watch</div></div>
+            <div class="kpi-mini f"><div class="km-val">1.82kg</div><div class="km-lbl">Avg Weight</div><div class="km-delta">↑ On target</div></div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">Weight vs Target · F-2401</div>
+                <div class="chart-legend">
+                  <div class="cl-item"><div class="cl-dot" style="background:var(--i-md)"></div>Actual</div>
+                  <div class="cl-item"><div class="cl-dot" style="background:var(--border-strong)"></div>Target</div>
+                </div>
+              </div>
+              <div class="chart-bars">
+                <div class="cb" style="height:22%;background:var(--i-border)"></div><div class="cb" style="height:26%;background:var(--i-md)"></div>
+                <div class="cb" style="height:38%;background:var(--i-border)"></div><div class="cb" style="height:41%;background:var(--i-md)"></div>
+                <div class="cb" style="height:56%;background:var(--i-border)"></div><div class="cb" style="height:54%;background:var(--i-md)"></div>
+                <div class="cb" style="height:72%;background:var(--i-border)"></div><div class="cb" style="height:74%;background:var(--i-md)"></div>
+                <div class="cb" style="height:88%;background:var(--i-border)"></div><div class="cb" style="height:90%;background:var(--i-md)"></div>
+              </div>
+            </div>
+            <div class="alert-card">
+              <div class="alert-header"><div class="alert-dot-live"></div>Today's Alerts</div>
+              <div class="alert-item"><div class="ai-dot amber"></div><div><div class="ai-text">Vacc due · F-2402</div><div class="ai-time">Day 14 · Shed B</div></div></div>
+              <div class="alert-item"><div class="ai-dot brick"></div><div><div class="ai-text">Mortality spike</div><div class="ai-time">Shed B · +0.3%</div></div></div>
+              <div class="alert-item"><div class="ai-dot amber"></div><div><div class="ai-text">Feed log missing</div><div class="ai-time">F-2403 · today</div></div></div>
+            </div>
+          </div>
+          <div class="data-table">
+            <div class="dt-header"><div class="dt-title">Active Flocks</div><div class="dt-action">View all →</div></div>
+            <div class="dt-head"><div class="dt-th">Flock</div><div class="dt-th">Shed</div><div class="dt-th">Day</div><div class="dt-th">Avg Weight</div><div class="dt-th">Status</div></div>
+            <div class="dt-row"><div class="dt-td">F-2401</div><div class="dt-td muted">Shed A</div><div class="dt-td muted">28</div><div class="dt-td">1.82 kg</div><div class="dt-td"><div class="status-chip healthy">Healthy</div></div></div>
+            <div class="dt-row"><div class="dt-td">F-2402</div><div class="dt-td muted">Shed B</div><div class="dt-td muted">21</div><div class="dt-td">1.44 kg</div><div class="dt-td"><div class="status-chip watch">Watch</div></div></div>
+            <div class="dt-row"><div class="dt-td">F-2403</div><div class="dt-td muted">Shed C</div><div class="dt-td muted">14</div><div class="dt-td">0.88 kg</div><div class="dt-td"><div class="status-chip alert">Alert</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════ WEBSITE PANEL ════════════════ -->
+<div class="panel" id="panel-website">
+
+  <div class="page-hero">
+    <div>
+      <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div> Surface 02 · Public Website</div>
+      <div class="hero-h1">Earn trust <span class="accent">before</span><br>hello.</div>
+      <div class="hero-desc">Forest accent on key words. Large editorial type. Generous whitespace. The app is a tool — the website is a statement. Same DNA, restrained palette.</div>
+    </div>
+    <div style="background:var(--f-lt);border:1.5px solid var(--f-border);border-radius:var(--radius-lg);padding:24px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--f-dk);margin-bottom:6px">Personality</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px;color:var(--ink)">EDITORIAL<br>AUTHORITY</div>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.6">White-dominant. Forest as the only accent. Big type earns attention. The app preview card carries all six colors — showing the product power without cluttering the marketing message.</div>
+    </div>
+  </div>
+
+  <div class="section reveal">
+    <div class="section-header"><div><div class="section-label">Full Preview</div><div class="section-title">Landing Page · Hero + Features</div></div></div>
+    <div class="web-shell">
+      <div class="web-nav-bar">
+        <div class="web-logo">
+          <div class="web-logomark"><svg viewBox="0 0 20 20"><use href="#icon-piq"/></svg></div>
+          <div class="web-logo-text">Poultry <span>Works</span></div>
+        </div>
+        <div class="web-links">
+          <div class="web-link">Features</div>
+          <div class="web-link">Pricing</div>
+          <div class="web-link">About</div>
+          <div class="web-link">Contact</div>
+        </div>
+        <div class="web-nav-ctas">
+          <button class="web-btn-ghost">Log in</button>
+          <button class="web-btn-primary">Get Started</button>
+        </div>
+      </div>
+      <div class="web-hero-section">
+        <div>
+          <div class="web-eyebrow"><div style="width:5px;height:5px;border-radius:50%;background:var(--f-md);animation:pulse 2s infinite"></div>Pakistan · Enterprise Farm Tech</div>
+          <div class="web-h1">Your flock.<br><span class="line2">Your data.</span><br><span class="line3">Your edge.</span></div>
+          <div class="web-desc">Real-time intelligence for poultry operations of any scale. 45+ endpoints. Offline-first. Ships to Android and iOS.</div>
+          <div class="web-cta-row">
+            <button class="web-cta-lg primary">Start Free Trial</button>
+            <button class="web-cta-lg forest">See the Demo</button>
+          </div>
+        </div>
+        <div class="web-app-preview">
+          <div class="wap-bar"><div class="wap-logo-sm">Poultry <span>Works</span></div><div style="margin-left:auto"><div class="badge t" style="font-size:9px;padding:2px 7px">● Live</div></div></div>
+          <div class="wap-body">
+            <div class="wap-kpis">
+              <div class="wap-kpi f"><div class="wap-kpi-val">24,800</div><div class="wap-kpi-lbl">Birds</div></div>
+              <div class="wap-kpi g"><div class="wap-kpi-val">₨2.4M</div><div class="wap-kpi-lbl">Revenue</div></div>
+              <div class="wap-kpi i"><div class="wap-kpi-val">1.82kg</div><div class="wap-kpi-lbl">Avg Wt</div></div>
+            </div>
+            <div class="wap-chart">
+              <div class="wap-chart-bars">
+                <div class="wcb" style="height:25%;background:var(--i-border)"></div>
+                <div class="wcb" style="height:40%;background:var(--i-md)"></div>
+                <div class="wcb" style="height:55%;background:var(--i-border)"></div>
+                <div class="wcb" style="height:68%;background:var(--i-md)"></div>
+                <div class="wcb" style="height:80%;background:var(--i-border)"></div>
+                <div class="wcb" style="height:92%;background:var(--i-md)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="web-feat-grid">
+        <div class="web-feat"><div class="wf-num f">45+</div><div class="wf-title">API Endpoints</div><div class="wf-desc">Production backend already running at full capacity</div></div>
+        <div class="web-feat"><div class="wf-num i">9</div><div class="wf-title">Species</div><div class="wf-desc">Chickens, ducks, quail, pigeons, turkeys and more</div></div>
+        <div class="web-feat"><div class="wf-num g">100%</div><div class="wf-title">Offline First</div><div class="wf-desc">Full functionality without internet. Syncs on reconnect.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════ PORTAL PANEL ════════════════ -->
+<div class="panel" id="panel-portal">
+
+  <div class="page-hero">
+    <div>
+      <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div> Surface 03 · Client Portal</div>
+      <div class="hero-h1">Numbers that <span class="accent">matter.</span><br>Nothing else.</div>
+      <div class="hero-desc">The owner wants to know it's managed well — not manage it themselves. Gold for money. Forest for health. Amber for what needs attention. Summary first.</div>
+    </div>
+    <div style="background:var(--g-lt);border:1.5px solid var(--g-border);border-radius:var(--radius-lg);padding:24px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g-dk);margin-bottom:6px">Personality</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px;color:var(--ink)">EXECUTIVE<br>DIGEST</div>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.6">Same DNA as the app, inverted hierarchy. Summary first, drill-down on tap. Cards are larger, breathing room is generous. The portal feels like a morning briefing prepared by someone who respects your time.</div>
+    </div>
+  </div>
+
+  <div class="section reveal">
+    <div class="section-header"><div><div class="section-label">Full Preview</div><div class="section-title">Client Dashboard · Morning Summary</div></div></div>
+    <div class="portal-shell">
+      <div class="portal-topbar">
+        <div class="portal-logo">
+          <div class="portal-logomark"><svg viewBox="0 0 20 20"><use href="#icon-piq"/></svg></div>
+          <div class="portal-wordmark">Poultry <span>Works</span></div>
+        </div>
+        <div class="portal-sep">/</div>
+        <div class="portal-farm-name">Ahmed Farms</div>
+        <div class="portal-right">
+          <div class="portal-week">Week 10 · March 2026</div>
+          <div class="portal-avatar">A</div>
+        </div>
+      </div>
+      <div class="portal-body">
+        <div class="portal-greeting">Good morning, Ahmed.</div>
+        <div class="portal-meta">
+          <span>3 active flocks</span><div class="portal-meta-dot"></div>
+          <span>All sheds reported</span><div class="portal-meta-dot"></div>
+          <span>Last sync 6:04 AM</span>
+        </div>
+        <div class="portal-kpis">
+          <div class="pkpi g"><div class="pkpi-label">Revenue</div><div class="pkpi-val">₨ 2.4M</div><div class="pkpi-note">↑ +8% vs last batch</div></div>
+          <div class="pkpi f"><div class="pkpi-label">Birds Active</div><div class="pkpi-val">24,800</div><div class="pkpi-note">↑ On target</div></div>
+          <div class="pkpi a"><div class="pkpi-label">Mortality</div><div class="pkpi-val">1.4%</div><div class="pkpi-note">↑ Watch Shed B</div></div>
+          <div class="pkpi i"><div class="pkpi-label">Avg Weight</div><div class="pkpi-val">1.82 kg</div><div class="pkpi-note">↑ Day 28</div></div>
+        </div>
+        <div class="portal-bottom">
+          <div class="pb-card gold">
+            <div class="pb-title">Revenue by Batch · PKR</div>
+            <div class="pb-bars">
+              <div class="pbb" style="height:35%;background:var(--g-border)"></div>
+              <div class="pbb" style="height:52%;background:var(--g-border)"></div>
+              <div class="pbb" style="height:46%;background:var(--g-border)"></div>
+              <div class="pbb" style="height:68%;background:var(--g-md);opacity:.7"></div>
+              <div class="pbb" style="height:80%;background:var(--g-dk)"></div>
+            </div>
+          </div>
+          <div class="pb-card forest">
+            <div class="pb-title">Net P&L · This Batch</div>
+            <div class="portal-sum-row"><div class="psrk">Feed cost</div><div class="psrv">₨ 840K</div></div>
+            <div class="portal-sum-row"><div class="psrk">Chick cost</div><div class="psrv">₨ 360K</div></div>
+            <div class="portal-sum-row"><div class="psrk">Net profit</div><div class="psrv">₨ 1.2M</div></div>
+          </div>
+          <div class="pb-card slate">
+            <div class="pb-title">Manager Note</div>
+            <div class="pb-note">Shed B showing elevated mortality. <strong>Vet visit scheduled tomorrow.</strong> Sheds A and C performing above target weight curve.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.mnav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.classList.add('active');
+    // trigger reveals
+    setTimeout(() => {
+      document.querySelectorAll('#panel-' + name + ' .reveal').forEach(el => el.classList.add('visible'));
+    }, 50);
+  }
+
+  // Initial reveals
+  document.querySelectorAll('#panel-dna .reveal').forEach(el => el.classList.add('visible'));
+
+  // Scroll reveal
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
