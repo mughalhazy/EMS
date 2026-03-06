@@ -9,3 +9,17 @@ image:
 service:
   type: ClusterIP
   port: 3000
+
+env:
+  APP_ENV: development
+  LOG_FORMAT: json
+  METRICS_ENABLED: true
+  TRACING_ENABLED: true
+
+secrets:
+  existingSecret: ""
+  placeholders:
+    DATABASE_URL: "<set-in-secret-manager>"
+    REDIS_URL: "<set-in-secret-manager>"
+    KAFKA_BROKERS: "<set-in-secret-manager>"
+    JWT_SECRET: "<set-in-secret-manager>"
