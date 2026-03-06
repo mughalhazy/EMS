@@ -175,6 +175,12 @@ EMS enforces strict logical isolation between tenants throughout identity, compu
 - Automated tests for cross-tenant access prevention.
 - Policy checks in code review and CI to ensure tenant predicates are present.
 - Operational guardrails for admin tooling to prevent multi-tenant data leakage.
+- Tenant-level analytics access controls must be enforced in addition to RBAC for reporting endpoints.
+
+### Tenant analytics access controls
+- Every analytics request must satisfy both role permission checks and tenant analytics policy checks.
+- Tenant policy includes independent switches for analytics enablement, cross-event reporting, and PII analytics access.
+- Analytics APIs should fail closed (`42501`) when tenant policy or permission checks fail.
 
 ---
 

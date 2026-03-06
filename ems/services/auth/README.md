@@ -16,6 +16,8 @@ This directory contains the RBAC model and core credential security flow for EMS
 - `revokeRoleAssignment(tenantId, assignmentId)`: revokes an assignment without deleting history.
 - `getUserRbac(tenantId, userId)`: resolves effective roles and permissions.
 - `userHasPermission(tenantId, userId, permissionCode)`: convenience permission check.
+- `upsertTenantAnalyticsAccessPolicy(input)`: configures tenant-level analytics controls (enablement, cross-event access, PII access).
+- `getTenantAnalyticsAccessPolicy(tenantId)`: returns effective analytics policy for a tenant.
 
 ## Credential Security Tables
 
@@ -58,9 +60,9 @@ users (1) ─────< auth_credentials
 users (1) ─────< auth_tokens
 users (1) ─────< auth_user_state
 
-role ─────< role_permission >───── permission
-  │
-  └────────< user_role_assignment
+roles ─────< role_permissions >───── permissions
+   │
+   └────────< user_role_assignments
 ```
 
 ## Authorization guards
@@ -71,6 +73,8 @@ The schema defines SQL guard functions for RBAC checks:
 - `auth_current_user_id()`: reads the request user from `app.current_user_id`.
 - `auth_has_permission(permission_code, requested_scope_type, requested_scope_id)`: boolean permission check scoped to current tenant and user.
 - `auth_require_permission(permission_code, requested_scope_type, requested_scope_id)`: raises `42501` when a permission check fails.
+- `auth_has_tenant_analytics_access(requested_scope_type, requested_scope_id, requires_pii, requires_cross_event)`: tenant-aware analytics gate that combines RBAC with tenant policy.
+- `auth_require_tenant_analytics_access(requested_scope_type, requested_scope_id, requires_pii, requires_cross_event)`: raises `42501` when analytics access is not allowed.
 
 Applications should set these settings at transaction start:
 
@@ -83,8 +87,19 @@ SET LOCAL app.current_user_id = '<user-id>';
 
 Row-level security policies are enabled for tenant-scoped tables:
 
-- `role`
-- `user_role_assignment`
-- `role_permission` (through role ownership)
+- `roles`
+- `user_role_assignments`
+- `role_permissions` (through role ownership)
+- `tenant_analytics_access_policies`
 
 These policies enforce that reads/writes are limited to the current tenant.
+
+## Tenant-level analytics controls
+
+`tenant_analytics_access_policies` adds a second authorization layer for analytics workloads:
+
+- `analytics_enabled` is the tenant master switch for analytics access.
+- `allow_cross_event_reporting` controls whether a tenant can run portfolio-style reporting across events.
+- `allow_pii_access` controls whether analytics queries that require PII are permitted.
+
+Analytics endpoints should call `auth_require_tenant_analytics_access(...)` to enforce tenant policy + RBAC in one guard.

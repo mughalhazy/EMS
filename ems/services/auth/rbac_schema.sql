@@ -69,12 +69,25 @@ CREATE TABLE IF NOT EXISTS user_role_assignments (
         UNIQUE (tenant_id, user_id, role_id, scope_type, scope_id, revoked_at)
 );
 
+CREATE TABLE IF NOT EXISTS tenant_analytics_access_policies (
+    tenant_id UUID PRIMARY KEY,
+    analytics_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    allow_cross_event_reporting BOOLEAN NOT NULL DEFAULT FALSE,
+    allow_pii_access BOOLEAN NOT NULL DEFAULT FALSE,
+    updated_by UUID,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_roles_tenant_scope ON roles (tenant_id, scope);
 CREATE INDEX IF NOT EXISTS idx_permissions_code ON permissions (code);
 CREATE INDEX IF NOT EXISTS idx_role_permissions_permission ON role_permissions (permission_id);
 CREATE INDEX IF NOT EXISTS idx_user_role_assignments_lookup
     ON user_role_assignments (tenant_id, user_id, scope_type, scope_id)
     WHERE revoked_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tenant_analytics_access_policies_enabled
+    ON tenant_analytics_access_policies (tenant_id)
+    WHERE analytics_enabled = TRUE;
 
 -- -----------------------------------------------------------------------------
 -- Tenant-aware authorization guards
@@ -86,7 +99,7 @@ CREATE INDEX IF NOT EXISTS idx_user_role_assignments_lookup
 --   SET LOCAL app.current_user_id = '<user-id>';
 
 CREATE OR REPLACE FUNCTION auth_current_tenant_id()
-RETURNS BIGINT
+RETURNS UUID
 LANGUAGE plpgsql
 STABLE
 AS $$
@@ -97,12 +110,12 @@ BEGIN
     IF tenant_id_setting IS NULL OR btrim(tenant_id_setting) = '' THEN
         RAISE EXCEPTION 'Missing app.current_tenant_id for tenant-isolated access';
     END IF;
-    RETURN tenant_id_setting::BIGINT;
+    RETURN tenant_id_setting::UUID;
 END;
 $$;
 
 CREATE OR REPLACE FUNCTION auth_current_user_id()
-RETURNS BIGINT
+RETURNS UUID
 LANGUAGE plpgsql
 STABLE
 AS $$
@@ -113,14 +126,14 @@ BEGIN
     IF user_id_setting IS NULL OR btrim(user_id_setting) = '' THEN
         RAISE EXCEPTION 'Missing app.current_user_id for RBAC checks';
     END IF;
-    RETURN user_id_setting::BIGINT;
+    RETURN user_id_setting::UUID;
 END;
 $$;
 
 CREATE OR REPLACE FUNCTION auth_has_permission(
     permission_code TEXT,
     requested_scope_type VARCHAR(32) DEFAULT NULL,
-    requested_scope_id BIGINT DEFAULT NULL
+    requested_scope_id UUID DEFAULT NULL
 )
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -128,12 +141,12 @@ STABLE
 AS $$
     SELECT EXISTS (
         SELECT 1
-        FROM user_role_assignment ura
-        JOIN role r
+        FROM user_role_assignments ura
+        JOIN roles r
             ON r.id = ura.role_id
-        JOIN role_permission rp
+        JOIN role_permissions rp
             ON rp.role_id = r.id
-        JOIN permission p
+        JOIN permissions p
             ON p.id = rp.permission_id
         WHERE p.code = permission_code
           AND ura.tenant_id = auth_current_tenant_id()
@@ -155,7 +168,7 @@ $$;
 CREATE OR REPLACE FUNCTION auth_require_permission(
     permission_code TEXT,
     requested_scope_type VARCHAR(32) DEFAULT NULL,
-    requested_scope_id BIGINT DEFAULT NULL
+    requested_scope_id UUID DEFAULT NULL
 )
 RETURNS VOID
 LANGUAGE plpgsql
@@ -169,40 +182,94 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION auth_has_tenant_analytics_access(
+    requested_scope_type VARCHAR(32) DEFAULT NULL,
+    requested_scope_id UUID DEFAULT NULL,
+    requires_pii BOOLEAN DEFAULT FALSE,
+    requires_cross_event BOOLEAN DEFAULT FALSE
+)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT EXISTS (
+        SELECT 1
+        FROM tenant_analytics_access_policies tap
+        WHERE tap.tenant_id = auth_current_tenant_id()
+          AND tap.analytics_enabled = TRUE
+          AND (requires_cross_event = FALSE OR tap.allow_cross_event_reporting = TRUE)
+          AND (requires_pii = FALSE OR tap.allow_pii_access = TRUE)
+    )
+    AND auth_has_permission(
+        CASE WHEN requires_pii THEN 'analytics.read.pii' ELSE 'analytics.read' END,
+        requested_scope_type,
+        requested_scope_id
+    );
+$$;
+
+CREATE OR REPLACE FUNCTION auth_require_tenant_analytics_access(
+    requested_scope_type VARCHAR(32) DEFAULT NULL,
+    requested_scope_id UUID DEFAULT NULL,
+    requires_pii BOOLEAN DEFAULT FALSE,
+    requires_cross_event BOOLEAN DEFAULT FALSE
+)
+RETURNS VOID
+LANGUAGE plpgsql
+STABLE
+AS $$
+BEGIN
+    IF NOT auth_has_tenant_analytics_access(
+        requested_scope_type,
+        requested_scope_id,
+        requires_pii,
+        requires_cross_event
+    ) THEN
+        RAISE EXCEPTION 'Tenant-level analytics access denied for tenant %', auth_current_tenant_id()
+            USING ERRCODE = '42501';
+    END IF;
+END;
+$$;
+
 -- -----------------------------------------------------------------------------
 -- Row-level security for tenant isolation
 -- -----------------------------------------------------------------------------
 
-ALTER TABLE role ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_role_assignment ENABLE ROW LEVEL SECURITY;
-ALTER TABLE role_permission ENABLE ROW LEVEL SECURITY;
+ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_role_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE role_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tenant_analytics_access_policies ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS role_tenant_isolation_policy ON role;
-DROP POLICY IF EXISTS user_role_assignment_tenant_isolation_policy ON user_role_assignment;
-DROP POLICY IF EXISTS role_permission_tenant_isolation_policy ON role_permission;
+DROP POLICY IF EXISTS roles_tenant_isolation_policy ON roles;
+DROP POLICY IF EXISTS user_role_assignments_tenant_isolation_policy ON user_role_assignments;
+DROP POLICY IF EXISTS role_permissions_tenant_isolation_policy ON role_permissions;
+DROP POLICY IF EXISTS tenant_analytics_access_policies_tenant_isolation_policy ON tenant_analytics_access_policies;
 
-CREATE POLICY role_tenant_isolation_policy ON role
+CREATE POLICY roles_tenant_isolation_policy ON roles
     USING (tenant_id = auth_current_tenant_id())
     WITH CHECK (tenant_id = auth_current_tenant_id());
 
-CREATE POLICY user_role_assignment_tenant_isolation_policy ON user_role_assignment
+CREATE POLICY user_role_assignments_tenant_isolation_policy ON user_role_assignments
     USING (tenant_id = auth_current_tenant_id())
     WITH CHECK (tenant_id = auth_current_tenant_id());
 
-CREATE POLICY role_permission_tenant_isolation_policy ON role_permission
+CREATE POLICY role_permissions_tenant_isolation_policy ON role_permissions
     USING (
         EXISTS (
             SELECT 1
-            FROM role r
-            WHERE r.id = role_permission.role_id
+            FROM roles r
+            WHERE r.id = role_permissions.role_id
               AND r.tenant_id = auth_current_tenant_id()
         )
     )
     WITH CHECK (
         EXISTS (
             SELECT 1
-            FROM role r
-            WHERE r.id = role_permission.role_id
+            FROM roles r
+            WHERE r.id = role_permissions.role_id
               AND r.tenant_id = auth_current_tenant_id()
         )
     );
+
+CREATE POLICY tenant_analytics_access_policies_tenant_isolation_policy ON tenant_analytics_access_policies
+    USING (tenant_id = auth_current_tenant_id())
+    WITH CHECK (tenant_id = auth_current_tenant_id());
