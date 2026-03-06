@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddSponsorshipTierToExhibitors1718000000000
+export class AddSponsorshipTierToExhibitors1718000000002
   implements MigrationInterface
 {
-  name = 'AddSponsorshipTierToExhibitors1718000000000';
+  name = 'AddSponsorshipTierToExhibitors1718000000002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
