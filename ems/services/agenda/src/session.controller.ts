@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 
 import { AssignSpeakerDto } from './dto/assign-speaker.dto';
 import { CreateSessionDto } from './dto/create-session.dto';
@@ -66,5 +66,38 @@ export class SessionController {
     @Body() payload: AssignSpeakerDto,
   ): Promise<SessionSpeakerEntity> {
     return this.sessionService.assignSpeaker({ tenantId, eventId, sessionId, speakerId: payload.speakerId });
+  }
+
+  @Post(':sessionId/bookmarks/:attendeeId')
+  async addBookmark(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @Param('attendeeId', ParseUUIDPipe) attendeeId: string,
+  ) {
+    return this.sessionService.addToSchedule({ tenantId, eventId, sessionId, attendeeId });
+  }
+
+  @Get('bookmarks/:attendeeId')
+  async listBookmarks(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('attendeeId', ParseUUIDPipe) attendeeId: string,
+  ) {
+    return this.sessionService.listSchedule(tenantId, eventId, attendeeId);
+  }
+
+  @Delete(':sessionId/bookmarks/:attendeeId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeBookmark(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @Param('attendeeId', ParseUUIDPipe) attendeeId: string,
+  ): Promise<void> {
+    const removed = await this.sessionService.removeFromSchedule(tenantId, eventId, attendeeId, sessionId);
+    if (!removed) {
+      throw new NotFoundException('Bookmark not found for attendee session.');
+    }
   }
 }
