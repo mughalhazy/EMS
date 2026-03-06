@@ -13,6 +13,7 @@ import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { EventAnalyticsEntity } from './entities/event-analytics.entity';
 import { SessionAnalyticsEntity } from './entities/session-analytics.entity';
+import { ExhibitorAnalyticsEntity } from './entities/exhibitor-analytics.entity';
 
 export interface AggregateEventAnalyticsResult {
   tenantId: string;
@@ -26,6 +27,36 @@ export interface AggregateEventAnalyticsResult {
   questionsAskedCount: number;
   networkingConnectionsCount: number;
   totalEngagementActionsCount: number;
+}
+
+export interface EventDashboardOverview extends AggregateEventAnalyticsResult {
+  generatedAt: string;
+}
+
+export interface EventDashboardTrendPoint {
+  snapshotDate: string;
+  registrationsCount: number;
+  ticketsSoldCount: number;
+  attendeesCheckedInCount: number;
+  ticketSalesAmount: string;
+}
+
+export interface EventDashboardSessionAnalytics {
+  sessionId: string;
+  registeredAttendees: number;
+  checkedInAttendees: number;
+  noShowAttendees: number;
+  pollResponses: number;
+  questionsAsked: number;
+  reactions: number;
+  totalEngagementActions: number;
+  engagementScore: string;
+}
+
+export interface EventDashboardExhibitorAnalytics {
+  exhibitorId: string;
+  leadCapturesCount: number;
+  boothVisitsCount: number;
 }
 
 @Injectable()
@@ -43,6 +74,8 @@ export class AnalyticsService {
     private readonly sessionAnalyticsRepository: Repository<SessionAnalyticsEntity>,
     @InjectRepository(AttendeeConnectionEntity)
     private readonly attendeeConnectionRepository: Repository<AttendeeConnectionEntity>,
+    @InjectRepository(ExhibitorAnalyticsEntity)
+    private readonly exhibitorAnalyticsRepository: Repository<ExhibitorAnalyticsEntity>,
   ) {}
 
   async aggregateEventAnalytics(
@@ -151,5 +184,107 @@ export class AnalyticsService {
       networkingConnectionsCount,
       totalEngagementActionsCount,
     };
+  }
+
+  async getDashboardOverview(
+    tenantId: string,
+    eventId: string,
+    snapshotDate?: string,
+  ): Promise<EventDashboardOverview> {
+    const aggregate = await this.aggregateEventAnalytics(tenantId, eventId, snapshotDate);
+
+    return {
+      ...aggregate,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
+  async getDashboardTrends(
+    tenantId: string,
+    eventId: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<EventDashboardTrendPoint[]> {
+    const queryBuilder = this.eventAnalyticsRepository
+      .createQueryBuilder('eventAnalytics')
+      .where('eventAnalytics.tenantId = :tenantId', { tenantId })
+      .andWhere('eventAnalytics.eventId = :eventId', { eventId });
+
+    if (startDate) {
+      queryBuilder.andWhere('eventAnalytics.snapshotDate >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('eventAnalytics.snapshotDate <= :endDate', { endDate });
+    }
+
+    const snapshots = await queryBuilder.orderBy('eventAnalytics.snapshotDate', 'ASC').getMany();
+
+    return snapshots.map((snapshot) => ({
+      snapshotDate: snapshot.snapshotDate,
+      registrationsCount: snapshot.registrationsCount,
+      ticketsSoldCount: snapshot.ticketsSoldCount,
+      attendeesCheckedInCount: snapshot.attendeesCheckedInCount,
+      ticketSalesAmount: snapshot.ticketSalesAmount,
+    }));
+  }
+
+  async getTopSessionsForDashboard(
+    tenantId: string,
+    eventId: string,
+    limit: number,
+  ): Promise<EventDashboardSessionAnalytics[]> {
+    const sessions = await this.sessionAnalyticsRepository.find({
+      where: {
+        tenantId,
+        eventId,
+      },
+      order: {
+        engagementScore: 'DESC',
+        totalEngagementActions: 'DESC',
+      },
+      take: limit,
+    });
+
+    return sessions.map((session) => ({
+      sessionId: session.sessionId,
+      registeredAttendees: session.registeredAttendees,
+      checkedInAttendees: session.checkedInAttendees,
+      noShowAttendees: session.noShowAttendees,
+      pollResponses: session.pollResponses,
+      questionsAsked: session.questionsAsked,
+      reactions: session.reactions,
+      totalEngagementActions: session.totalEngagementActions,
+      engagementScore: session.engagementScore,
+    }));
+  }
+
+  async getTopExhibitorsForDashboard(
+    tenantId: string,
+    eventId: string,
+    limit: number,
+  ): Promise<EventDashboardExhibitorAnalytics[]> {
+    const rows = await this.exhibitorAnalyticsRepository
+      .createQueryBuilder('analytics')
+      .select('analytics.exhibitorId', 'exhibitorId')
+      .addSelect('COALESCE(SUM(analytics.leadCapturesCount), 0)', 'leadCapturesCount')
+      .addSelect('COALESCE(SUM(analytics.boothVisitsCount), 0)', 'boothVisitsCount')
+      .where('analytics.tenantId = :tenantId', { tenantId })
+      .andWhere('analytics.eventId = :eventId', { eventId })
+      .groupBy('analytics.exhibitorId')
+      .orderBy('COALESCE(SUM(analytics.leadCapturesCount), 0)', 'DESC')
+      .addOrderBy('COALESCE(SUM(analytics.boothVisitsCount), 0)', 'DESC')
+      .limit(limit)
+      .getRawMany<{
+        exhibitorId: string;
+        leadCapturesCount: string;
+        boothVisitsCount: string;
+      }>();
+
+    return rows.map((row) => ({
+      exhibitorId: row.exhibitorId,
+      leadCapturesCount: Number.parseInt(row.leadCapturesCount ?? '0', 10),
+      boothVisitsCount: Number.parseInt(row.boothVisitsCount ?? '0', 10),
+    }));
   }
 }
