@@ -8,6 +8,7 @@ import { SpeakerEntity } from '../../speaker/src/entities/speaker.entity';
 import { SessionController } from './session.controller';
 import { AttendeeScheduleEntity } from './entities/attendee-schedule.entity';
 import { SessionEntity } from './entities/session.entity';
+import { SessionQnaEntity } from './entities/session-qna.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
 import { SessionService } from './session.service';
@@ -18,6 +19,7 @@ import { SessionService } from './session.service';
       SessionEntity,
       SessionSpeakerEntity,
       AttendeeScheduleEntity,
+      SessionQnaEntity,
       AttendeeEntity,
       SpeakerEntity,
       RoomEntity,

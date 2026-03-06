@@ -15,6 +15,7 @@ import { EventEntity } from '../../../event/src/entities/event.entity';
 import { RoomEntity } from '../../../event/src/entities/room.entity';
 import { AttendeeScheduleEntity } from './attendee-schedule.entity';
 import { SessionSpeakerEntity } from './session-speaker.entity';
+import { SessionQnaEntity } from './session-qna.entity';
 
 export enum SessionStatus {
   DRAFT = 'draft',
@@ -83,6 +84,9 @@ export class SessionEntity {
 
   @OneToMany(() => AttendeeScheduleEntity, (attendeeSchedule) => attendeeSchedule.session)
   attendeeSchedules!: AttendeeScheduleEntity[];
+
+  @OneToMany(() => SessionQnaEntity, (qnaEntry) => qnaEntry.session)
+  qnaEntries!: SessionQnaEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
