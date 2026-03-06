@@ -37,13 +37,16 @@ export class AuditService {
     return this.createAuditLog(AuditDomain.EVENT, input);
   }
 
-
   async trackCommerceChange(input: TrackAuditChangeInput): Promise<AuditLogEntity> {
     return this.createAuditLog(AuditDomain.COMMERCE, input);
   }
 
   async trackRegistrationChange(input: TrackAuditChangeInput): Promise<AuditLogEntity> {
     return this.createAuditLog(AuditDomain.REGISTRATION, input);
+  }
+
+  async trackOnsiteChange(input: TrackAuditChangeInput): Promise<AuditLogEntity> {
+    return this.createAuditLog(AuditDomain.ONSITE, input);
   }
 
   async listByTenant(tenantId: string, domain?: AuditDomain): Promise<AuditLogEntity[]> {
