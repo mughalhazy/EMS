@@ -9,7 +9,7 @@ import {
   AttendeeService,
 } from './attendee.service';
 
-@Controller('tenants/:tenantId/events/:eventId/attendees')
+@Controller('api/v1/tenants/:tenantId/events/:eventId/attendees')
 export class AttendeeController {
   constructor(private readonly attendeeService: AttendeeService) {}
 

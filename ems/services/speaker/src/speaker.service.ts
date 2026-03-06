@@ -30,6 +30,13 @@ export class SpeakerService {
   async update(tenantId: string, eventId: string, speakerId: string, input: Partial<SpeakerEntity>, actorUserId?: string): Promise<SpeakerEntity | null> {
     const speaker = await this.speakerRepository.findOne({ where: { id: speakerId, tenantId, eventId } });
     if (!speaker) return null;
+    if (input.email && input.email !== speaker.email) {
+      const existing = await this.findByTenantEventAndEmail(tenantId, eventId, input.email);
+      if (existing && existing.id !== speakerId) {
+        throw new ConflictException('Speaker email already exists in event.');
+      }
+    }
+
     const before = this.auditSpeaker(speaker);
     Object.assign(speaker, input);
     const updated = await this.speakerRepository.save(speaker);

@@ -56,7 +56,9 @@ export class NetworkingService {
     if (existingConnection) {
       if (existingConnection.status === AttendeeConnectionStatus.DECLINED) {
         existingConnection.status = AttendeeConnectionStatus.PENDING;
-        return this.connectionRepository.save(existingConnection);
+        const reopenedConnection = await this.connectionRepository.save(existingConnection);
+        await this.networkingEventsPublisher.publishConnectionRequested(reopenedConnection, { tenantId, eventId });
+        return reopenedConnection;
       }
 
       throw new ConflictException(
@@ -73,6 +75,7 @@ export class NetworkingService {
     });
 
     const savedConnection = await this.connectionRepository.save(connection);
+    await this.networkingEventsPublisher.publishConnectionRequested(savedConnection, { tenantId, eventId });
     await this.auditService.trackEventChange({
       tenantId,
       action: 'networking.connection.requested',
