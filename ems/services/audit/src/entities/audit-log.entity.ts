@@ -14,10 +14,11 @@ export enum AuditDomain {
   EVENT = 'event',
   COMMERCE = 'commerce',
   REGISTRATION = 'registration',
+  ONSITE = 'onsite',
 }
 
 @Entity({ name: 'audit_logs' })
-@Check('ck_audit_logs_domain', "domain IN ('auth', 'role', 'tenant', 'event', 'commerce', 'registration')")
+@Check('ck_audit_logs_domain', "domain IN ('auth', 'role', 'tenant', 'event', 'commerce', 'registration', 'onsite')")
 @Index('idx_audit_logs_tenant_domain_created', ['tenantId', 'domain', 'createdAt'])
 @Index('idx_audit_logs_actor_created', ['actorUserId', 'createdAt'])
 export class AuditLogEntity {
