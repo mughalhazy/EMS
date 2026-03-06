@@ -1,4 +1,4 @@
-import { IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class ScanSessionCheckInDto {
   @IsUUID()
@@ -6,4 +6,8 @@ export class ScanSessionCheckInDto {
 
   @IsString()
   deviceId!: string;
+
+  @IsOptional()
+  @IsString()
+  qrTicketCode?: string;
 }

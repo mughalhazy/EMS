@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 
 export const ONSITE_EVENTS_KAFKA_CLIENT = 'ONSITE_EVENTS_KAFKA_CLIENT';
 export const ATTENDEE_CHECKED_IN_TOPIC = 'attendee.checked_in';
+export const SESSION_ATTENDED_TOPIC = 'session.attended';
 
 @Injectable()
 export class OnsiteEventsPublisher {
@@ -39,6 +40,35 @@ export class OnsiteEventsPublisher {
       check_in_id: payload.checkInId,
       device_id: payload.deviceId,
       checked_in_at: payload.checkedInAt.toISOString(),
+    });
+  }
+
+  async publishSessionAttended(payload: {
+    tenantId: string;
+    eventId: string;
+    attendeeId: string;
+    sessionId: string;
+    sessionCheckInId: string;
+    deviceId: string;
+    scannedAt: Date;
+  }): Promise<void> {
+    if (!this.kafkaClient) {
+      this.logger.warn(
+        `Kafka client unavailable. Skipping publish to topic '${SESSION_ATTENDED_TOPIC}' for attendee '${payload.attendeeId}'.`,
+      );
+      return;
+    }
+
+    await this.kafkaClient.emit(SESSION_ATTENDED_TOPIC, {
+      event_id: randomUUID(),
+      occurred_at: new Date().toISOString(),
+      tenant_id: payload.tenantId,
+      event_id_ref: payload.eventId,
+      attendee_id: payload.attendeeId,
+      session_id: payload.sessionId,
+      session_check_in_id: payload.sessionCheckInId,
+      device_id: payload.deviceId,
+      scanned_at: payload.scannedAt.toISOString(),
     });
   }
 }

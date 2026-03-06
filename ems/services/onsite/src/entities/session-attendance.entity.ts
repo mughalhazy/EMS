@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { AttendeeEntity } from '../../../attendee/src/entities/attendee.entity';
-import { SessionEntity } from '../../../event/src/entities/session.entity';
+import { SessionEntity } from '../../../agenda/src/entities/session.entity';
 
 @Entity({ name: 'session_attendance' })
 @Index('idx_session_attendance_attendee_id', ['attendeeId'])

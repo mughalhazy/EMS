@@ -15,8 +15,9 @@ import { OnsiteEventsPublisher } from './onsite-events.publisher';
 import { BadgeEntity } from './entities/badge.entity';
 import { CheckInEntity } from './entities/check-in.entity';
 import { ScanningDeviceEntity } from './entities/scanning-device.entity';
+import { SessionAttendanceEntity } from './entities/session-attendance.entity';
 import { SessionCheckInEntity } from './entities/session-check-in.entity';
-import { OnsiteEventsPublisher } from './onsite-events.publisher';
+import { QrTicketValidationService } from './qr-ticket-validation.service';
 
 export interface CheckInResult {
   checkIn: CheckInEntity;
@@ -29,6 +30,10 @@ export interface SessionScanResult {
   accessGranted: boolean;
 }
 
+export interface BadgePrintResult {
+  badge: BadgeEntity;
+  isReprint: boolean;
+}
 
 export interface ScanningDeviceResult {
   device: ScanningDeviceEntity;
@@ -50,6 +55,8 @@ export class OnsiteService {
     private readonly checkInRepository: Repository<CheckInEntity>,
     @InjectRepository(SessionCheckInEntity)
     private readonly sessionCheckInRepository: Repository<SessionCheckInEntity>,
+    @InjectRepository(SessionAttendanceEntity)
+    private readonly sessionAttendanceRepository: Repository<SessionAttendanceEntity>,
     @InjectRepository(AttendeeEntity)
     private readonly attendeeRepository: Repository<AttendeeEntity>,
     @InjectRepository(AttendeeScheduleEntity)
@@ -60,6 +67,7 @@ export class OnsiteService {
     private readonly scanningDeviceRepository: Repository<ScanningDeviceEntity>,
     private readonly badgePrintingService: BadgePrintingService,
     private readonly onsiteEventsPublisher: OnsiteEventsPublisher,
+    private readonly qrTicketValidationService: QrTicketValidationService,
     private readonly auditService: AuditService,
   ) {}
 
@@ -246,9 +254,8 @@ export class OnsiteService {
       },
     });
 
-    const badge = await this.badgePrintingService.getOrCreateBadge(attendeeId, eventId);
-
     if (existingCheckIn) {
+      const badge = await this.badgePrintingService.getOrCreateBadge(attendeeId, eventId);
       await this.auditService.trackOnsiteChange({
         tenantId,
         targetUserId: attendee.userId,
@@ -272,6 +279,8 @@ export class OnsiteService {
       };
     }
 
+    const { badge } = await this.badgePrintingService.printBadge(attendeeId, eventId);
+
     const checkIn = this.checkInRepository.create({
       attendeeId,
       eventId,
@@ -289,6 +298,7 @@ export class OnsiteService {
       deviceId,
       checkedInAt: savedCheckIn.checkedInAt,
     });
+
 
     if (attendee.status !== AttendeeStatus.CHECKED_IN) {
       attendee.status = AttendeeStatus.CHECKED_IN;
@@ -342,7 +352,25 @@ export class OnsiteService {
       );
     }
 
-    return this.badgePrintingService.printBadge(attendeeId, eventId);
+    const badgePrintResult = await this.badgePrintingService.printBadge(attendeeId, eventId);
+
+    await this.auditService.trackOnsiteChange({
+      tenantId,
+      targetUserId: attendee.userId,
+      action: badgePrintResult.isReprint ? 'onsite.badge.reprinted' : 'onsite.badge.printed',
+      before: null,
+      after: {
+        badgeId: badgePrintResult.badge.id,
+        printedAt: badgePrintResult.badge.printedAt,
+      },
+      metadata: {
+        eventId,
+        attendeeId,
+        deviceId,
+      },
+    });
+
+    return badgePrintResult;
   }
 
   async scanSessionCheckIn(
@@ -351,6 +379,7 @@ export class OnsiteService {
     sessionId: string,
     attendeeId: string,
     deviceId: string,
+    qrTicketCode?: string,
   ): Promise<SessionScanResult> {
     const attendee = await this.attendeeRepository.findOne({ where: { id: attendeeId, tenantId, eventId } });
 
@@ -366,6 +395,11 @@ export class OnsiteService {
 
     await this.assertActiveDevice(eventId, deviceId);
 
+    this.qrTicketValidationService.assertValidTicket({
+      qrTicketCode,
+      attendeeId,
+      eventId,
+    });
 
     if (attendee.status !== AttendeeStatus.CHECKED_IN) {
       throw new ForbiddenException('Attendee must complete event check-in before session scanning.');
@@ -431,6 +465,26 @@ export class OnsiteService {
         scannedAt: new Date(),
       }),
     );
+
+    if (sessionCheckIn.accessGranted) {
+      await this.sessionAttendanceRepository.save(
+        this.sessionAttendanceRepository.create({
+          attendeeId,
+          sessionId,
+          scannedAt: sessionCheckIn.scannedAt,
+        }),
+      );
+
+      await this.onsiteEventsPublisher.publishSessionAttended({
+        tenantId,
+        eventId,
+        attendeeId,
+        sessionId,
+        sessionCheckInId: sessionCheckIn.id,
+        deviceId,
+        scannedAt: sessionCheckIn.scannedAt,
+      });
+    }
 
     await this.auditService.trackOnsiteChange({
       tenantId,
