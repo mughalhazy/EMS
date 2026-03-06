@@ -9,8 +9,9 @@ import {
 } from '@nestjs/common';
 
 import { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
+import { PrintBadgeDto } from './dto/print-badge.dto';
 import { ScanSessionCheckInDto } from './dto/scan-session-check-in.dto';
-import { CheckInResult, OnsiteService, SessionScanResult } from './onsite.service';
+import { BadgePrintResult, CheckInResult, OnsiteService, SessionScanResult } from './onsite.service';
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId/check-ins')
 export class OnsiteController {
@@ -43,6 +44,21 @@ export class OnsiteController {
       tenantId,
       eventId,
       sessionId,
+      payload.attendeeId,
+      payload.deviceId,
+    );
+  }
+
+  @Post('badges/print')
+  @HttpCode(HttpStatus.CREATED)
+  async printBadge(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() payload: PrintBadgeDto,
+  ): Promise<BadgePrintResult> {
+    return this.onsiteService.printBadge(
+      tenantId,
+      eventId,
       payload.attendeeId,
       payload.deviceId,
     );

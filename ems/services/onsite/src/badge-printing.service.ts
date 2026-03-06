@@ -11,6 +11,36 @@ export class BadgePrintingService {
     private readonly badgeRepository: Repository<BadgeEntity>,
   ) {}
 
+  async findBadgeByAttendee(attendeeId: string): Promise<BadgeEntity | null> {
+    return this.badgeRepository.findOne({
+      where: { attendeeId },
+    });
+  }
+
+  async printBadge(attendeeId: string, eventId: string): Promise<{ badge: BadgeEntity; isReprint: boolean }> {
+    const existingBadge = await this.findBadgeByAttendee(attendeeId);
+
+    if (existingBadge) {
+      existingBadge.printedAt = new Date();
+      return {
+        badge: await this.badgeRepository.save(existingBadge),
+        isReprint: true,
+      };
+    }
+
+    const badge = this.badgeRepository.create({
+      attendeeId,
+      badgeId: this.buildBadgeId(attendeeId, eventId),
+      qrCode: this.buildQrCode(attendeeId, eventId),
+      printedAt: new Date(),
+    });
+
+    return {
+      badge: await this.badgeRepository.save(badge),
+      isReprint: false,
+    };
+  }
+
   async getOrCreateBadge(attendeeId: string, eventId: string): Promise<BadgeEntity> {
     const existingBadge = await this.badgeRepository.findOne({
       where: { attendeeId },
