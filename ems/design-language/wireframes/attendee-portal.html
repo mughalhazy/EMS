@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMS — Attendee Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* Website surface — editorial, white-dominant, generous whitespace */
+  body { background:var(--white); }
+  .portal-nav {
+    height:64px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 40px; background:var(--white); border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:100;
+  }
+  .portal-wordmark { font-size:13px; font-weight:800; letter-spacing:.1em; color:var(--ink); text-transform:uppercase; }
+  .portal-nav-actions { display:flex; align-items:center; gap:12px; }
+  .portal-main { max-width:1100px; margin:0 auto; padding:48px 32px; }
+  .hero-section { margin-bottom:48px; }
+  .hero-event-name { font-size:42px; font-weight:800; letter-spacing:-.04em; color:var(--ink); line-height:1.1; margin-bottom:12px; }
+  .hero-meta { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+  .hero-meta-item { display:flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:var(--ink-2); }
+  .ticket-card {
+    border:2px solid var(--border); border-radius:var(--radius-xl); padding:24px;
+    display:flex; flex-direction:column; gap:16px; background:var(--white);
+    transition:all .15s; cursor:pointer;
+  }
+  .ticket-card:hover { border-color:var(--i-md); box-shadow:0 0 0 4px var(--i-border); }
+  .ticket-card.selected { border-color:var(--i-md); box-shadow:0 0 0 4px var(--i-border); background:var(--i-lt); }
+  .ticket-name { font-size:18px; font-weight:700; letter-spacing:-.02em; color:var(--ink); }
+  .ticket-price { font-size:28px; font-weight:800; letter-spacing:-.03em; color:var(--g-dk); }
+  .ticket-desc { font-size:13px; font-weight:500; color:var(--ink-3); line-height:1.5; }
+  .ticket-perks { display:flex; flex-direction:column; gap:6px; }
+  .ticket-perk { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--ink-2); }
+  .ticket-perk::before { content:'✓'; color:var(--f-md); font-weight:800; flex-shrink:0; }
+  .qr-container {
+    background:var(--ink); border-radius:var(--radius-xl); padding:32px;
+    display:flex; flex-direction:column; align-items:center; gap:20px; color:var(--white);
+  }
+  .qr-mock { width:160px; height:160px; background:var(--white); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; }
+  .qr-pattern { width:140px; height:140px; background:repeating-conic-gradient(var(--ink) 0% 25%, transparent 0% 50%) 0 0 / 10px 10px; border-radius:4px; }
+  .section-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:32px; }
+  .stab { padding:12px 20px; font-size:13px; font-weight:700; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; color:var(--ink-3); transition:all .12s; }
+  .stab.active { color:var(--i-md); border-bottom-color:var(--i-md); }
+  .session-row { display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+  .session-time-col { width:80px; flex-shrink:0; text-align:right; }
+  .session-time-val { font-size:12px; font-weight:700; color:var(--ink-3); }
+</style>
+</head>
+<body>
+
+<!-- Portal Nav — Website surface -->
+<nav class="portal-nav">
+  <span class="portal-wordmark">EMS</span>
+  <div class="portal-nav-actions">
+    <span style="font-size:13px;font-weight:600;color:var(--ink-2);">Amy Lee</span>
+    <div class="avatar">AL</div>
+    <button class="btn btn-ghost">Sign out</button>
+  </div>
+</nav>
+
+<div class="portal-main">
+
+  <!-- Hero -->
+  <div class="hero-section">
+    <div style="margin-bottom:16px;">
+      <span class="chip t-tag" style="font-size:12px;">Live now</span>
+    </div>
+    <div class="hero-event-name">TechSummit 2026</div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📅 March 14–16, 2026</div>
+      <div class="hero-meta-item">📍 San Francisco Convention Center</div>
+      <div class="hero-meta-item">👥 1,842 attendees</div>
+    </div>
+  </div>
+
+  <!-- Section Tabs -->
+  <div class="section-tabs">
+    <div class="stab active">My Ticket</div>
+    <div class="stab">Agenda</div>
+    <div class="stab">Speakers</div>
+    <div class="stab">Venue & Map</div>
+    <div class="stab">Networking</div>
+  </div>
+
+  <!-- My Ticket Content -->
+  <div class="two-col" style="align-items:start;gap:40px;">
+
+    <div style="display:flex;flex-direction:column;gap:24px;">
+
+      <!-- Registration confirmed -->
+      <div class="alert f" style="padding:16px 20px;">
+        <span style="font-size:18px;">✓</span>
+        <div>
+          <div style="font-weight:800;font-size:15px;margin-bottom:3px;">Registration confirmed</div>
+          <div style="font-size:13px;color:var(--f-dk);opacity:.85;">General Admission · Order #ORD-00804</div>
+        </div>
+      </div>
+
+      <!-- Ticket detail -->
+      <div class="card" style="padding:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:6px;">Your Ticket</div>
+            <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--ink);">General Admission</div>
+          </div>
+          <span class="badge f-tag">Confirmed</span>
+        </div>
+        <hr style="margin-bottom:20px;">
+        <div class="form-grid">
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:4px;">Name</div><div style="font-weight:700;">Amy Lee</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:4px;">Email</div><div style="font-weight:600;">amy@designlabs.co</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:4px;">Badge Name</div><div style="font-weight:700;">Amy Lee</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:4px;">Order Number</div><div style="font-weight:600;font-family:var(--font-mono);">ORD-00804</div></div>
+        </div>
+        <hr style="margin:20px 0;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary">Download PDF Ticket</button>
+          <button class="btn btn-ghost">Add to Apple Wallet</button>
+          <button class="btn btn-ghost">Add to Google Wallet</button>
+        </div>
+      </div>
+
+      <!-- My Agenda -->
+      <div>
+        <div style="font-size:16px;font-weight:700;letter-spacing:-.02em;margin-bottom:16px;">My Schedule — Day 1</div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+          <div class="session-row" style="padding:16px 20px;">
+            <div class="session-time-col"><div class="session-time-val">09:00</div></div>
+            <div>
+              <div style="font-weight:700;color:var(--ink);">Opening Keynote</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:3px;">Dr. Elena Vasquez · Main Hall</div>
+            </div>
+            <span class="badge i-tag" style="margin-left:auto;flex-shrink:0;">Keynote</span>
+          </div>
+          <div class="session-row" style="padding:16px 20px;">
+            <div class="session-time-col"><div class="session-time-val">10:15</div></div>
+            <div>
+              <div style="font-weight:700;color:var(--ink);">Scaling Microservices at 10M RPS</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:3px;">James Park · Room A</div>
+            </div>
+            <span class="badge f-tag" style="margin-left:auto;flex-shrink:0;">Saved</span>
+          </div>
+          <div class="session-row" style="padding:16px 20px;border-bottom:none;">
+            <div class="session-time-col"><div class="session-time-val">13:30</div></div>
+            <div>
+              <div style="font-weight:700;color:var(--ink);">AI-Native Application Design</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:3px;">Sam Okafor · Main Hall</div>
+            </div>
+            <span class="badge f-tag" style="margin-left:auto;flex-shrink:0;">Saved</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- QR + Actions -->
+    <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:88px;">
+      <div class="qr-container">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.6;">Entry Pass</div>
+        <div class="qr-mock"><div class="qr-pattern"></div></div>
+        <div style="text-align:center;">
+          <div style="font-size:16px;font-weight:800;letter-spacing:-.02em;">Amy Lee</div>
+          <div style="font-size:12px;font-weight:600;opacity:.6;margin-top:3px;">General Admission</div>
+          <div style="font-family:var(--font-mono);font-size:11px;opacity:.4;margin-top:4px;">ORD-00804-GA</div>
+        </div>
+        <span class="chip t-tag" style="font-size:12px;">Valid for entry</span>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Event Info</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);">Check-in opens</div><div style="font-weight:700;margin-top:2px;">Mar 14 · 07:30 AM</div></div>
+          <hr>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);">Venue</div><div style="font-weight:700;margin-top:2px;">Moscone Center, SF</div><div style="font-size:12px;color:var(--ink-3);">747 Howard St, San Francisco</div></div>
+          <hr>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);">WiFi</div><div style="font-weight:700;font-family:var(--font-mono);margin-top:2px;">TECHSUMMIT · pass: summit26</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

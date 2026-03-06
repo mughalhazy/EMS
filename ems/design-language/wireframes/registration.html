@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMS — Registrations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .workflow { display:flex; gap:0; align-items:center; margin-bottom:4px; }
+  .wf-step {
+    padding:8px 16px; font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; gap:6px; cursor:pointer;
+  }
+  .wf-step:first-child { border-radius:var(--radius) 0 0 var(--radius); }
+  .wf-step:last-child  { border-radius:0 var(--radius) var(--radius) 0; }
+  .wf-step + .wf-step  { border-left:none; }
+  .wf-step.active { background:var(--ink); color:var(--white); border-color:var(--ink); }
+  .wf-step .count { font-size:10px; font-weight:800; padding:1px 6px; border-radius:10px; background:rgba(255,255,255,.2); }
+  .wf-step:not(.active) .count { background:var(--border); color:var(--ink-2); }
+  .bulk-bar { display:flex; align-items:center; gap:8px; padding:10px 16px; background:var(--i-lt); border-bottom:1px solid var(--i-border); font-size:13px; font-weight:600; color:var(--i-dk); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-header"><span class="wordmark">EMS</span></div>
+    <nav class="nav">
+      <a class="nav-item"><span class="nav-icon">◈</span><span>Dashboard</span></a>
+      <a class="nav-item"><span class="nav-icon">◉</span><span>Events</span></a>
+      <a class="nav-item"><span class="nav-icon">▦</span><span>Agenda</span></a>
+      <a class="nav-item"><span class="nav-icon">◎</span><span>Speakers</span></a>
+      <a class="nav-item"><span class="nav-icon">◑</span><span>Attendees</span></a>
+      <a class="nav-item active"><span class="nav-icon">◐</span><span>Registrations</span><span class="pip"></span></a>
+      <a class="nav-item"><span class="nav-icon">◆</span><span>Ticketing</span></a>
+      <a class="nav-item"><span class="nav-icon">◇</span><span>Sponsors</span></a>
+      <a class="nav-item"><span class="nav-icon">▣</span><span>Exhibitors</span></a>
+      <a class="nav-item"><span class="nav-icon">◫</span><span>Analytics</span></a>
+      <a class="nav-item"><span class="nav-icon">◬</span><span>Notifications</span></a>
+      <a class="nav-item"><span class="nav-icon">◌</span><span>Settings</span></a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Registrations</span>
+      <div class="topbar-actions">
+        <select class="filter-select"><option>TechSummit 2026</option><option>DesignCon Spring</option></select>
+        <button class="btn btn-ghost">Export CSV</button>
+        <button class="btn btn-primary">+ Add Registration</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <input class="filter-input" placeholder="Search by name or email…" style="min-width:280px;">
+      <select class="filter-select"><option>All ticket types</option><option>VIP All-Access</option><option>General Admission</option><option>Workshop Day Pass</option></select>
+      <select class="filter-select"><option>All statuses</option><option>Pending</option><option>Approved</option><option>Confirmed</option><option>Cancelled</option></select>
+      <div class="filter-sep"></div>
+      <span style="font-size:12px;font-weight:600;color:var(--ink-3);">1,842 registrations</span>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Status Workflow Tabs -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div class="workflow">
+          <div class="wf-step"><span>All</span><span class="count">1,842</span></div>
+          <div class="wf-step active"><span>Pending</span><span class="count">14</span></div>
+          <div class="wf-step"><span>Approved</span><span class="count">84</span></div>
+          <div class="wf-step"><span>Confirmed</span><span class="count">1,728</span></div>
+          <div class="wf-step"><span>Cancelled</span><span class="count">16</span></div>
+        </div>
+        <div class="alert a" style="padding:8px 14px;margin:0;">
+          <span>⚠</span> 14 registrations awaiting your approval
+        </div>
+      </div>
+
+      <!-- Bulk action bar (shown when rows selected) -->
+      <div class="bulk-bar">
+        <input type="checkbox" checked style="width:14px;height:14px;">
+        <span>3 selected</span>
+        <div style="width:1px;height:16px;background:var(--i-border);"></div>
+        <button class="btn btn-soft btn-sm">Approve</button>
+        <button class="btn btn-soft btn-sm">Send reminder</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--b-md);">Cancel</button>
+        <div class="filter-sep"></div>
+        <span style="font-size:12px;opacity:.7;">Clear selection</span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox"></th>
+              <th>Attendee</th>
+              <th>Ticket Type</th>
+              <th>Order</th>
+              <th>Registered</th>
+              <th>Status</th>
+              <th>Fulfillment</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--a-lt);">
+              <td><input type="checkbox" checked></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar" style="background:var(--a-lt);color:var(--a-dk);">SM</div>
+                  <div>
+                    <div style="font-weight:700;color:var(--ink);">Sarah Mitchell</div>
+                    <div style="font-size:12px;color:var(--ink-3);">sarah@acmecorp.com</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge g-tag">VIP All-Access</span></td>
+              <td style="font-size:12px;color:var(--ink-3);">ORD-00821</td>
+              <td style="font-size:12px;color:var(--ink-3);">Mar 4, 2026</td>
+              <td><span class="chip a-tag">Pending</span></td>
+              <td><span class="chip n-tag">—</span></td>
+              <td>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-forest btn-sm">Approve</button>
+                  <button class="btn btn-ghost btn-sm">View</button>
+                </div>
+              </td>
+            </tr>
+            <tr style="background:var(--a-lt);">
+              <td><input type="checkbox" checked></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar" style="background:var(--a-lt);color:var(--a-dk);">RK</div>
+                  <div>
+                    <div style="font-weight:700;color:var(--ink);">Raj Kumar</div>
+                    <div style="font-size:12px;color:var(--ink-3);">raj@techventures.io</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge g-tag">VIP All-Access</span></td>
+              <td style="font-size:12px;color:var(--ink-3);">ORD-00819</td>
+              <td style="font-size:12px;color:var(--ink-3);">Mar 3, 2026</td>
+              <td><span class="chip a-tag">Pending</span></td>
+              <td><span class="chip n-tag">—</span></td>
+              <td>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-forest btn-sm">Approve</button>
+                  <button class="btn btn-ghost btn-sm">View</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar">AL</div>
+                  <div>
+                    <div style="font-weight:700;color:var(--ink);">Amy Lee</div>
+                    <div style="font-size:12px;color:var(--ink-3);">amy@designlabs.co</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge n-tag">General Admission</span></td>
+              <td style="font-size:12px;color:var(--ink-3);">ORD-00804</td>
+              <td style="font-size:12px;color:var(--ink-3);">Feb 28, 2026</td>
+              <td><span class="chip f-tag">Confirmed</span></td>
+              <td><span class="chip t-tag">QR Issued</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar">MC</div>
+                  <div>
+                    <div style="font-weight:700;color:var(--ink);">Marcus Chen</div>
+                    <div style="font-size:12px;color:var(--ink-3);">mchen@dataops.com</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge i-tag">Workshop Day Pass</span></td>
+              <td style="font-size:12px;color:var(--ink-3);">ORD-00799</td>
+              <td style="font-size:12px;color:var(--ink-3);">Feb 26, 2026</td>
+              <td><span class="chip f-tag">Confirmed</span></td>
+              <td><span class="chip t-tag">QR Issued</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="opacity:.6;">
+              <td><input type="checkbox"></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="avatar" style="background:var(--b-lt);color:var(--b-dk);">PW</div>
+                  <div>
+                    <div style="font-weight:700;color:var(--ink);">Paul Wright</div>
+                    <div style="font-size:12px;color:var(--ink-3);">p.wright@corp.net</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge n-tag">General Admission</span></td>
+              <td style="font-size:12px;color:var(--ink-3);">ORD-00788</td>
+              <td style="font-size:12px;color:var(--ink-3);">Feb 20, 2026</td>
+              <td><span class="chip b-tag">Cancelled</span></td>
+              <td><span class="chip b-tag">Revoked</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">Showing 14 of 14 pending registrations</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm">← Prev</button>
+            <button class="btn btn-ghost btn-sm">Next →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

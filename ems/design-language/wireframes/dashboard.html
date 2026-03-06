@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMS — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .event-row-meta { display:flex; align-items:center; gap:8px; }
+  .mini-bar { display:flex; flex-direction:column; gap:4px; }
+  .mini-bar-label { display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); }
+  .stat-row { display:flex; gap:24px; padding:16px 0; border-bottom:1px solid var(--border); }
+  .stat-row:last-child { border-bottom:none; }
+  .stat-block { display:flex; flex-direction:column; gap:2px; }
+  .stat-num { font-size:22px; font-weight:800; letter-spacing:-.03em; color:var(--ink); }
+  .stat-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header"><span class="wordmark">EMS</span></div>
+    <nav class="nav">
+      <a class="nav-item active"><span class="nav-icon">◈</span><span>Dashboard</span><span class="pip"></span></a>
+      <a class="nav-item"><span class="nav-icon">◉</span><span>Events</span></a>
+      <a class="nav-item"><span class="nav-icon">▦</span><span>Agenda</span></a>
+      <a class="nav-item"><span class="nav-icon">◎</span><span>Speakers</span></a>
+      <a class="nav-item"><span class="nav-icon">◑</span><span>Attendees</span></a>
+      <a class="nav-item"><span class="nav-icon">◐</span><span>Registrations</span></a>
+      <a class="nav-item"><span class="nav-icon">◆</span><span>Ticketing</span></a>
+      <a class="nav-item"><span class="nav-icon">◇</span><span>Sponsors</span></a>
+      <a class="nav-item"><span class="nav-icon">▣</span><span>Exhibitors</span></a>
+      <a class="nav-item"><span class="nav-icon">◫</span><span>Analytics</span></a>
+      <a class="nav-item"><span class="nav-icon">◬</span><span>Notifications</span></a>
+      <a class="nav-item"><span class="nav-icon">◌</span><span>Settings</span></a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <!-- TopBar -->
+    <div class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <div class="topbar-actions">
+        <div class="avatar">JD</div>
+        <button class="btn btn-primary">+ New Event</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Live Alert -->
+      <div class="alert i">
+        <span class="alert-dot"></span>
+        <div>
+          <strong>TechSummit 2026</strong> goes live in 3 hours — 1,842 registrations confirmed, 14 pending approval.
+        </div>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi i">
+          <div class="kpi-icon i">◉</div>
+          <div class="kpi-label">Active Events</div>
+          <div class="kpi-value">7</div>
+          <div class="kpi-delta pos">↑ 2 this month</div>
+        </div>
+        <div class="kpi f">
+          <div class="kpi-icon f">◑</div>
+          <div class="kpi-label">Registrations</div>
+          <div class="kpi-value">4,291</div>
+          <div class="kpi-delta pos">↑ 18% vs last period</div>
+        </div>
+        <div class="kpi g">
+          <div class="kpi-icon g">◆</div>
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-value">$218k</div>
+          <div class="kpi-delta pos">↑ 24% vs last period</div>
+        </div>
+        <div class="kpi t">
+          <div class="kpi-icon t">✓</div>
+          <div class="kpi-label">Checked In</div>
+          <div class="kpi-value">1,104</div>
+          <div class="kpi-delta neu">Live today</div>
+        </div>
+        <div class="kpi a">
+          <div class="kpi-icon a">◐</div>
+          <div class="kpi-label">Pending Approval</div>
+          <div class="kpi-value">34</div>
+          <div class="kpi-delta neu">Needs action</div>
+        </div>
+        <div class="kpi b">
+          <div class="kpi-icon b">⚠</div>
+          <div class="kpi-label">Open Issues</div>
+          <div class="kpi-value">3</div>
+          <div class="kpi-delta neg">↑ 1 since yesterday</div>
+        </div>
+      </div>
+
+      <!-- Two-column: Events Table + Activity -->
+      <div class="two-col">
+
+        <!-- Active Events Table -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Active Events</span>
+            <a style="font-size:12px;font-weight:700;color:var(--i-md);cursor:pointer;">View all →</a>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Date</th>
+                  <th>Registrations</th>
+                  <th>Revenue</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="primary">TechSummit 2026</td>
+                  <td>Mar 14–16, 2026</td>
+                  <td>
+                    <div class="mini-bar">
+                      <div class="mini-bar-label"><span>1,842</span><span style="color:var(--ink-4)">/ 2,000</span></div>
+                      <div class="progress-track" style="width:120px">
+                        <div class="progress-fill" style="width:92%;background:var(--f-md)"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color:var(--g-dk);font-weight:700;">$92,400</td>
+                  <td><span class="chip t-tag">Live</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">DesignCon Spring</td>
+                  <td>Apr 3–4, 2026</td>
+                  <td>
+                    <div class="mini-bar">
+                      <div class="mini-bar-label"><span>740</span><span style="color:var(--ink-4)">/ 1,200</span></div>
+                      <div class="progress-track" style="width:120px">
+                        <div class="progress-fill" style="width:62%;background:var(--i-md)"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color:var(--g-dk);font-weight:700;">$44,200</td>
+                  <td><span class="chip f-tag">Published</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">CloudOps Forum</td>
+                  <td>May 20–22, 2026</td>
+                  <td>
+                    <div class="mini-bar">
+                      <div class="mini-bar-label"><span>218</span><span style="color:var(--ink-4)">/ 800</span></div>
+                      <div class="progress-track" style="width:120px">
+                        <div class="progress-fill" style="width:27%;background:var(--a-md)"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color:var(--g-dk);font-weight:700;">$18,100</td>
+                  <td><span class="chip f-tag">Published</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">AI Leaders Summit</td>
+                  <td>Jun 8–9, 2026</td>
+                  <td style="color:var(--ink-3);">—</td>
+                  <td style="color:var(--ink-3);">—</td>
+                  <td><span class="chip n-tag">Draft</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">HR & People Expo</td>
+                  <td>Jun 30, 2026</td>
+                  <td>
+                    <div class="mini-bar">
+                      <div class="mini-bar-label"><span>91</span><span style="color:var(--ink-4)">/ 500</span></div>
+                      <div class="progress-track" style="width:120px">
+                        <div class="progress-fill" style="width:18%;background:var(--a-md)"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color:var(--g-dk);font-weight:700;">$5,600</td>
+                  <td><span class="chip f-tag">Published</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">Showing 5 of 7 events</span>
+            <button class="btn btn-ghost btn-sm">Load more</button>
+          </div>
+        </div>
+
+        <!-- Sidebar panel -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Pending Actions -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Needs Attention</span>
+              <span class="badge a-tag">34</span>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div>
+                  <div style="font-weight:700;font-size:13px;color:var(--ink);">Registration approvals</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">TechSummit 2026</div>
+                </div>
+                <span class="badge a-tag">14</span>
+              </div>
+              <hr>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div>
+                  <div style="font-weight:700;font-size:13px;color:var(--ink);">Exhibitor confirmation</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">DesignCon Spring</div>
+                </div>
+                <span class="badge a-tag">8</span>
+              </div>
+              <hr>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div>
+                  <div style="font-weight:700;font-size:13px;color:var(--ink);">Payment failures</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Multiple events</div>
+                </div>
+                <span class="badge b-tag">3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Check-ins -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Today — TechSummit</span>
+              <span class="chip t-tag">Live</span>
+            </div>
+            <div class="card-body">
+              <div class="stat-row">
+                <div class="stat-block"><div class="stat-num">1,104</div><div class="stat-lbl">Checked In</div></div>
+                <div class="stat-block"><div class="stat-num">738</div><div class="stat-lbl">Remaining</div></div>
+              </div>
+              <div style="margin-top:14px;">
+                <div class="mini-bar-label" style="font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;margin-bottom:6px;">
+                  <span>Check-in rate</span><span style="font-weight:700;color:var(--f-md);">60%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width:60%;background:var(--f-md)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div>
+</body>
+</html>

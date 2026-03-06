@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMS — Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* Portal surface — executive / admin digest */
+  .admin-header {
+    height:56px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 40px; background:var(--ink); border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .admin-wordmark { font-size:12px; font-weight:800; letter-spacing:.12em; color:var(--white); text-transform:uppercase; }
+  .admin-nav { display:flex; gap:0; }
+  .admin-nav-item { padding:0 16px; height:56px; display:flex; align-items:center; font-size:13px; font-weight:600; color:var(--ink-3); cursor:pointer; border-bottom:2px solid transparent; transition:all .12s; }
+  .admin-nav-item:hover { color:var(--white); }
+  .admin-nav-item.active { color:var(--white); border-bottom-color:var(--i-md); }
+  .admin-main { max-width:1200px; margin:0 auto; padding:40px 32px; display:flex;flex-direction:column;gap:32px; }
+  .toggle { position:relative; width:36px; height:20px; background:var(--surface); border-radius:10px; cursor:pointer; border:1px solid var(--border); flex-shrink:0; }
+  .toggle.on { background:var(--f-md); border-color:var(--f-dk); }
+  .toggle::after { content:''; position:absolute; width:14px; height:14px; border-radius:50%; background:var(--white); top:2px; left:2px; transition:.15s; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+  .toggle.on::after { left:18px; }
+  .flag-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border); gap:16px; }
+  .flag-row:last-child { border-bottom:none; }
+  .flag-info { flex:1; min-width:0; }
+  .flag-name { font-weight:700; font-size:13px; color:var(--ink); }
+  .flag-desc { font-size:12px; font-weight:500; color:var(--ink-3); margin-top:2px; }
+  .health-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .health-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .health-row:last-child { border-bottom:none; }
+  .health-service { font-weight:700; font-size:13px; flex:1; }
+  .health-latency { font-size:12px; font-weight:600; color:var(--ink-3); font-family:var(--font-mono); }
+</style>
+</head>
+<body>
+
+<!-- Admin Header — Portal surface with dark nav -->
+<header class="admin-header">
+  <div style="display:flex;align-items:center;gap:32px;">
+    <span class="admin-wordmark">EMS Admin</span>
+    <nav class="admin-nav">
+      <div class="admin-nav-item active">Overview</div>
+      <div class="admin-nav-item">Tenants</div>
+      <div class="admin-nav-item">Users</div>
+      <div class="admin-nav-item">Roles</div>
+      <div class="admin-nav-item">System</div>
+      <div class="admin-nav-item">Audit Log</div>
+    </nav>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="chip t-tag">All systems operational</span>
+    <div class="avatar" style="background:var(--i-lt);color:var(--i-dk);">AD</div>
+  </div>
+</header>
+
+<div class="admin-main">
+
+  <!-- Top KPIs -->
+  <div>
+    <div class="section-heading" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:16px;">Platform Overview</div>
+    <div class="kpi-grid-4">
+      <div class="kpi i">
+        <div class="kpi-icon i">◉</div>
+        <div class="kpi-label">Active Tenants</div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-delta pos">↑ 2 this month</div>
+      </div>
+      <div class="kpi f">
+        <div class="kpi-icon f">◑</div>
+        <div class="kpi-label">Total Users</div>
+        <div class="kpi-value">2,841</div>
+        <div class="kpi-delta pos">↑ 341 this month</div>
+      </div>
+      <div class="kpi g">
+        <div class="kpi-icon g">$</div>
+        <div class="kpi-label">Platform MRR</div>
+        <div class="kpi-value">$48k</div>
+        <div class="kpi-delta pos">↑ 12% MoM</div>
+      </div>
+      <div class="kpi t">
+        <div class="kpi-icon t">⚡</div>
+        <div class="kpi-label">API Uptime</div>
+        <div class="kpi-value">99.98%</div>
+        <div class="kpi-delta neu">Last 30 days</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col" style="align-items:start;">
+
+    <!-- Tenants -->
+    <div style="grid-column:span 2;">
+      <div class="section-heading" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:12px;">Tenants</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tenant</th>
+              <th>Plan</th>
+              <th>Users</th>
+              <th>Events</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="font-weight:700;color:var(--ink);">Apex Events</div>
+                <div style="font-size:12px;color:var(--ink-3);">apex-events</div>
+              </td>
+              <td><span class="badge g-tag">Enterprise</span></td>
+              <td>248</td>
+              <td>7</td>
+              <td><span class="chip f-tag">Active</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight:700;color:var(--ink);">DesignWorld</div>
+                <div style="font-size:12px;color:var(--ink-3);">designworld</div>
+              </td>
+              <td><span class="badge i-tag">Pro</span></td>
+              <td>82</td>
+              <td>3</td>
+              <td><span class="chip f-tag">Active</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight:700;color:var(--ink);">TechForward</div>
+                <div style="font-size:12px;color:var(--ink-3);">techforward</div>
+              </td>
+              <td><span class="badge n-tag">Starter</span></td>
+              <td>14</td>
+              <td>1</td>
+              <td><span class="chip a-tag">Trial</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+            <tr style="opacity:.6;">
+              <td>
+                <div style="font-weight:700;color:var(--ink);">OldConf Co.</div>
+                <div style="font-size:12px;color:var(--ink-3);">oldconf</div>
+              </td>
+              <td><span class="badge n-tag">Pro</span></td>
+              <td>3</td>
+              <td>0</td>
+              <td><span class="chip b-tag">Suspended</span></td>
+              <td><button class="btn btn-ghost btn-sm">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">14 tenants total</span>
+          <button class="btn btn-ghost btn-sm">View all tenants →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Health + Feature Flags -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- System Health -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">System Health</span>
+          <span class="chip t-tag">All operational</span>
+        </div>
+        <div class="card-body">
+          <div class="health-row">
+            <div class="health-dot" style="background:var(--f-md);"></div>
+            <div class="health-service">API Gateway</div>
+            <div class="health-latency">42ms</div>
+          </div>
+          <div class="health-row">
+            <div class="health-dot" style="background:var(--f-md);"></div>
+            <div class="health-service">Auth Service</div>
+            <div class="health-latency">18ms</div>
+          </div>
+          <div class="health-row">
+            <div class="health-dot" style="background:var(--f-md);"></div>
+            <div class="health-service">PostgreSQL</div>
+            <div class="health-latency">6ms</div>
+          </div>
+          <div class="health-row">
+            <div class="health-dot" style="background:var(--f-md);"></div>
+            <div class="health-service">Redis</div>
+            <div class="health-latency">1ms</div>
+          </div>
+          <div class="health-row">
+            <div class="health-dot" style="background:var(--a-md);animation:pulse 2s infinite;"></div>
+            <div class="health-service">Kafka</div>
+            <div class="health-latency">94ms ⚠</div>
+          </div>
+          <div class="health-row">
+            <div class="health-dot" style="background:var(--f-md);"></div>
+            <div class="health-service">OpenSearch</div>
+            <div class="health-latency">22ms</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Flags -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Feature Flags</span>
+          <button class="btn btn-soft btn-sm">+ Add Flag</button>
+        </div>
+        <div class="card-body">
+          <div class="flag-row">
+            <div class="flag-info">
+              <div class="flag-name">AI Copilot</div>
+              <div class="flag-desc">Agenda recommendations + assistant</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="flag-row">
+            <div class="flag-info">
+              <div class="flag-name">Wallet Pass</div>
+              <div class="flag-desc">Apple & Google Wallet fulfillment</div>
+            </div>
+            <div class="toggle on"></div>
+          </div>
+          <div class="flag-row">
+            <div class="flag-info">
+              <div class="flag-name">Exhibitor Lead Scan</div>
+              <div class="flag-desc">Mobile QR lead capture</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+          <div class="flag-row">
+            <div class="flag-info">
+              <div class="flag-name">Multi-currency</div>
+              <div class="flag-desc">EUR, GBP, CAD checkout</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="section-heading" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:0;">Recent Users</div>
+      <div style="display:flex;gap:8px;">
+        <input class="filter-select" placeholder="Search users…" style="min-width:220px;padding:7px 12px;font-family:var(--font);">
+        <button class="btn btn-primary">+ Invite User</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Tenant</th>
+            <th>Role</th>
+            <th>Last Login</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar">JD</div>
+                <div><div style="font-weight:700;color:var(--ink);">John Doe</div><div style="font-size:12px;color:var(--ink-3);">john@apexevents.com</div></div>
+              </div>
+            </td>
+            <td>Apex Events</td>
+            <td><span class="badge i-tag">Tenant Admin</span></td>
+            <td style="font-size:12px;color:var(--ink-3);">Today, 09:14</td>
+            <td><span class="chip f-tag">Active</span></td>
+            <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar">AL</div>
+                <div><div style="font-weight:700;color:var(--ink);">Amy Lee</div><div style="font-size:12px;color:var(--ink-3);">amy@designlabs.co</div></div>
+              </div>
+            </td>
+            <td>DesignWorld</td>
+            <td><span class="badge n-tag">Event Manager</span></td>
+            <td style="font-size:12px;color:var(--ink-3);">Yesterday</td>
+            <td><span class="chip f-tag">Active</span></td>
+            <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar" style="background:var(--a-lt);color:var(--a-dk);">MK</div>
+                <div><div style="font-weight:700;color:var(--ink);">Mike Kwan</div><div style="font-size:12px;color:var(--ink-3);">mike@techforward.io</div></div>
+              </div>
+            </td>
+            <td>TechForward</td>
+            <td><span class="badge n-tag">Tenant Admin</span></td>
+            <td style="font-size:12px;color:var(--ink-3);">3 days ago</td>
+            <td><span class="chip a-tag">Invited</span></td>
+            <td><button class="btn btn-ghost btn-sm">Resend</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

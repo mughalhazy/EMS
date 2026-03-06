@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMS — Agenda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .schedule-grid { display:grid; grid-template-columns:80px repeat(4,1fr); gap:0; border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; background:var(--white); }
+  .sched-header { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); }
+  .sched-header.room { text-align:center; border-left:1px solid var(--border); }
+  .time-slot { padding:8px 10px; font-size:11px; font-weight:700; color:var(--ink-3); background:var(--surface); border-bottom:1px solid var(--border); text-align:right; border-right:1px solid var(--border); display:flex; align-items:flex-start; justify-content:flex-end; }
+  .sched-cell { border-left:1px solid var(--border); border-bottom:1px solid var(--border); padding:6px; background:var(--white); min-height:80px; vertical-align:top; position:relative; }
+  .sched-cell.empty { background:var(--off); }
+  .session-block {
+    border-radius:var(--radius); padding:10px 12px; height:100%;
+    display:flex; flex-direction:column; gap:4px; cursor:pointer;
+    transition:filter .15s;
+  }
+  .session-block:hover { filter:brightness(.97); }
+  .session-block.keynote { background:var(--i-lt); border-left:3px solid var(--i-md); }
+  .session-block.talk    { background:var(--f-lt); border-left:3px solid var(--f-md); }
+  .session-block.panel   { background:var(--g-lt); border-left:3px solid var(--g-md); }
+  .session-block.workshop{ background:var(--t-lt); border-left:3px solid var(--t-md); }
+  .session-block.conflict{ background:var(--b-lt); border-left:3px solid var(--b-md); }
+  .session-title { font-size:12px; font-weight:700; color:var(--ink); line-height:1.3; }
+  .session-speaker { font-size:11px; font-weight:600; color:var(--ink-3); }
+  .session-time { font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--ink-4); text-transform:uppercase; }
+  .day-tabs { display:flex; gap:0; }
+  .day-tab { padding:8px 20px; font-size:13px; font-weight:700; cursor:pointer; border-bottom:2px solid transparent; color:var(--ink-3); transition:all .12s; }
+  .day-tab.active { color:var(--i-md); border-bottom-color:var(--i-md); }
+  .track-legend { display:flex; gap:12px; flex-wrap:wrap; }
+  .track-dot { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--ink-2); }
+  .dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-header"><span class="wordmark">EMS</span></div>
+    <nav class="nav">
+      <a class="nav-item"><span class="nav-icon">◈</span><span>Dashboard</span></a>
+      <a class="nav-item"><span class="nav-icon">◉</span><span>Events</span></a>
+      <a class="nav-item active"><span class="nav-icon">▦</span><span>Agenda</span><span class="pip"></span></a>
+      <a class="nav-item"><span class="nav-icon">◎</span><span>Speakers</span></a>
+      <a class="nav-item"><span class="nav-icon">◑</span><span>Attendees</span></a>
+      <a class="nav-item"><span class="nav-icon">◐</span><span>Registrations</span></a>
+      <a class="nav-item"><span class="nav-icon">◆</span><span>Ticketing</span></a>
+      <a class="nav-item"><span class="nav-icon">◇</span><span>Sponsors</span></a>
+      <a class="nav-item"><span class="nav-icon">▣</span><span>Exhibitors</span></a>
+      <a class="nav-item"><span class="nav-icon">◫</span><span>Analytics</span></a>
+      <a class="nav-item"><span class="nav-icon">◬</span><span>Notifications</span></a>
+      <a class="nav-item"><span class="nav-icon">◌</span><span>Settings</span></a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="topbar-title">Agenda</span>
+        <div class="day-tabs">
+          <div class="day-tab active">Day 1 — Mar 14</div>
+          <div class="day-tab">Day 2 — Mar 15</div>
+          <div class="day-tab">Day 3 — Mar 16</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost">Publish Agenda</button>
+        <button class="btn btn-primary">+ Add Session</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <select class="filter-select"><option>TechSummit 2026</option></select>
+      <select class="filter-select"><option>All tracks</option><option>Keynote</option><option>Engineering</option><option>Product</option><option>Workshop</option></select>
+      <select class="filter-select"><option>All rooms</option><option>Main Hall</option><option>Room A</option><option>Room B</option><option>Workshop Lab</option></select>
+      <div class="filter-sep"></div>
+      <div class="track-legend">
+        <div class="track-dot"><div class="dot" style="background:var(--i-md)"></div>Keynote</div>
+        <div class="track-dot"><div class="dot" style="background:var(--f-md)"></div>Talk</div>
+        <div class="track-dot"><div class="dot" style="background:var(--g-md)"></div>Panel</div>
+        <div class="track-dot"><div class="dot" style="background:var(--t-md)"></div>Workshop</div>
+        <div class="track-dot"><div class="dot" style="background:var(--b-md)"></div>Conflict</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="schedule-grid">
+        <!-- Headers -->
+        <div class="sched-header">Time</div>
+        <div class="sched-header room">Main Hall<br><span style="font-size:10px;font-weight:600;color:var(--ink-4);">Cap. 800</span></div>
+        <div class="sched-header room">Room A<br><span style="font-size:10px;font-weight:600;color:var(--ink-4);">Cap. 200</span></div>
+        <div class="sched-header room">Room B<br><span style="font-size:10px;font-weight:600;color:var(--ink-4);">Cap. 150</span></div>
+        <div class="sched-header room">Workshop Lab<br><span style="font-size:10px;font-weight:600;color:var(--ink-4);">Cap. 60</span></div>
+
+        <!-- 09:00 -->
+        <div class="time-slot">09:00</div>
+        <div class="sched-cell" style="grid-column:span 4;background:var(--i-lt);border-left:1px solid var(--border);">
+          <div class="session-block keynote" style="flex-direction:row;align-items:center;gap:16px;min-height:70px;">
+            <div style="flex:1;">
+              <div class="session-time">Keynote · 09:00–10:00 · All rooms</div>
+              <div class="session-title" style="font-size:15px;">Opening Keynote: The Future of Enterprise Tech</div>
+              <div class="session-speaker">Dr. Elena Vasquez, CTO · Apex Systems</div>
+            </div>
+            <span class="badge i-tag">Keynote</span>
+          </div>
+        </div>
+
+        <!-- 10:00 -->
+        <div class="time-slot">10:00</div>
+        <div class="sched-cell empty"></div>
+        <div class="sched-cell">
+          <div class="session-block talk">
+            <div class="session-time">10:15–11:00</div>
+            <div class="session-title">Scaling Microservices at 10M RPS</div>
+            <div class="session-speaker">James Park · Cloudflare</div>
+          </div>
+        </div>
+        <div class="sched-cell">
+          <div class="session-block panel">
+            <div class="session-time">10:15–11:00</div>
+            <div class="session-title">Product-Led Growth Panel</div>
+            <div class="session-speaker">4 speakers</div>
+          </div>
+        </div>
+        <div class="sched-cell">
+          <div class="session-block workshop">
+            <div class="session-time">10:00–12:00</div>
+            <div class="session-title">Hands-on: Kubernetes Operators</div>
+            <div class="session-speaker">Mia Torres · HashiCorp</div>
+          </div>
+        </div>
+
+        <!-- 11:00 -->
+        <div class="time-slot">11:00</div>
+        <div class="sched-cell">
+          <div class="session-block talk">
+            <div class="session-time">11:15–12:00</div>
+            <div class="session-title">AI-Native Application Design</div>
+            <div class="session-speaker">Sam Okafor · Anthropic</div>
+          </div>
+        </div>
+        <div class="sched-cell">
+          <div class="session-block conflict">
+            <div class="session-time" style="color:var(--b-dk);">⚠ 11:00–11:45 — Conflict</div>
+            <div class="session-title" style="color:var(--b-dk);">DevSecOps in Practice</div>
+            <div class="session-speaker" style="color:var(--b-dk);">Overlaps with Room B session</div>
+          </div>
+        </div>
+        <div class="sched-cell">
+          <div class="session-block conflict">
+            <div class="session-time" style="color:var(--b-dk);">⚠ 11:00–11:45 — Conflict</div>
+            <div class="session-title" style="color:var(--b-dk);">Platform Engineering</div>
+            <div class="session-speaker" style="color:var(--b-dk);">Speaker booked for Room A</div>
+          </div>
+        </div>
+        <div class="sched-cell empty" style="background:var(--off);"></div>
+
+        <!-- 12:00 -->
+        <div class="time-slot">12:00</div>
+        <div class="sched-cell" style="grid-column:span 4;background:var(--surface);border-left:1px solid var(--border);">
+          <div style="display:flex;align-items:center;justify-content:center;height:60px;color:var(--ink-3);font-weight:700;font-size:13px;gap:8px;">
+            🍽 Lunch Break — 12:00–13:30
+          </div>
+        </div>
+
+        <!-- 13:30 -->
+        <div class="time-slot">13:30</div>
+        <div class="sched-cell">
+          <div class="session-block keynote">
+            <div class="session-time">13:30–14:15</div>
+            <div class="session-title">Fireside: Building Resilient Teams</div>
+            <div class="session-speaker">Priya Nair · Stripe</div>
+          </div>
+        </div>
+        <div class="sched-cell">
+          <div class="session-block talk">
+            <div class="session-time">13:30–14:15</div>
+            <div class="session-title">Observability at Scale</div>
+            <div class="session-speaker">Lin Zhao · Datadog</div>
+          </div>
+        </div>
+        <div class="sched-cell empty"></div>
+        <div class="sched-cell empty"></div>
+
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-ghost">← Day 1</button>
+        <button class="btn btn-ghost">Day 2 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

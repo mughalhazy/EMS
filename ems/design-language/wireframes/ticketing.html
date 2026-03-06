@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMS — Ticketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+  .inventory-bar { display:flex;flex-direction:column;gap:4px;min-width:120px; }
+  .inventory-nums { display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3); }
+  .price-cell { font-size:15px;font-weight:800;letter-spacing:-.02em;color:var(--g-dk); }
+  .ticket-detail-panel { position:sticky;top:24px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-header"><span class="wordmark">EMS</span></div>
+    <nav class="nav">
+      <a class="nav-item"><span class="nav-icon">◈</span><span>Dashboard</span></a>
+      <a class="nav-item"><span class="nav-icon">◉</span><span>Events</span></a>
+      <a class="nav-item"><span class="nav-icon">▦</span><span>Agenda</span></a>
+      <a class="nav-item"><span class="nav-icon">◎</span><span>Speakers</span></a>
+      <a class="nav-item"><span class="nav-icon">◑</span><span>Attendees</span></a>
+      <a class="nav-item"><span class="nav-icon">◐</span><span>Registrations</span></a>
+      <a class="nav-item active"><span class="nav-icon">◆</span><span>Ticketing</span><span class="pip"></span></a>
+      <a class="nav-item"><span class="nav-icon">◇</span><span>Sponsors</span></a>
+      <a class="nav-item"><span class="nav-icon">▣</span><span>Exhibitors</span></a>
+      <a class="nav-item"><span class="nav-icon">◫</span><span>Analytics</span></a>
+      <a class="nav-item"><span class="nav-icon">◬</span><span>Notifications</span></a>
+      <a class="nav-item"><span class="nav-icon">◌</span><span>Settings</span></a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Ticketing</span>
+      <div class="topbar-actions">
+        <select class="filter-select">
+          <option>TechSummit 2026</option><option>DesignCon Spring</option><option>CloudOps Forum</option>
+        </select>
+        <button class="btn btn-primary">+ Add Ticket Type</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <input class="filter-input" placeholder="Search ticket types…">
+      <select class="filter-select"><option>All statuses</option><option>Draft</option><option>On Sale</option><option>Sold Out</option><option>Closed</option></select>
+      <div class="filter-sep"></div>
+      <span style="font-size:12px;font-weight:600;color:var(--ink-3);">6 ticket types</span>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Revenue KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi g">
+          <div class="kpi-icon g">$</div>
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-value">$92,400</div>
+          <div class="kpi-delta pos">↑ 24% vs last event</div>
+        </div>
+        <div class="kpi f">
+          <div class="kpi-icon f">◆</div>
+          <div class="kpi-label">Tickets Sold</div>
+          <div class="kpi-value">1,842</div>
+          <div class="kpi-delta pos">↑ 92% of capacity</div>
+        </div>
+        <div class="kpi b">
+          <div class="kpi-icon b">⊗</div>
+          <div class="kpi-label">Sold Out Types</div>
+          <div class="kpi-value">2</div>
+          <div class="kpi-delta neu">Of 6 types</div>
+        </div>
+      </div>
+
+      <!-- Ticket Table -->
+      <div class="two-col" style="align-items:start">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket Type</th>
+                <th>Price</th>
+                <th>Inventory</th>
+                <th>Sales Window</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--ink);">VIP All-Access</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Full conference + VIP dinner + swag</div>
+                </td>
+                <td class="price-cell">$599</td>
+                <td>
+                  <div class="inventory-bar">
+                    <div class="inventory-nums"><span style="font-weight:700;color:var(--b-md);">200 / 200</span></div>
+                    <div class="progress-track" style="width:100px"><div class="progress-fill" style="width:100%;background:var(--b-md)"></div></div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--ink-3);">Jan 1 – Feb 28</td>
+                <td><span class="badge b-tag">Sold Out</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--ink);">Early Bird General</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Full conference access</div>
+                </td>
+                <td class="price-cell">$299</td>
+                <td>
+                  <div class="inventory-bar">
+                    <div class="inventory-nums"><span style="font-weight:700;color:var(--b-md);">500 / 500</span></div>
+                    <div class="progress-track" style="width:100px"><div class="progress-fill" style="width:100%;background:var(--b-md)"></div></div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--ink-3);">Jan 1 – Jan 31</td>
+                <td><span class="badge b-tag">Sold Out</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--ink);">General Admission</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Full conference access</div>
+                </td>
+                <td class="price-cell">$399</td>
+                <td>
+                  <div class="inventory-bar">
+                    <div class="inventory-nums"><span>1,042 <span style="color:var(--ink-4);">/ 1,100</span></span></div>
+                    <div class="progress-track" style="width:100px"><div class="progress-fill" style="width:95%;background:var(--f-md)"></div></div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--ink-3);">Feb 1 – Mar 13</td>
+                <td><span class="badge f-tag">On Sale</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--ink);">Workshop Day Pass</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Day 3 workshops only</div>
+                </td>
+                <td class="price-cell">$149</td>
+                <td>
+                  <div class="inventory-bar">
+                    <div class="inventory-nums"><span>80 <span style="color:var(--ink-4);">/ 200</span></span></div>
+                    <div class="progress-track" style="width:100px"><div class="progress-fill" style="width:40%;background:var(--i-md)"></div></div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--ink-3);">Feb 1 – Mar 13</td>
+                <td><span class="badge f-tag">On Sale</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--ink);">Exhibitor Staff</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">For registered exhibitors</div>
+                </td>
+                <td class="price-cell">$0</td>
+                <td>
+                  <div class="inventory-bar">
+                    <div class="inventory-nums"><span>20 <span style="color:var(--ink-4);">/ 100</span></span></div>
+                    <div class="progress-track" style="width:100px"><div class="progress-fill" style="width:20%;background:var(--t-md)"></div></div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--ink-3);">Jan 1 – Mar 13</td>
+                <td><span class="badge f-tag">On Sale</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:700;color:var(--ink);">Speaker Complimentary</div>
+                  <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Invited speakers</div>
+                </td>
+                <td class="price-cell">$0</td>
+                <td>
+                  <div class="inventory-bar">
+                    <div class="inventory-nums"><span>0 <span style="color:var(--ink-4);">/ 50</span></span></div>
+                    <div class="progress-track" style="width:100px"><div class="progress-fill" style="width:0%;background:var(--ink-4)"></div></div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--ink-3);">Not open yet</td>
+                <td><span class="badge n-tag">Draft</span></td>
+                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Promo / Discount Panel -->
+        <div style="display:flex;flex-direction:column;gap:16px;" class="ticket-detail-panel">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Promo Codes</span><button class="btn btn-soft btn-sm">+ Add Code</button></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-weight:700;font-size:13px;">EARLY30</div><div style="font-size:12px;color:var(--ink-3);">30% off — used 142×</div></div>
+                <span class="badge a-tag">Expired</span>
+              </div>
+              <hr>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-weight:700;font-size:13px;">SPEAKER15</div><div style="font-size:12px;color:var(--ink-3);">15% off — used 8×</div></div>
+                <span class="badge f-tag">Active</span>
+              </div>
+              <hr>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-weight:700;font-size:13px;">PARTNER50</div><div style="font-size:12px;color:var(--ink-3);">$50 off — used 31×</div></div>
+                <span class="badge f-tag">Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Sales Timeline</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--b-md);margin-top:4px;flex-shrink:0;"></div>
+                <div><div style="font-weight:700;font-size:13px;">VIP + Early Bird</div><div style="font-size:12px;color:var(--ink-3);">Jan 1 – Feb 28 · Closed</div></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--f-md);margin-top:4px;flex-shrink:0;"></div>
+                <div><div style="font-weight:700;font-size:13px;">General + Day Pass</div><div style="font-size:12px;color:var(--ink-3);">Feb 1 – Mar 13 · Active</div></div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--ink-4);margin-top:4px;flex-shrink:0;"></div>
+                <div><div style="font-weight:700;font-size:13px;">Door Sales</div><div style="font-size:12px;color:var(--ink-3);">Mar 14 · Not open</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -90,6 +90,25 @@
 
 ---
 
+## Phase 2.5 — Design Language Artifacts
+
+### Token Configuration
+- ✅ styles/tokens.css          — CSS variables (exact design language)
+- ✅ tailwind.config.js         — full token map: colors, type, radius, shadow, spacing, breakpoints
+- ✅ postcss.config.js          — Tailwind + autoprefixer pipeline
+- ✅ styles/globals.css updated — Tailwind directives added
+
+### Wireframes (`ems/design-language/wireframes/`)
+- ✅ _base.css                  — shared token styles for all wireframes
+- ✅ dashboard.html             — KPI grid, live alert, events table, pending actions
+- ✅ events.html                — event card grid, status badges, progress bars
+- ✅ ticketing.html             — ticket catalog, inventory bars, promo codes, sales timeline
+- ✅ registration.html          — status workflow tabs, bulk actions, fulfillment state
+- ✅ agenda.html                — schedule grid by room/time, conflict detection, day tabs
+- ✅ exhibitors.html            — floor plan map, exhibitor table, booth status
+- ✅ attendee-portal.html       — website surface, QR pass, personal agenda, event info
+- ✅ admin-console.html         — portal surface, tenants, users, health, feature flags
+
 ## Phase 3 — Backend Wiring
 ⏳ Not started — awaiting task prompts per module
 
