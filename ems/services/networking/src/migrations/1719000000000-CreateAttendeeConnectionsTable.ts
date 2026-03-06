@@ -13,6 +13,8 @@ export class CreateAttendeeConnectionsTable1719000000000
     await queryRunner.query(`
       CREATE TABLE "attendee_connections" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "tenant_id" uuid NOT NULL,
+        "event_id" uuid NOT NULL,
         "attendee_a_id" uuid NOT NULL,
         "attendee_b_id" uuid NOT NULL,
         "status" "public"."attendee_connections_status_enum" NOT NULL DEFAULT 'pending',
@@ -26,7 +28,10 @@ export class CreateAttendeeConnectionsTable1719000000000
     `);
 
     await queryRunner.query(
-      'CREATE UNIQUE INDEX "uq_attendee_connections_pair" ON "attendee_connections" ("attendee_a_id", "attendee_b_id")',
+      'CREATE UNIQUE INDEX "uq_attendee_connections_tenant_event_pair" ON "attendee_connections" ("tenant_id", "event_id", "attendee_a_id", "attendee_b_id")',
+    );
+    await queryRunner.query(
+      'CREATE INDEX "idx_attendee_connections_tenant_event" ON "attendee_connections" ("tenant_id", "event_id")',
     );
     await queryRunner.query(
       'CREATE INDEX "idx_attendee_connections_attendee_a" ON "attendee_connections" ("attendee_a_id")',
@@ -39,7 +44,8 @@ export class CreateAttendeeConnectionsTable1719000000000
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query('DROP INDEX IF EXISTS "idx_attendee_connections_attendee_b"');
     await queryRunner.query('DROP INDEX IF EXISTS "idx_attendee_connections_attendee_a"');
-    await queryRunner.query('DROP INDEX IF EXISTS "uq_attendee_connections_pair"');
+    await queryRunner.query('DROP INDEX IF EXISTS "idx_attendee_connections_tenant_event"');
+    await queryRunner.query('DROP INDEX IF EXISTS "uq_attendee_connections_tenant_event_pair"');
     await queryRunner.query('DROP TABLE IF EXISTS "attendee_connections"');
     await queryRunner.query('DROP TYPE IF EXISTS "public"."attendee_connections_status_enum"');
   }

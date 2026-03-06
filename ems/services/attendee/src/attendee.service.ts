@@ -128,8 +128,9 @@ export class AttendeeService {
 
     const connections = await this.attendeeConnectionRepository
       .createQueryBuilder('connection')
-      .where('connection.attendee_a_id = :attendeeId', { attendeeId })
-      .orWhere('connection.attendee_b_id = :attendeeId', { attendeeId })
+      .where('connection.tenant_id = :tenantId', { tenantId })
+      .andWhere('connection.event_id = :eventId', { eventId })
+      .andWhere('(connection.attendee_a_id = :attendeeId OR connection.attendee_b_id = :attendeeId)', { attendeeId })
       .orderBy('connection.updated_at', 'DESC')
       .getMany();
 

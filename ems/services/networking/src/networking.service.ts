@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { AuditService } from '../../audit/src/audit.service';
 import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
 import {
   AttendeeConnectionEntity,
@@ -22,6 +23,7 @@ export class NetworkingService {
     @InjectRepository(AttendeeEntity)
     private readonly attendeeRepository: Repository<AttendeeEntity>,
     private readonly networkingEventsPublisher: NetworkingEventsPublisher,
+    private readonly auditService: AuditService,
   ) {}
 
   async sendConnectionRequest(
@@ -44,6 +46,8 @@ export class NetworkingService {
 
     const existingConnection = await this.connectionRepository.findOne({
       where: {
+        tenantId,
+        eventId,
         attendeeAId,
         attendeeBId,
       },
@@ -61,12 +65,26 @@ export class NetworkingService {
     }
 
     const connection = this.connectionRepository.create({
+      tenantId,
+      eventId,
       attendeeAId,
       attendeeBId,
       status: AttendeeConnectionStatus.PENDING,
     });
 
-    return this.connectionRepository.save(connection);
+    const savedConnection = await this.connectionRepository.save(connection);
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'networking.connection.requested',
+      after: {
+        connectionId: savedConnection.id,
+        attendeeAId: savedConnection.attendeeAId,
+        attendeeBId: savedConnection.attendeeBId,
+        status: savedConnection.status,
+      },
+    });
+
+    return savedConnection;
   }
 
   async acceptConnectionRequest(
@@ -78,7 +96,7 @@ export class NetworkingService {
     await this.assertAttendeeInEvent(tenantId, eventId, attendeeId);
 
     const connection = await this.connectionRepository.findOne({
-      where: { id: connectionId },
+      where: { id: connectionId, tenantId, eventId },
     });
 
     if (!connection) {
@@ -103,6 +121,16 @@ export class NetworkingService {
     await this.networkingEventsPublisher.publishAttendeeConnected(acceptedConnection, {
       tenantId,
       eventId,
+    });
+    await this.auditService.trackEventChange({
+      tenantId,
+      action: 'networking.connection.accepted',
+      after: {
+        connectionId: acceptedConnection.id,
+        attendeeAId: acceptedConnection.attendeeAId,
+        attendeeBId: acceptedConnection.attendeeBId,
+        status: acceptedConnection.status,
+      },
     });
 
     return acceptedConnection;

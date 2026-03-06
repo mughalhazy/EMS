@@ -10,6 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 import { SessionQnaEntity } from '../../agenda/src/entities/session-qna.entity';
 import { SurveyEntity } from '../../event/src/entities/survey.entity';
@@ -20,6 +21,20 @@ import { UpdatePollDto } from './dto/update-poll.dto';
 import { UpdateSurveyDto } from './dto/update-survey.dto';
 import { PollEntity } from './entities/poll.entity';
 import { EngagementService } from './engagement.service';
+
+class SubmitPollDto {
+  @IsUUID()
+  attendeeId!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  option!: string;
+}
+
+class CompleteSurveyDto {
+  @IsUUID()
+  attendeeId!: string;
+}
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId/engagement')
 export class EngagementController {
@@ -41,6 +56,17 @@ export class EngagementController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
   ): Promise<PollEntity[]> {
     return this.engagementService.listPolls(tenantId, eventId);
+  }
+
+  @Post('polls/:pollId/submissions')
+  @HttpCode(HttpStatus.CREATED)
+  async submitPoll(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('pollId', ParseUUIDPipe) pollId: string,
+    @Body() payload: SubmitPollDto,
+  ): Promise<{ status: string }> {
+    return this.engagementService.submitPoll(tenantId, eventId, pollId, payload);
   }
 
   @Patch('polls/:pollId')
@@ -88,6 +114,17 @@ export class EngagementController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
   ): Promise<SurveyEntity[]> {
     return this.engagementService.listSurveys(tenantId, eventId);
+  }
+
+  @Post('surveys/:surveyId/completions')
+  @HttpCode(HttpStatus.CREATED)
+  async completeSurvey(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('surveyId', ParseUUIDPipe) surveyId: string,
+    @Body() payload: CompleteSurveyDto,
+  ): Promise<{ status: string }> {
+    return this.engagementService.completeSurvey(tenantId, eventId, surveyId, payload);
   }
 
   @Patch('surveys/:surveyId')
