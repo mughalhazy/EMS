@@ -9,6 +9,7 @@ import { RoomEntity } from '../../event/src/entities/room.entity';
 import { AttendeeScheduleEntity } from './entities/attendee-schedule.entity';
 import { SessionEntity, SessionStatus } from './entities/session.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
+import { SessionAttendancePublisher } from './session-attendance.publisher';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
 
 @Injectable()
@@ -27,6 +28,7 @@ export class SessionService {
     @InjectRepository(RoomEntity)
     private readonly roomRepository: Repository<RoomEntity>,
     private readonly sessionLifecyclePublisher: SessionLifecyclePublisher,
+    private readonly sessionAttendancePublisher: SessionAttendancePublisher,
     private readonly auditService: AuditService,
   ) {}
 
@@ -143,6 +145,12 @@ export class SessionService {
     }
 
     const schedule = await this.attendeeScheduleRepository.save(this.attendeeScheduleRepository.create(input));
+    await this.sessionAttendancePublisher.publishSessionAttended({
+      tenantId: input.tenantId,
+      eventId: input.eventId,
+      sessionId: input.sessionId,
+      attendeeId: input.attendeeId,
+    });
     await this.auditService.trackEventChange({
       tenantId: input.tenantId,
       actorUserId,

@@ -6,6 +6,7 @@ import { AttendeeEntity, AttendeeStatus } from '../../attendee/src/entities/atte
 import { BadgePrintingService } from './badge-printing.service';
 import { BadgeEntity } from './entities/badge.entity';
 import { CheckInEntity } from './entities/check-in.entity';
+import { OnsiteEventsPublisher } from './onsite-events.publisher';
 
 export interface CheckInResult {
   checkIn: CheckInEntity;
@@ -21,6 +22,7 @@ export class OnsiteService {
     @InjectRepository(AttendeeEntity)
     private readonly attendeeRepository: Repository<AttendeeEntity>,
     private readonly badgePrintingService: BadgePrintingService,
+    private readonly onsiteEventsPublisher: OnsiteEventsPublisher,
   ) {}
 
   async checkInAttendee(
@@ -71,6 +73,15 @@ export class OnsiteService {
     });
 
     const savedCheckIn = await this.checkInRepository.save(checkIn);
+
+    await this.onsiteEventsPublisher.publishAttendeeCheckedIn({
+      tenantId,
+      eventId,
+      attendeeId,
+      checkInId: savedCheckIn.id,
+      deviceId,
+      checkedInAt: savedCheckIn.checkedInAt,
+    });
 
     if (attendee.status !== AttendeeStatus.CHECKED_IN) {
       attendee.status = AttendeeStatus.CHECKED_IN;

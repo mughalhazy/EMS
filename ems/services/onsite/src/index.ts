@@ -9,3 +9,9 @@ export { ScanningDeviceEntity } from './entities/scanning-device.entity';
 export { CreateBadgesTable1723000000000 } from './migrations/1723000000000-CreateBadgesTable';
 export { CreateCheckInsTable1723000000001 } from './migrations/1723000000001-CreateCheckInsTable';
 export { AddUniqueBadgePerAttendee1723000000002 } from './migrations/1723000000002-AddUniqueBadgePerAttendee';
+
+export {
+  OnsiteEventsPublisher,
+  ONSITE_EVENTS_KAFKA_CLIENT,
+  ATTENDEE_CHECKED_IN_TOPIC,
+} from './onsite-events.publisher';

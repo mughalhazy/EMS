@@ -10,6 +10,7 @@ import { AttendeeScheduleEntity } from './entities/attendee-schedule.entity';
 import { SessionEntity } from './entities/session.entity';
 import { SessionQnaEntity } from './entities/session-qna.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
+import { SessionAttendancePublisher } from './session-attendance.publisher';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
 import { SessionService } from './session.service';
 
@@ -27,7 +28,7 @@ import { SessionService } from './session.service';
     AuditModule,
   ],
   controllers: [SessionController],
-  providers: [SessionService, SessionLifecyclePublisher],
+  providers: [SessionService, SessionLifecyclePublisher, SessionAttendancePublisher],
   exports: [SessionService],
 })
 export class AgendaModule {}
