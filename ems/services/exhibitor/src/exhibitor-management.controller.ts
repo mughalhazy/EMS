@@ -10,7 +10,10 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 
 import { AssignExhibitorBoothDto } from './dto/assign-exhibitor-booth.dto';
 import { CaptureLeadDto } from './dto/capture-lead.dto';
@@ -25,7 +28,10 @@ import { BoothInteractionEntity } from './entities/booth-interaction.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
-import { ExhibitorManagementService } from './exhibitor-management.service';
+import {
+  ExhibitorManagementService,
+  SponsorRoiReportRow,
+} from './exhibitor-management.service';
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId')
 export class ExhibitorManagementController {
@@ -63,8 +69,22 @@ export class ExhibitorManagementController {
   async getSponsorRoiReport(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
-  ): Promise<Array<Record<string, unknown>>> {
-    return this.exhibitorManagementService.getSponsorRoiReport(tenantId, eventId);
+    @Query('format') format: string = 'json',
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<SponsorRoiReportRow[] | string> {
+    const report = await this.exhibitorManagementService.getSponsorRoiReport(tenantId, eventId);
+
+    if (format.toLowerCase() === 'csv') {
+      response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      response.setHeader(
+        'Content-Disposition',
+        `attachment; filename="sponsor-roi-report-${eventId}.csv"`,
+      );
+      return this.exhibitorManagementService.buildSponsorRoiReportCsv(report);
+    }
+
+    response.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return report;
   }
 
   @Patch('sponsors/:sponsorProfileId')

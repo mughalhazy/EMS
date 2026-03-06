@@ -13,6 +13,17 @@ import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
 import { ExhibitorEventsPublisher } from './exhibitor-events.publisher';
 
+export interface SponsorRoiReportRow {
+  exhibitorId: string;
+  exhibitorName: string;
+  sponsorshipTier: ExhibitorEntity['sponsorshipTier'];
+  leadCount: number;
+  uniqueLeadAttendeeCount: number;
+  boothInteractionCount: number;
+  uniqueBoothInteractionAttendeeCount: number;
+  leadToInteractionRatio: number | null;
+}
+
 @Injectable()
 export class ExhibitorManagementService {
   constructor(
@@ -337,7 +348,7 @@ export class ExhibitorManagementService {
     return interaction;
   }
 
-  async getSponsorRoiReport(tenantId: string, eventId: string): Promise<Array<Record<string, unknown>>> {
+  async getSponsorRoiReport(tenantId: string, eventId: string): Promise<SponsorRoiReportRow[]> {
     const exhibitorRows = await this.exhibitorRepository.find({
       where: { tenantId, eventId },
       order: { name: 'ASC' },
@@ -388,6 +399,53 @@ export class ExhibitorManagementService {
     );
 
     return reports;
+  }
+
+  buildSponsorRoiReportCsv(reportRows: SponsorRoiReportRow[]): string {
+    const headers = [
+      'exhibitorId',
+      'exhibitorName',
+      'sponsorshipTier',
+      'leadCount',
+      'uniqueLeadAttendeeCount',
+      'boothInteractionCount',
+      'uniqueBoothInteractionAttendeeCount',
+      'leadToInteractionRatio',
+    ];
+
+    const escapeCsvValue = (value: string | number | null): string => {
+      if (value === null) {
+        return '';
+      }
+
+      const stringValue = String(value);
+      if (/[",\n]/.test(stringValue)) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+
+      return stringValue;
+    };
+
+    const lines = [headers.join(',')];
+
+    for (const row of reportRows) {
+      lines.push(
+        [
+          row.exhibitorId,
+          row.exhibitorName,
+          row.sponsorshipTier,
+          row.leadCount,
+          row.uniqueLeadAttendeeCount,
+          row.boothInteractionCount,
+          row.uniqueBoothInteractionAttendeeCount,
+          row.leadToInteractionRatio,
+        ]
+          .map(escapeCsvValue)
+          .join(','),
+      );
+    }
+
+    return `${lines.join('\n')}\n`;
   }
 
   async listExhibitors(tenantId: string, eventId: string): Promise<ExhibitorEntity[]> {
