@@ -151,3 +151,35 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 **Route group:** `app/(admin)/` with server component `layout.tsx` wrapping `<AdminLayout>`.
 
 **Patterns:** status-color-tinted left border accent on service cards, conditional metric color based on threshold (error rate > 1% → brick, latency > 500ms → amber), animated live pulse dot, useCallback for refreshable data fetch.
+
+---
+
+## [12] Development Seed Data — `ems/infra/scripts/seed/`
+
+**Files:** `seed.sql` (main), `seed.sh` (shell wrapper with postgres readiness check)
+
+**Records seeded:**
+
+| Table | Records | Notes |
+|-------|---------|-------|
+| `tenants` | 1 | Acme Events Co. (slug: `acme`) |
+| `users` | 10 | 8 active + 2 invited; emails `alice`–`jack` @acme.dev |
+| `auth_credentials` | 8 | bcrypt via pgcrypto `crypt()`. Password: `DevSeed2026!` |
+| `auth_user_state` | 8 | All active users email-verified |
+| `roles` | 3 | tenant_admin / event_manager / checkin_staff |
+| `user_role_assignments` | 6 | Alice+Bob = admin; Carol–Eve = manager; Frank = checkin |
+| `events` | 3 | TechConf 2026 (live), DevSummit 2026 (published), Design Week 2025 (archived) |
+| `venues` | 3 | Moscone Center (physical), Hopin (virtual), Design Hub Chicago (physical) |
+| `sessions` | 25 | 13 TechConf + 6 DevSummit + 6 Design Week; realistic titles + abstracts |
+| `speakers` | 8 | 4 TechConf + 2 DevSummit + 2 Design Week; confirmed status |
+| `inventory_items` | 5 | One per ticket type; reserved_quantity reflects current sales |
+| `tickets` | 5 | General $299, VIP $799, Standard $199, Workshop $99, All Access $149 |
+| `attendees` | 18 | 10 TechConf + 5 DevSummit + 3 Design Week; mix of linked/external |
+| `registrations` | 17 | Mix of confirmed/approved/pending across all events |
+| `event_analytics` | 51 | TechConf: 30 daily snapshots (growth model); DevSummit: 14 days; Design Week: 5 event-day rows |
+
+**Key design decisions:**
+- All UUIDs fixed (prefixed pattern) → seed is idempotent, `ON CONFLICT DO NOTHING` everywhere
+- Ticketing tables (`inventory_items`, `tickets`) wrapped in `DO $$ ... EXCEPTION WHEN undefined_table` — graceful fallback if app hasn't synced schema yet
+- TechConf analytics use `generate_series` + polynomial formula: `reg(d) = ROUND(3 + 5d + 0.1d²)`, check-ins ramp 90/day from Mar 5
+- Today = Mar 7 2026: TechConf is live (days 1–2 completed, day 3 in progress), DevSummit published, Design Week archived
