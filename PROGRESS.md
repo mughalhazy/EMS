@@ -201,3 +201,76 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 - `NEXT_PUBLIC_API_URL` is both an ARG (baked into bundle at build) and an ENV (available at runtime for server-side rewrites)
 - Standalone output bundles only required files — image ~200MB vs ~1GB full `node_modules`
 - Render's Docker runtime reads the same `Dockerfile`; env vars set in dashboard override build-time defaults
+
+---
+
+## [14] Render Deployment — `https://ems-web-b233.onrender.com`
+
+| Item | Value |
+|------|-------|
+| Service ID | `srv-d6lq8hdactks73fm2bpg` |
+| Project | `prj-d6lnsl75gffc73b0ip90` |
+| Runtime | Node.js (native, not Docker) |
+| Build command | `cd ems/apps/web && npm install && npm run build` |
+| Start command | `cd ems/apps/web && npm start` |
+| Health check | `/login` |
+| Region | Oregon (free tier) |
+
+**Key fixes applied during deployment:**
+- `next.config.ts` → `next.config.js` (CJS `module.exports`) — SWC not available in Render build env
+- Removed `output: 'standalone'` — native Node runtime does not copy `.next/static` into standalone dir
+- `rootDir: ""` + explicit `cd ems/apps/web &&` prefix — more reliable than Render's rootDir field
+- Health check `/login` (root `/` returns 307 → health check failure)
+- Removed all `NEXT_PUBLIC_*` env vars from Render dashboard — changing them invalidates build cache
+
+---
+
+## [15] Stub Pages Wired — all 7 nav destinations
+
+| Page | Key Features |
+|------|-------------|
+| Agenda | Event selector; status filter tabs (All/Scheduled/Completed/Draft/Cancelled); session columns: title, type, date+time, duration, capacity, status |
+| Speakers | Event selector; status filter (All/Confirmed/Invited/Declined/Withdrawn); Avatar cell with bio |
+| Attendees | Event selector; status filter (All/Registered/Checked In/Prospect/Cancelled); count badge |
+| Sponsors | Event selector; status filter; org ID, tier (gold/silver/bronze badge), amount, status |
+| Exhibitors | Event selector; status filter; org ID, booth code, booth size, status |
+| Notifications | Status filter only (no event selector); channel, template (mono), subject, status, sentAt |
+| Settings | Tab layout (Account/Team); Account: workspace + platform info Cards; Team: User DataTable with Avatar |
+
+---
+
+## [16] Mock API — seed data served by Next.js route handlers
+
+**Root cause fixed:** `API_BASE` defaulted to `http://localhost:3001`, baked into client bundle at build — all browser fetches hit a nonexistent server on Render.
+
+**Fix:**
+- `services/api.ts` — `API_BASE` default changed from `'http://localhost:3001'` to `''` (relative URLs)
+- `next.config.js` — rewrites only activate when `NEXT_PUBLIC_API_URL` is explicitly set; otherwise internal handlers serve all data
+- `lib/mock-data.ts` — full seed dataset: 3 events, 18 sessions, 8 speakers, 18 attendees, 17 registrations, 6 tickets, 7 sponsors, 4 exhibitors, 10 notifications, 10 users, 1 tenant, analytics KPIs
+- `app/api/v1/[...path]/route.ts` — catch-all GET handler matching every endpoint used by the frontend services; POST/PATCH/PUT/DELETE return `{ ok: true, mock: true }`
+
+---
+
+## [17] UI Polish Pass — enterprise SaaS caliber
+
+**Auth:**
+- `AuthLayout` rewritten as split-screen: dark brand panel (ink bg + teal/indigo radial glows + dot-grid overlay) left, white form panel right
+- Brand panel: teal logomark with shadow, tagline, 3 feature bullets with teal dots
+- Mobile: brand panel hidden, form becomes centered card with embedded wordmark
+
+**Navigation:**
+- Sidebar: user identity footer — `Avatar` + name + "Admin" role label; collapses to avatar-only
+- Sidebar: unicode toggle arrows replaced with SVG chevrons
+- TopBar: right-side user chip — `Avatar` + name + chevron; vertical separator from page actions
+
+**Core components:**
+- `KpiCard`: value 28px → 32px; border-top 3px → 4px; delta renders as colored pill (forest/brick/neutral bg)
+- `DataTable` skeleton: opacity-pulse → shimmer gradient slide with staggered per-row delays
+- `DataTable` empty state: SVG table icon in bordered box + bold title + descriptor text
+- `Button`: removed `translateY(-1px)` hover jump — shadow elevation only
+- `AlertCard`: live dot upgraded to outward-expanding ring pulse (sonar style)
+
+**Page-level:**
+- Content padding standardized: 24px → 20px across all 11 pages
+- Toolbar horizontal padding: 16px → 20px (aligns with card edges)
+- Dashboard KPI grid: added 1100px responsive breakpoint (3-col → 2-col)
