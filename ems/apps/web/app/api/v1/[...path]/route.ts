@@ -8,8 +8,8 @@ function paginate<T>(items: T[]) {
 }
 
 // All-events flat lists (for pages that don't filter by event)
-const allSessions     = Object.values(mock.sessions).flat()
-const allSpeakers     = Object.values(mock.speakers)
+const allSessions     = mock.sessions
+const allSpeakers     = mock.speakers
 const allAttendees    = Object.values(mock.attendees).flat()
 const allRegistrations = Object.values(mock.registrations).flat()
 const allTickets      = Object.values(mock.tickets).flat()
@@ -35,15 +35,14 @@ export async function GET(_req: Request, { params }: Context) {
   // ── /events/:id/sessions ──────────────────────────────────────
   const sessionsMatch = path.match(/^events\/([^/]+)\/sessions$/)
   if (sessionsMatch) {
-    const items = mock.sessions[sessionsMatch[1]] ?? []
+    const items = mock.sessions.filter(s => s.eventId === sessionsMatch[1])
     return NextResponse.json(paginate(items))
   }
 
   // ── /events/:id/sessions/:sid ─────────────────────────────────
   const sessionMatch = path.match(/^events\/([^/]+)\/sessions\/([^/]+)$/)
   if (sessionMatch) {
-    const items = mock.sessions[sessionMatch[1]] ?? []
-    const s = items.find(x => x.id === sessionMatch[2])
+    const s = mock.sessions.find(x => x.eventId === sessionMatch[1] && x.id === sessionMatch[2])
     if (!s) return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Session not found', details: [], requestId: 'mock' } }, { status: 404 })
     return NextResponse.json(s)
   }
@@ -145,7 +144,7 @@ export async function GET(_req: Request, { params }: Context) {
   // ── /analytics/events/:id/sessions ───────────────────────────
   const sessionEngagementMatch = path.match(/^analytics\/events\/([^/]+)\/sessions$/)
   if (sessionEngagementMatch) {
-    const items = (mock.sessions[sessionEngagementMatch[1]] ?? []).map(s => ({
+    const items = mock.sessions.filter(s => s.eventId === sessionEngagementMatch[1]).map(s => ({
       sessionId: s.id,
       title: s.title,
       capacity: s.capacity ?? 0,
