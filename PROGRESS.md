@@ -290,3 +290,28 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 | Sponsors showed raw `organizationId` | Page loads `/organizations`, builds `orgId → name` map, renders org name |
 | Exhibitors showed raw `organizationId` | Same pattern as sponsors |
 | Registrations showed truncated IDs | Parallel-loads attendees + tickets per event; renders attendee full name + ticket type name |
+
+---
+
+## [19] UI Polish — Design Language Audit
+
+**Re-anchored to all 5 backend docs** before starting. Full sweep of all CSS modules against `ems/design-language/design-language.html` as source of truth.
+
+**Fixes applied (12 files):**
+
+| File | Violation | Fix |
+|------|-----------|-----|
+| `Button.module.css` | `border: 1px solid` | → `1.5px solid` (spec) |
+| `Badge.module.css` | `border: 1px solid` on all variants | → `1.5px solid` (spec) |
+| `AlertCard.module.css` | `border: 1px`, `radius: --radius`, `padding: 12px 16px` | → `1.5px`, `--radius-lg`, `14px 16px` |
+| `Sidebar.module.css` | Active item: `ink`/`white` (master-nav pattern) | → `--i-lt`/`--i-dk` (app-nav spec) |
+| `DataTable.module.css` | `th`/`td`/`footer` horizontal padding `16px` | → `20px` (aligns with content padding) |
+| `KpiCard.module.css` | Off-grid padding `20px 22px 18px`; hover only `shadow-md` | → `20px` flat; hover `translateY(-3px)` + `shadow-lg` |
+| `Input.module.css` | `border: 1px`; no default shadow | → `1.5px`; `box-shadow: var(--shadow-sm)` |
+| `events/events.module.css` | Toolbar `padding: 12px 16px` | → `10px 20px` |
+| `registrations/registrations.module.css` | Toolbar `padding: 12px 16px` | → `10px 20px` |
+| `ticketing/ticketing.module.css` | Toolbar `padding: 12px 16px` | → `10px 20px` |
+| `dashboard/dashboard.module.css` | KPI grid `gap: 14px` (off 8px grid) | → `16px` |
+| `settings/settings.module.css` | Tabs `padding: 0 16px`; skeleton opacity-pulse | → `0 20px`; shimmer gradient |
+
+**Commit:** `7cbc38b` — `fix(ui): design-language audit — token/spacing/state violations [19]`
