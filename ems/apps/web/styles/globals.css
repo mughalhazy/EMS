@@ -1,9 +1,10 @@
-/* Tailwind utilities — base/components omitted (preflight disabled, we own the reset) */
+/* Design tokens must import first — @import must precede all other rules per CSS spec */
+@import './tokens.css';
+
+/* Tailwind utilities — preflight disabled, we own the reset below */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './tokens.css';
 
 /* ── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after {
