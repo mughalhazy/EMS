@@ -1,0 +1,32 @@
+# ──────────────────────────────────────────────────────────────
+# EMS — Render Infrastructure
+# https://render.com/docs/blueprint-spec
+# ──────────────────────────────────────────────────────────────
+
+services:
+  # ── Next.js Web App ───────────────────────────────────────────
+  - type: web
+    name: ems-web
+    runtime: docker
+    dockerfilePath: ./ems/apps/web/Dockerfile
+    dockerContext: ./ems/apps/web
+
+    # Build-time arguments (public vars baked into the JS bundle)
+    dockerCommand: node server.js
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Public API URL — set in Render dashboard or here.
+      # This value is baked into the Next.js bundle at build time.
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.your-domain.com   # ← replace with your API URL
+
+      # Optional: public app URL (for canonical links / OG tags)
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false   # set in Render dashboard
+
+    autoDeploy: true
+
+    healthCheckPath: /
