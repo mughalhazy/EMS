@@ -183,3 +183,21 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 - Ticketing tables (`inventory_items`, `tickets`) wrapped in `DO $$ ... EXCEPTION WHEN undefined_table` — graceful fallback if app hasn't synced schema yet
 - TechConf analytics use `generate_series` + polynomial formula: `reg(d) = ROUND(3 + 5d + 0.1d²)`, check-ins ramp 90/day from Mar 5
 - Today = Mar 7 2026: TechConf is live (days 1–2 completed, day 3 in progress), DevSummit published, Design Week archived
+
+---
+
+## [13] Build & Deploy — `ems/apps/web/`
+
+| File | Change |
+|------|--------|
+| `next.config.ts` | `output: 'standalone'`; `NEXT_PUBLIC_API_URL` guarded with `?? 'http://localhost:3001'` fallback (prevents `undefined/api/v1/*` rewrite in CI) |
+| `Dockerfile` | Multi-stage: `deps` (npm ci) → `builder` (next build, ARG for API URL) → `runner` (standalone, non-root `nextjs` user, port 3000) |
+| `.dockerignore` | Excludes `node_modules`, `.next`, `.env*` from build context |
+| `render.yaml` | Render Blueprint — `ems-web` Docker web service; `NEXT_PUBLIC_API_URL` + `NEXT_PUBLIC_APP_URL` env vars; `autoDeploy: true` |
+| `.env.local.example` | Documented all public env vars with descriptions |
+| `public/.gitkeep` | Created `public/` dir (required by Dockerfile COPY) |
+
+**Key decisions:**
+- `NEXT_PUBLIC_API_URL` is both an ARG (baked into bundle at build) and an ENV (available at runtime for server-side rewrites)
+- Standalone output bundles only required files — image ~200MB vs ~1GB full `node_modules`
+- Render's Docker runtime reads the same `Dockerfile`; env vars set in dashboard override build-time defaults
