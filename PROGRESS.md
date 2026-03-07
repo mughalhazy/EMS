@@ -274,3 +274,19 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 - Content padding standardized: 24px → 20px across all 11 pages
 - Toolbar horizontal padding: 16px → 20px (aligns with card edges)
 - Dashboard KPI grid: added 1100px responsive breakpoint (3-col → 2-col)
+
+---
+
+## [18] Page Audit & Data Fixes
+
+**Re-anchored to all 5 backend docs** (product.md, architecture.md, domain-model.md, api-standards.md, service-map.md) before audit.
+
+**Fixes applied:**
+
+| Issue | Fix |
+|-------|-----|
+| `/events/[id]` placeholder | Full event detail page: header card (code, status, description, dates, timezone) + Sessions DataTable + Speakers DataTable |
+| Events status filter tabs did nothing | Mock route `/events` now reads `?status=` query param and filters |
+| Sponsors showed raw `organizationId` | Page loads `/organizations`, builds `orgId → name` map, renders org name |
+| Exhibitors showed raw `organizationId` | Same pattern as sponsors |
+| Registrations showed truncated IDs | Parallel-loads attendees + tickets per event; renders attendee full name + ticket type name |
