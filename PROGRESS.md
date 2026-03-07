@@ -410,3 +410,28 @@ Status filter tabs derived directly from `domain-model.md` status enumerations.
 | `agenda.wireframe.json` | schedule_page | top, filters (event selector + day tabs + 2 CTAs), primary (schedule_grid) |
 
 **Domain anchors used:** entity statuses from `domain-model.md`; color semantics from DL (forest=positive, amber=warning, gold=finance, teal=live, indigo=data, brick=danger).
+
+---
+
+## [23] Wire COMPONENT_REGISTRY — Step 3
+
+**File:** `ems/apps/web/renderer/components/RenderedBlock.tsx`
+
+Populated `COMPONENT_REGISTRY` with `dynamic()` lazy imports for all currently built UI components:
+
+| CanonicalComponent | Mapped to | Source file |
+|--------------------|-----------|-------------|
+| `StatCard` | `KpiCard` | `components/ui/KpiCard.tsx` |
+| `DataTable` | `DataTable` | `components/ui/DataTable.tsx` |
+| `EventCard` | `Card` | `components/ui/Card.tsx` |
+| `Card` | `Card` | `components/ui/Card.tsx` |
+| `Button` | `Button` | `components/ui/Button.tsx` |
+| `EventStatusPill` | `StatusChip` | `components/ui/StatusChip.tsx` |
+| `Badge` | `Badge` | `components/ui/Badge.tsx` |
+| `Avatar` | `Avatar` | `components/ui/Avatar.tsx` |
+| `Alert` | `AlertCard` | `components/ui/AlertCard.tsx` |
+| `AlertBanner` | `AlertCard` | `components/ui/AlertCard.tsx` |
+| `Modal` | `Modal` | `components/ui/Modal.tsx` |
+| `Input` | `Input` | `components/ui/Input.tsx` |
+
+Still resolving to `getComponent()` placeholder (not yet built): `Skeleton`, `EmptyState`, `Toast`, `Drawer`, `Popover`, `Tabs`, `CommandPalette`, `TenantSwitcher`, `VenueSelector`, `AttendeeList`, `ScheduleGrid`, `UnknownBlock`.

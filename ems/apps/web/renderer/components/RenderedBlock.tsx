@@ -9,13 +9,39 @@ import React from 'react'
 import type { RenderedNode } from '../types/output'
 
 // Lazy-import actual components from the UI library
-// These resolve to the components built in Phase 2
 import dynamic from 'next/dynamic'
 
 // ── Component registry ───────────────────────────────────────
 // Maps CanonicalComponent name → lazy-loaded React component
-// Falls back to UnknownBlock for anything not in registry
-const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unknown>>> = {}
+// Falls back to placeholder for components not yet built.
+const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unknown>>> = {
+  // ── Data display ─────────────────────────────────────────
+  StatCard:    dynamic(() => import('@/components/ui/KpiCard').then(m => ({ default: m.KpiCard as React.ComponentType<Record<string, unknown>> }))),
+  DataTable:   dynamic(() => import('@/components/ui/DataTable').then(m => ({ default: m.DataTable as React.ComponentType<Record<string, unknown>> }))),
+  EventCard:   dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
+  Card:        dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Actions ──────────────────────────────────────────────
+  Button:      dynamic(() => import('@/components/ui/Button').then(m => ({ default: m.Button as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Status / badges ──────────────────────────────────────
+  EventStatusPill: dynamic(() => import('@/components/ui/StatusChip').then(m => ({ default: m.StatusChip as React.ComponentType<Record<string, unknown>> }))),
+  Badge:           dynamic(() => import('@/components/ui/Badge').then(m => ({ default: m.Badge as React.ComponentType<Record<string, unknown>> }))),
+  Avatar:          dynamic(() => import('@/components/ui/Avatar').then(m => ({ default: m.Avatar as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Feedback / alerts ────────────────────────────────────
+  Alert:        dynamic(() => import('@/components/ui/AlertCard').then(m => ({ default: m.AlertCard as React.ComponentType<Record<string, unknown>> }))),
+  AlertBanner:  dynamic(() => import('@/components/ui/AlertCard').then(m => ({ default: m.AlertCard as React.ComponentType<Record<string, unknown>> }))),
+  Modal:        dynamic(() => import('@/components/ui/Modal').then(m => ({ default: m.Modal as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Form ─────────────────────────────────────────────────
+  Input:       dynamic(() => import('@/components/ui/Input').then(m => ({ default: m.Input as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Not yet built — resolved by getComponent() placeholder ──
+  // Skeleton, EmptyState, Toast, Drawer, Popover, Tabs,
+  // CommandPalette, TenantSwitcher, VenueSelector,
+  // AttendeeList, ScheduleGrid, UnknownBlock
+}
 
 // Populated lazily to avoid circular imports at module init
 function getComponent(name: string): React.ComponentType<Record<string, unknown>> {

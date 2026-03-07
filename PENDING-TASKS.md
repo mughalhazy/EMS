@@ -152,7 +152,7 @@ renderer/samples/analytics.wireframe.json
 
 ---
 
-## STEP 3 — Wire COMPONENT_REGISTRY [ ]
+## STEP 3 — Wire COMPONENT_REGISTRY [x]
 
 **File:** `ems/apps/web/renderer/components/RenderedBlock.tsx`
 
