@@ -18,6 +18,11 @@ export interface MeResponse {
   permissions: string[]
 }
 
+export interface ChangePasswordPayload {
+  currentPassword: string
+  newPassword: string
+}
+
 export const authService = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
     const res = await api.post<LoginResponse>('/auth/login', payload)
@@ -44,5 +49,17 @@ export const authService = {
       localStorage.setItem('ems_token', res.accessToken)
     }
     return res
+  },
+
+  changePassword(payload: ChangePasswordPayload): Promise<void> {
+    return api.patch('/auth/password', payload)
+  },
+
+  forgotPassword(email: string): Promise<void> {
+    return api.post('/auth/forgot-password', { email })
+  },
+
+  resetPassword(payload: { token: string; newPassword: string }): Promise<void> {
+    return api.post('/auth/reset-password', payload)
   },
 }

@@ -63,3 +63,37 @@
 - AdminLayout.tsx + module.css — portal surface: dark ink header, horizontal tab nav, centered 1200px body
 - layouts/index.ts
 - dashboard/page.tsx and events/page.tsx migrated to new layouts
+
+---
+
+## [7] UI Component Audit — `ems/apps/web/components/ui/`
+Full audit against design-language tokens. All 7 requested components confirmed present and on-spec.
+
+| Component | Variants / Features |
+|-----------|---------------------|
+| Button | primary / forest / indigo / ghost / soft; sm/md/lg; loading spinner |
+| Badge | forest / amber / brick / indigo / gold / teal / neutral; pill shape |
+| Input | label, error, hint; indigo focus ring; brick error state |
+| Card | header (title + actions slot); body; flush variant |
+| Modal | portal; ESC + click-outside close; scroll lock; focus trap; sm/md/lg; mobile bottom sheet |
+| Avatar | initials or img; 6 colors + neutral; sm/md/lg |
+| DataTable | typed columns; opacity-pulse skeleton; empty state; footer slot; row click |
+
+- index.ts exports all 10 components (above 7 + StatusChip, KpiCard, AlertCard) with full type re-exports
+- No changes required — all components on-token, production-ready
+
+---
+
+## [8] Frontend API Services — `ems/apps/web/services/`
+All 6 requested services audited against api-standards.md + domain-model.md + service-map.md. Gaps filled.
+
+| Service | Added |
+|---------|-------|
+| `auth.service.ts` | `changePassword`, `forgotPassword`, `resetPassword` |
+| `events.service.ts` | `remove` (DELETE); `listVenues`, `createVenue` sub-resource |
+| `ticketing.service.ts` | `CreateTicketPayload`/`UpdateTicketPayload` types; `remove`; `availability` |
+| `registrations.service.ts` | `confirm` transition; `checkin`; status filter on `list`; caller-supplied idempotencyKey |
+| `attendees.service.ts` | `create`, `update`; `AttendeeStatus` filter on `list` |
+| `analytics.service.ts` | `FunnelMetrics` type + `funnelMetrics`; `TenantKpis` type + `tenantKpis` |
+
+Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/api.ts`) unchanged — already correct.
