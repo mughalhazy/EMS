@@ -18,10 +18,11 @@
   font-weight: 600;
   padding: 10px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--white);
   color: var(--ink);
   width: 100%;
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
   outline: none;
   appearance: none;
@@ -39,6 +40,7 @@
 
 .error {
   border-color: var(--b-md);
+  box-shadow: none;
 }
 
 .error:focus {

@@ -5,7 +5,7 @@
 .tabs {
   display: flex;
   gap: 2px;
-  padding: 0 16px;
+  padding: 0 20px;
   border-bottom: 1px solid var(--border);
   background: var(--white);
   flex-shrink: 0;
@@ -55,6 +55,6 @@
 .memberEmail { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 1px; }
 .mono        { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
 
-.skeleton { height: 120px; border-radius: var(--radius); background: var(--surface); animation: skPulse 1.4s ease-in-out infinite; }
-@keyframes skPulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+.skeleton { height: 120px; border-radius: var(--radius); background: linear-gradient(90deg, var(--surface) 0%, var(--border) 40%, var(--surface) 80%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 .empty { font-size: 13px; color: var(--ink-3); padding: 8px 0; }

@@ -119,8 +119,8 @@
 }
 
 .item.active {
-  color: var(--white);
-  background: var(--ink);
+  color: var(--i-dk);
+  background: var(--i-lt);
 }
 
 .icon {

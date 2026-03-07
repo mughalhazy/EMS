@@ -10,10 +10,10 @@
   white-space: nowrap;
 }
 
-.forest  { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
-.amber   { background: var(--a-lt); color: var(--a-dk); border: 1px solid var(--a-border); }
-.brick   { background: var(--b-lt); color: var(--b-dk); border: 1px solid var(--b-border); }
-.indigo  { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
-.gold    { background: var(--g-lt); color: var(--g-dk); border: 1px solid var(--g-border); }
-.teal    { background: var(--t-lt); color: var(--t-dk); border: 1px solid var(--t-border); }
-.neutral { background: var(--surface); color: var(--ink-2); border: 1px solid var(--border); }
+.forest  { background: var(--f-lt); color: var(--f-dk); border: 1.5px solid var(--f-border); }
+.amber   { background: var(--a-lt); color: var(--a-dk); border: 1.5px solid var(--a-border); }
+.brick   { background: var(--b-lt); color: var(--b-dk); border: 1.5px solid var(--b-border); }
+.indigo  { background: var(--i-lt); color: var(--i-dk); border: 1.5px solid var(--i-border); }
+.gold    { background: var(--g-lt); color: var(--g-dk); border: 1.5px solid var(--g-border); }
+.teal    { background: var(--t-lt); color: var(--t-dk); border: 1.5px solid var(--t-border); }
+.neutral { background: var(--surface); color: var(--ink-2); border: 1.5px solid var(--border); }

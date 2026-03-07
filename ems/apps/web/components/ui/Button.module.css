@@ -4,7 +4,7 @@
   font-weight: 700;
   padding: 9px 16px;
   border-radius: var(--radius);
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
