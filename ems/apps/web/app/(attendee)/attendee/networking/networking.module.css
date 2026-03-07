@@ -1,0 +1,134 @@
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.heading    { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 6px; }
+.subheading { font-size: 14px; color: var(--ink-3); font-weight: 500; }
+.count      { font-size: 13px; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
+
+/* ── Controls ────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.selectorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  flex: 1;
+  min-width: 280px;
+}
+
+.selectorLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.select {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 28px 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--off)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8880' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  background-size: 10px 6px;
+  color: var(--ink);
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  flex: 1;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.select:focus   { border-color: var(--i-md); box-shadow: 0 0 0 3px var(--i-border); }
+.select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.searchWrap { flex: 1; min-width: 240px; }
+
+/* ── Skeleton ────────────────────────────────────────────────── */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.skeletonCard {
+  height: 120px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+/* ── Empty ───────────────────────────────────────────────────── */
+.empty { display: flex; flex-direction: column; align-items: center; padding: 80px 24px; gap: 8px; text-align: center; }
+.emptyTitle { font-size: 18px; font-weight: 700; color: var(--ink); }
+.emptyDesc  { font-size: 13px; color: var(--ink-3); }
+
+/* ── Directory ───────────────────────────────────────────────── */
+.directory { display: flex; flex-direction: column; gap: 24px; }
+
+.section { display: flex; flex-direction: column; gap: 10px; }
+
+.sectionLetter {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ── Attendee card ───────────────────────────────────────────── */
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  cursor: default;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.cardInfo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cardName  { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cardEmail { font-size: 12px; color: var(--ink-3); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sectionGrid { grid-template-columns: repeat(2, 1fr); }
+  .skeletonGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .sectionGrid { grid-template-columns: 1fr; }
+  .skeletonGrid { grid-template-columns: 1fr; }
+  .controls    { flex-direction: column; }
+  .selectorRow { min-width: 0; width: 100%; }
+  .searchWrap  { min-width: 0; width: 100%; }
+}

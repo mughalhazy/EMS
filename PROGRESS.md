@@ -97,3 +97,40 @@ All 6 requested services audited against api-standards.md + domain-model.md + se
 | `analytics.service.ts` | `FunnelMetrics` type + `funnelMetrics`; `TenantKpis` type + `tenantKpis` |
 
 Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/api.ts`) unchanged — already correct.
+
+---
+
+## [9] Organizer Dashboard UI — 5 pages
+
+| Page | Route | Key Features |
+|------|-------|-------------|
+| Dashboard | `/dashboard` | `tenantKpis` + recent events right panel; 6 KPI cards; live alert banner |
+| Events | `/events` | NEW page.tsx; status filter tabs (All/Draft/Published/Live/Archived); DataTable; row → `/events/:id` |
+| Ticketing | `/ticketing` | Event selector dropdown; ticket inventory table (price, total/sold/available, status, sales window) |
+| Registrations | `/registrations` | Event selector + status filter tabs; approve / confirm / cancel row actions wired to service |
+| Analytics | `/analytics` | Event selector; 6 KPI cards; revenue by ticket type + checkout funnel + attendance by day tables |
+
+**Patterns used across all pages:**
+- `'use client'` + `useEffect`/`useState` for data fetching with loading states
+- `Card flush` wrapping `DataTable` for edge-to-edge tables
+- Shared styled `<select>` with SVG chevron (design token colors) for event selector
+- Filter button row (pill tabs) using `--ink`/`--surface` tokens
+- All `.module.css` files rewritten: `height:100%` + `overflow:hidden` shell, `overflow-y:auto` scroll body
+
+---
+
+## [10] Attendee Portal — 5 pages + layout
+
+| Page | Route | Key Features |
+|------|-------|-------------|
+| Events | `/attendee/events` | 3-col card grid; search + status filter tabs (All/Published/Live/Upcoming); skeleton loading |
+| Event Detail | `/attendee/event/[id]` | Parallel fetch event+sessions+speakers; 3 tabs (overview/sessions/speakers); hero panel; session timeline grouped by date; speaker grid |
+| Schedule | `/attendee/schedule` | Event selector; timeline view; sessions grouped by date; time gutter (start→line→end); duration + capacity |
+| Networking | `/attendee/networking` | Event selector + search; attendee directory grouped A–Z by last name; deterministic avatar colors; checked_in/registered badges |
+| Profile | `/attendee/profile` | `authService.me()`; edit/view toggle (firstName/lastName/email); registration list with status badge; skeleton loading |
+
+**Layout:** `AttendeeLayout` — sticky horizontal nav, forest gradient logomark, 4 nav links with `usePathname` active state, avatar button → profile.
+
+**Route group:** `app/(attendee)/` with server component `layout.tsx` wrapping `<AttendeeLayout>`.
+
+**Patterns:** deterministic avatar color (`charCodeAt(0) % 6`), `groupByDate()` for timeline/schedule, styled native `<select>` with SVG chevron data URI, `useMemo` for client-side filtering/grouping.

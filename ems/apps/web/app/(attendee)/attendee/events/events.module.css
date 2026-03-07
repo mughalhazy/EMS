@@ -1,0 +1,181 @@
+/* ── Page header ─────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.subheading {
+  font-size: 14px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+/* ── Controls ────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchWrap { width: 280px; }
+
+.filters {
+  display: flex;
+  gap: 4px;
+}
+
+.filterBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+.filterBtn:hover  { background: var(--surface); color: var(--ink-2); }
+.filterActive     { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.filterActive:hover { background: var(--ink-2); }
+
+/* ── Event card grid ─────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Event card ──────────────────────────────────────────────── */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+  cursor: pointer;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardCode {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-4);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.cardDesc {
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.cardMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.cardCta {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--i-md);
+  letter-spacing: -0.01em;
+}
+
+/* ── Skeleton ────────────────────────────────────────────────── */
+.skeleton {
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+.skeletonBadge { height: 20px; width: 72px; border-radius: 20px; background: var(--surface); }
+.skeletonTitle { height: 24px; width: 80%; border-radius: var(--radius); background: var(--surface); }
+.skeletonLine  { height: 14px; width: 100%; border-radius: var(--radius); background: var(--surface); }
+
+/* ── Empty ───────────────────────────────────────────────────── */
+.empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 8px;
+  text-align: center;
+}
+.emptyTitle { font-size: 18px; font-weight: 700; color: var(--ink); }
+.emptyDesc  { font-size: 13px; color: var(--ink-3); }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .grid       { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .searchWrap { width: 100%; }
+  .controls   { flex-direction: column; align-items: stretch; }
+  .filters    { flex-wrap: wrap; }
+}
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}

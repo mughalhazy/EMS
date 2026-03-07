@@ -1,0 +1,224 @@
+/* ── Skeletons ────────────────────────────────────────────────── */
+.loadingShell { display: flex; flex-direction: column; gap: 24px; }
+.heroSkeleton { height: 200px; border-radius: var(--radius-lg); background: var(--surface); animation: pulse 1.4s ease-in-out infinite; }
+.bodySkeleton { height: 120px; border-radius: var(--radius-lg); background: var(--surface); animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+/* ── Not found ───────────────────────────────────────────────── */
+.notFound { display: flex; flex-direction: column; align-items: center; padding: 80px 24px; gap: 8px; text-align: center; }
+.notFoundTitle { font-size: 18px; font-weight: 700; color: var(--ink); }
+.notFoundDesc  { font-size: 13px; color: var(--ink-3); }
+
+/* ── Page ────────────────────────────────────────────────────── */
+.page { display: flex; flex-direction: column; gap: 28px; }
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.hero {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px 40px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.heroBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heroCode {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.heroDesc {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  max-width: 680px;
+}
+
+.heroMeta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.heroMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all var(--transition-fast);
+}
+.tab:hover   { color: var(--ink-2); }
+.tabActive   { color: var(--ink); border-bottom-color: var(--i-md); }
+
+.tabCount {
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--ink-3);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.tabActive .tabCount { background: var(--i-lt); color: var(--i-dk); }
+
+/* ── Overview grid ───────────────────────────────────────────── */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.detailList { display: flex; flex-direction: column; }
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+.detailRow:last-child { border-bottom: none; }
+
+.detailLabel { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.detailValue { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+.aboutText { font-size: 14px; color: var(--ink-2); line-height: 1.7; }
+
+/* ── Sessions ────────────────────────────────────────────────── */
+.sessionList { display: flex; flex-direction: column; gap: 28px; }
+.emptyState  { font-size: 14px; color: var(--ink-3); font-weight: 500; text-align: center; padding: 48px; }
+
+.dayGroup { display: flex; flex-direction: column; gap: 12px; }
+
+.dayLabel {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.dayItems { display: flex; flex-direction: column; gap: 8px; }
+
+.sessionCard {
+  display: flex;
+  gap: 20px;
+  padding: 18px 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+.sessionCard:hover { box-shadow: var(--shadow-md); }
+
+.sessionTime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+  min-width: 64px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.timeDash { color: var(--ink-4); font-weight: 400; }
+
+.sessionBody { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.sessionTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sessionTitle { font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+.sessionAbstract { font-size: 13px; color: var(--ink-3); line-height: 1.55; }
+
+/* ── Speakers ────────────────────────────────────────────────── */
+.speakersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.speakerCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.speakerInfo { display: flex; flex-direction: column; gap: 4px; }
+.speakerName  { font-size: 15px; font-weight: 700; color: var(--ink); }
+.speakerEmail { font-size: 12px; color: var(--ink-3); font-weight: 500; }
+.speakerBio   { font-size: 13px; color: var(--ink-3); line-height: 1.55; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero         { padding: 24px; }
+  .heroTitle    { font-size: 24px; }
+  .overviewGrid { grid-template-columns: 1fr; }
+  .speakersGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .speakersGrid { grid-template-columns: 1fr; }
+  .sessionCard  { flex-direction: column; gap: 12px; }
+  .sessionTime  { flex-direction: row; }
+}
