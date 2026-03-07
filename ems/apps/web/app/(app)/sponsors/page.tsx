@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/Badge'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { eventsService } from '@/services/events.service'
 import { sponsorsService } from '@/services/sponsors.service'
-import { Event, Sponsor, SponsorStatus, SponsorTier } from '@/types/domain'
+import { api } from '@/services/api'
+import { Event, Sponsor, SponsorStatus, SponsorTier, Organization } from '@/types/domain'
 import styles from './sponsors.module.css'
 
 type StatusFilter = SponsorStatus | 'all'
@@ -32,15 +33,22 @@ export default function SponsorsPage() {
   const [events, setEvents]     = useState<Event[]>([])
   const [eventId, setEventId]   = useState('')
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
+  const [orgMap, setOrgMap]     = useState<Record<string, string>>({})
   const [filter, setFilter]     = useState<StatusFilter>('all')
   const [loadingEvents, setLoadingEvents]     = useState(true)
   const [loadingSponsors, setLoadingSponsors] = useState(false)
 
   useEffect(() => {
-    eventsService.list({ limit: 100 })
-      .then(r => { setEvents(r.data); if (r.data.length > 0) setEventId(r.data[0].id) })
-      .catch(() => {})
-      .finally(() => setLoadingEvents(false))
+    Promise.all([
+      eventsService.list({ limit: 100 }),
+      api.get<Organization[]>('/organizations').catch(() => [] as Organization[]),
+    ]).then(([evRes, orgs]) => {
+      setEvents(evRes.data)
+      if (evRes.data.length > 0) setEventId(evRes.data[0].id)
+      const map: Record<string, string> = {}
+      orgs.forEach(o => { map[o.id] = o.name })
+      setOrgMap(map)
+    }).catch(() => {}).finally(() => setLoadingEvents(false))
   }, [])
 
   useEffect(() => {
@@ -57,10 +65,14 @@ export default function SponsorsPage() {
     [sponsors, filter])
 
   const columns: Column<Sponsor>[] = [
-    { key: 'organizationId', header: 'Organization', render: s => <span className={styles.orgId}>{s.organizationId}</span> },
-    { key: 'tier',           header: 'Tier',   width: '100px', render: s => <Badge color={TIER_COLOR[s.tier]}>{s.tier}</Badge> },
-    { key: 'amount',         header: 'Amount', width: '130px', render: s => <span className={styles.amount}>{fmtAmount(s.amount)}</span> },
-    { key: 'status',         header: 'Status', width: '120px', render: s => <Badge color={STATUS_COLOR[s.status]}>{s.status}</Badge> },
+    {
+      key: 'organizationId',
+      header: 'Organization',
+      render: s => <span className={styles.orgName}>{orgMap[s.organizationId] ?? s.organizationId}</span>,
+    },
+    { key: 'tier',   header: 'Tier',   width: '100px', render: s => <Badge color={TIER_COLOR[s.tier]}>{s.tier}</Badge> },
+    { key: 'amount', header: 'Amount', width: '130px', render: s => <span className={styles.amount}>{fmtAmount(s.amount)}</span> },
+    { key: 'status', header: 'Status', width: '120px', render: s => <Badge color={STATUS_COLOR[s.status]}>{s.status}</Badge> },
   ]
 
   return (

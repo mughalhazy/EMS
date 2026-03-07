@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/Button'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { eventsService } from '@/services/events.service'
 import { registrationsService } from '@/services/registrations.service'
-import { Event, Registration, RegistrationStatus } from '@/types/domain'
+import { attendeesService } from '@/services/attendees.service'
+import { ticketingService } from '@/services/ticketing.service'
+import { Event, Registration, RegistrationStatus, Attendee, Ticket } from '@/types/domain'
 import styles from './registrations.module.css'
 
 type StatusFilter = RegistrationStatus | 'all'
@@ -38,6 +40,8 @@ export default function RegistrationsPage() {
   const [events, setEvents]           = useState<Event[]>([])
   const [eventId, setEventId]         = useState<string>('')
   const [registrations, setRegistrations] = useState<Registration[]>([])
+  const [attendeeMap, setAttendeeMap] = useState<Record<string, Attendee>>({})
+  const [ticketMap, setTicketMap]     = useState<Record<string, Ticket>>({})
   const [statusFilter, setStatusFilter]   = useState<StatusFilter>('all')
   const [loadingEvents, setLoadingEvents]   = useState(true)
   const [loadingRegs, setLoadingRegs]       = useState(false)
@@ -56,10 +60,22 @@ export default function RegistrationsPage() {
   const loadRegistrations = useCallback(() => {
     if (!eventId) return
     setLoadingRegs(true)
-    registrationsService
-      .list(eventId, { limit: 100, ...(statusFilter !== 'all' ? { status: statusFilter as RegistrationStatus } : {}) })
-      .then(r => setRegistrations(r.data))
-      .catch(() => setRegistrations([]))
+    Promise.all([
+      registrationsService.list(eventId, {
+        limit: 100,
+        ...(statusFilter !== 'all' ? { status: statusFilter as RegistrationStatus } : {}),
+      }),
+      attendeesService.list(eventId, { limit: 100 }),
+      ticketingService.list(eventId, { limit: 100 }),
+    ]).then(([regsRes, attsRes, ticksRes]) => {
+      setRegistrations(regsRes.data)
+      const am: Record<string, Attendee> = {}
+      attsRes.data.forEach(a => { am[a.id] = a })
+      setAttendeeMap(am)
+      const tm: Record<string, Ticket> = {}
+      ticksRes.data.forEach(t => { tm[t.id] = t })
+      setTicketMap(tm)
+    }).catch(() => setRegistrations([]))
       .finally(() => setLoadingRegs(false))
   }, [eventId, statusFilter])
 
@@ -68,18 +84,36 @@ export default function RegistrationsPage() {
   async function handleAction(action: 'approve' | 'confirm' | 'cancel', regId: string) {
     setActioning(regId)
     try {
-      if (action === 'approve')  await registrationsService.approve(regId)
-      if (action === 'confirm')  await registrationsService.confirm(regId)
-      if (action === 'cancel')   await registrationsService.cancel(regId)
+      if (action === 'approve') await registrationsService.approve(regId)
+      if (action === 'confirm') await registrationsService.confirm(regId)
+      if (action === 'cancel')  await registrationsService.cancel(regId)
       loadRegistrations()
     } catch { /* surface error toast in future iteration */ }
     finally { setActioning(null) }
   }
 
   const columns: Column<Registration>[] = [
-    { key: 'id',           header: 'ID',        width: '96px',  render: r => <span className={styles.mono}>{r.id.slice(0, 8)}…</span> },
-    { key: 'attendeeId',   header: 'Attendee',  width: '120px', render: r => <span className={styles.mono}>{r.attendeeId.slice(0, 8)}…</span> },
-    { key: 'ticketId',     header: 'Ticket',    width: '120px', render: r => <span className={styles.mono}>{r.ticketId.slice(0, 8)}…</span> },
+    {
+      key: 'attendeeId',
+      header: 'Attendee',
+      render: r => {
+        const a = attendeeMap[r.attendeeId]
+        return a
+          ? <span className={styles.name}>{a.firstName} {a.lastName}</span>
+          : <span className={styles.mono}>{r.attendeeId.slice(0, 8)}…</span>
+      },
+    },
+    {
+      key: 'ticketId',
+      header: 'Ticket',
+      width: '160px',
+      render: r => {
+        const t = ticketMap[r.ticketId]
+        return t
+          ? <span className={styles.ticketName}>{t.name}</span>
+          : <span className={styles.mono}>{r.ticketId.slice(0, 8)}…</span>
+      },
+    },
     {
       key: 'status',
       header: 'Status',

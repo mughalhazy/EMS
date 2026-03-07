@@ -16,12 +16,15 @@ const allTickets      = Object.values(mock.tickets).flat()
 const allSponsors     = Object.values(mock.sponsors).flat()
 const allExhibitors   = Object.values(mock.exhibitors).flat()
 
-export async function GET(_req: Request, { params }: Context) {
+export async function GET(req: Request, { params }: Context) {
   const path = params.path.join('/')
+  const url = new URL(req.url)
 
   // ── /events ──────────────────────────────────────────────────
   if (path === 'events') {
-    return NextResponse.json(paginate(mock.events))
+    const status = url.searchParams.get('status')
+    const items = status ? mock.events.filter(e => e.status === status) : mock.events
+    return NextResponse.json(paginate(items))
   }
 
   // ── /events/:id ───────────────────────────────────────────────

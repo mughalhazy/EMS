@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/Badge'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { eventsService } from '@/services/events.service'
 import { exhibitorsService } from '@/services/exhibitors.service'
-import { Event, Exhibitor, ExhibitorStatus } from '@/types/domain'
+import { api } from '@/services/api'
+import { Event, Exhibitor, ExhibitorStatus, Organization } from '@/types/domain'
 import styles from './exhibitors.module.css'
 
 type StatusFilter = ExhibitorStatus | 'all'
@@ -25,15 +26,22 @@ export default function ExhibitorsPage() {
   const [events, setEvents]         = useState<Event[]>([])
   const [eventId, setEventId]       = useState('')
   const [exhibitors, setExhibitors] = useState<Exhibitor[]>([])
+  const [orgMap, setOrgMap]         = useState<Record<string, string>>({})
   const [filter, setFilter]         = useState<StatusFilter>('all')
   const [loadingEvents, setLoadingEvents]         = useState(true)
   const [loadingExhibitors, setLoadingExhibitors] = useState(false)
 
   useEffect(() => {
-    eventsService.list({ limit: 100 })
-      .then(r => { setEvents(r.data); if (r.data.length > 0) setEventId(r.data[0].id) })
-      .catch(() => {})
-      .finally(() => setLoadingEvents(false))
+    Promise.all([
+      eventsService.list({ limit: 100 }),
+      api.get<Organization[]>('/organizations').catch(() => [] as Organization[]),
+    ]).then(([evRes, orgs]) => {
+      setEvents(evRes.data)
+      if (evRes.data.length > 0) setEventId(evRes.data[0].id)
+      const map: Record<string, string> = {}
+      orgs.forEach(o => { map[o.id] = o.name })
+      setOrgMap(map)
+    }).catch(() => {}).finally(() => setLoadingEvents(false))
   }, [])
 
   useEffect(() => {
@@ -50,10 +58,14 @@ export default function ExhibitorsPage() {
     [exhibitors, filter])
 
   const columns: Column<Exhibitor>[] = [
-    { key: 'organizationId', header: 'Organization', render: e => <span className={styles.orgId}>{e.organizationId}</span> },
-    { key: 'boothCode',      header: 'Booth', width: '100px', render: e => <span className={styles.mono}>{e.boothCode}</span> },
-    { key: 'boothSize',      header: 'Size',  width: '100px', render: e => <span className={styles.size}>{e.boothSize}</span> },
-    { key: 'status',         header: 'Status', width: '130px', render: e => <Badge color={STATUS_COLOR[e.status]}>{e.status.replace('_', ' ')}</Badge> },
+    {
+      key: 'organizationId',
+      header: 'Organization',
+      render: e => <span className={styles.orgName}>{orgMap[e.organizationId] ?? e.organizationId}</span>,
+    },
+    { key: 'boothCode', header: 'Booth', width: '100px', render: e => <span className={styles.mono}>{e.boothCode}</span> },
+    { key: 'boothSize', header: 'Size',  width: '100px', render: e => <span className={styles.size}>{e.boothSize}</span> },
+    { key: 'status',    header: 'Status', width: '130px', render: e => <Badge color={STATUS_COLOR[e.status]}>{e.status.replace('_', ' ')}</Badge> },
   ]
 
   return (

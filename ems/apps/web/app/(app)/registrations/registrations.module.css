@@ -8,7 +8,7 @@
 .content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 20px;
 }
 
 /* ── Toolbar ─────────────────────────────────────────────────── */
@@ -87,7 +87,9 @@
   color: var(--ink-3);
 }
 
-.na { color: var(--ink-4); }
+.name       { font-size: 13px; font-weight: 600; color: var(--ink); }
+.ticketName { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.na         { color: var(--ink-4); }
 
 .rowActions {
   display: flex;

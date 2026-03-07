@@ -95,9 +95,10 @@
 .badge  { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 
 /* Sponsors / Exhibitors */
-.orgId  { font-size: 12px; font-weight: 600; color: var(--i-dk); font-family: var(--font-mono); }
-.amount { font-size: 13px; font-weight: 700; color: var(--g-dk); }
-.size   { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.orgId   { font-size: 12px; font-weight: 600; color: var(--i-dk); font-family: var(--font-mono); }
+.orgName { font-size: 13px; font-weight: 600; color: var(--ink); }
+.amount  { font-size: 13px; font-weight: 700; color: var(--g-dk); }
+.size    { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 
 /* Notifications */
 .channel  { font-size: 12px; font-weight: 700; color: var(--ink-2); }
