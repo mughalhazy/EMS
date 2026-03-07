@@ -134,3 +134,20 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 **Route group:** `app/(attendee)/` with server component `layout.tsx` wrapping `<AttendeeLayout>`.
 
 **Patterns:** deterministic avatar color (`charCodeAt(0) % 6`), `groupByDate()` for timeline/schedule, styled native `<select>` with SVG chevron data URI, `useMemo` for client-side filtering/grouping.
+
+---
+
+## [11] Admin Console — 4 pages + service
+
+| Page | Route | Key Features |
+|------|-------|-------------|
+| Users | `/admin/users` | All platform users cross-tenant; search + status filter (All/Active/Invited/Disabled); Avatar+Name cell; tenant tag; enable/disable row action |
+| Tenants | `/admin/tenants` | Stat summary row (Total/Active/Suspended); status filter tabs; DataTable with slug, event/user counts; suspend/activate action |
+| Events | `/admin/events` | Cross-tenant event list; tenant selector + status tabs + search; live-now pulse pill; attendee count column |
+| System | `/admin/system` | Platform metrics (6 cards: req/min, error rate, p95 latency, active sessions, kafka lag, cache hit); service health grid (3-col) with colored status dot + left-border accent, latency, uptime; overall status pill; manual refresh |
+
+**New service:** `services/admin.service.ts` — `AdminTenant`, `AdminUser`, `AdminEvent`, `SystemMetrics`/`ServiceHealth` types; listTenants/Users/Events (paginated), suspend/activate tenant, enable/disable user, systemHealth.
+
+**Route group:** `app/(admin)/` with server component `layout.tsx` wrapping `<AdminLayout>`.
+
+**Patterns:** status-color-tinted left border accent on service cards, conditional metric color based on threshold (error rate > 1% → brick, latency > 500ms → amber), animated live pulse dot, useCallback for refreshable data fetch.

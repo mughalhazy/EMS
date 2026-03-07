@@ -1,0 +1,246 @@
+.page { display: flex; flex-direction: column; gap: 32px; }
+
+/* ── Page header ─────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.heading    { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 6px; }
+.subheading { font-size: 14px; color: var(--ink-3); font-weight: 500; }
+.asOf       { color: var(--ink-4); }
+
+.headerActions { display: flex; align-items: center; gap: 12px; }
+
+/* Overall status pill */
+.overallStatus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid transparent;
+}
+.overallDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.overallOk {
+  color: var(--f-dk);
+  background: var(--f-lt);
+  border-color: var(--f-border);
+}
+.overallOk .overallDot { background: var(--f-md); animation: pulse 2s ease-in-out infinite; }
+
+.overallDown {
+  color: var(--b-dk);
+  background: var(--b-lt);
+  border-color: var(--b-border);
+}
+.overallDown .overallDot { background: var(--b-md); }
+
+.overallDegraded {
+  color: var(--a-dk);
+  background: var(--a-lt);
+  border-color: var(--a-border);
+}
+.overallDegraded .overallDot { background: var(--a-md); }
+
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+/* ── Section ─────────────────────────────────────────────────── */
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.sectionHeader .sectionTitle { margin-bottom: 0; }
+.svcCount { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+
+/* ── Platform metric grid ────────────────────────────────────── */
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 20px 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.metricValue {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.colorIndigo { color: var(--i-dk); }
+.colorForest { color: var(--f-dk); }
+.colorAmber  { color: var(--a-dk); }
+.colorBrick  { color: var(--b-dk); }
+.colorTeal   { color: var(--t-dk); }
+
+.metricLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+}
+
+/* ── Service health grid ─────────────────────────────────────── */
+.svcGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.svcCard {
+  padding: 16px 18px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow var(--transition-fast);
+}
+.svcCard:hover { box-shadow: var(--shadow-md); }
+
+/* Status-tinted left border accent */
+.svc_healthy  { border-left: 3px solid var(--f-md); }
+.svc_degraded { border-left: 3px solid var(--a-md); }
+.svc_down     { border-left: 3px solid var(--b-md); }
+
+.svcHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Status dot */
+.svcDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot_healthy  { background: var(--f-md); }
+.dot_degraded { background: var(--a-md); animation: pulse 1.4s ease-in-out infinite; }
+.dot_down     { background: var(--b-md); }
+
+.svcName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.svcStatus {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+.status_healthy  { color: var(--f-dk); }
+.status_degraded { color: var(--a-dk); }
+.status_down     { color: var(--b-dk); }
+
+.svcMeta { display: flex; gap: 16px; }
+
+.svcMetaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.svcMetaLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-4);
+}
+
+.svcMetaValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+}
+.uptimeLow { color: var(--a-dk); }
+
+/* ── Skeleton ────────────────────────────────────────────────── */
+.skeleton         { display: flex; flex-direction: column; gap: 32px; }
+.skeletonMetricRow {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+.skeletonMetric {
+  height: 88px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  animation: skPulse 1.4s ease-in-out infinite;
+}
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.skeletonCard {
+  height: 96px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  animation: skPulse 1.4s ease-in-out infinite;
+}
+@keyframes skPulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+/* ── Error state ─────────────────────────────────────────────── */
+.error      { display: flex; flex-direction: column; align-items: center; padding: 60px 24px; gap: 8px; text-align: center; }
+.errorTitle { font-size: 16px; font-weight: 700; color: var(--ink); }
+.errorDesc  { font-size: 13px; color: var(--ink-3); margin-bottom: 4px; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .metricGrid { grid-template-columns: repeat(3, 1fr); }
+  .skeletonMetricRow { grid-template-columns: repeat(3, 1fr); }
+  .svcGrid    { grid-template-columns: repeat(2, 1fr); }
+  .skeletonGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .metricGrid { grid-template-columns: repeat(2, 1fr); }
+  .skeletonMetricRow { grid-template-columns: repeat(2, 1fr); }
+  .svcGrid    { grid-template-columns: 1fr; }
+  .skeletonGrid { grid-template-columns: 1fr; }
+  .pageHeader { flex-direction: column; align-items: flex-start; }
+  .headerActions { width: 100%; }
+}

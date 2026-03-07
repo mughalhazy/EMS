@@ -1,0 +1,70 @@
+.page        { display: flex; flex-direction: column; gap: 24px; }
+
+/* ── Page header ─────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.heading    { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 6px; }
+.subheading { font-size: 14px; color: var(--ink-3); font-weight: 500; }
+.count      { font-size: 13px; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
+
+/* ── Controls ────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters    { display: flex; gap: 4px; }
+
+.filterBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+.filterBtn:hover { background: var(--surface); color: var(--ink-2); }
+.active          { background: var(--ink); color: var(--white); }
+.active:hover    { background: var(--ink-2); }
+
+.searchWrap { flex: 1; min-width: 240px; max-width: 360px; }
+
+/* ── Table cell styles ───────────────────────────────────────── */
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.userName  { font-size: 13px; font-weight: 700; color: var(--ink); }
+.userEmail { font-size: 11px; color: var(--ink-3); font-weight: 500; margin-top: 2px; }
+
+.tenant {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+}
+
+.roles { font-size: 12px; color: var(--ink-2); }
+.date  { font-size: 12px; color: var(--ink-3); }
+.na    { font-size: 12px; color: var(--ink-4); }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .controls  { flex-direction: column; align-items: flex-start; }
+  .searchWrap { max-width: 100%; width: 100%; }
+}

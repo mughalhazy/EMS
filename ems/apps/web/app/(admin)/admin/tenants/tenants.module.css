@@ -1,0 +1,95 @@
+.page        { display: flex; flex-direction: column; gap: 24px; }
+
+/* ── Page header ─────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.heading    { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 6px; }
+.subheading { font-size: 14px; color: var(--ink-3); font-weight: 500; }
+
+/* ── Stat summary row ────────────────────────────────────────── */
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 20px 28px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  width: fit-content;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 28px;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1;
+}
+.statForest { color: var(--f-dk); }
+.statBrick  { color: var(--b-dk); }
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.statDivider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* ── Filters ─────────────────────────────────────────────────── */
+.filters { display: flex; gap: 4px; }
+
+.filterBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+.filterBtn:hover { background: var(--surface); color: var(--ink-2); }
+.active          { background: var(--ink); color: var(--white); }
+.active:hover    { background: var(--ink-2); }
+
+/* ── Table cell styles ───────────────────────────────────────── */
+.tenantName { font-size: 13px; font-weight: 700; color: var(--ink); }
+.tenantSlug {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+.num  { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.date { font-size: 12px; color: var(--ink-3); }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .statRow  { width: 100%; justify-content: center; }
+  .stat     { padding: 0 16px; }
+}
