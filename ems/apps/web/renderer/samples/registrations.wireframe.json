@@ -1,0 +1,75 @@
+{
+  "id": "registrations-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Registrations",
+    "route": "/registrations",
+    "description": "Registration management with approval workflow",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "registrations-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Registrations",
+            "subtitle": "Manage and approve event registrations"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "event-selector",
+          "type": "select_input",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "eventId",
+            "label": "Event",
+            "placeholder": "Select event…"
+          }
+        },
+        {
+          "id": "status-filter",
+          "type": "tabset",
+          "order": 1,
+          "props": {
+            "tabs": ["All", "Pending", "Approved", "Confirmed", "Cancelled"],
+            "dataKey": "statusFilter"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "registrations-table",
+          "type": "list_table",
+          "order": 0,
+          "span": 12,
+          "props": {
+            "dataKey": "registrations",
+            "pageSize": 25,
+            "columns": ["attendee", "ticket", "status", "registeredAt", "actions"]
+          },
+          "states": {
+            "loading": { "id": "registrations-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "registrations-table-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}

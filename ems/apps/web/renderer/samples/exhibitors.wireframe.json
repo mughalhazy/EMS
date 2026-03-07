@@ -1,0 +1,75 @@
+{
+  "id": "exhibitors-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Exhibitors",
+    "route": "/exhibitors",
+    "description": "Exhibitor booth management per event",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "exhibitors-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Exhibitors",
+            "subtitle": "Booth assignments and exhibitor status"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "event-selector",
+          "type": "select_input",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "eventId",
+            "label": "Event",
+            "placeholder": "Select event…"
+          }
+        },
+        {
+          "id": "status-filter",
+          "type": "tabset",
+          "order": 1,
+          "props": {
+            "tabs": ["All", "Confirmed", "Pending", "Cancelled"],
+            "dataKey": "statusFilter"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "exhibitors-table",
+          "type": "list_table",
+          "order": 0,
+          "span": 12,
+          "props": {
+            "dataKey": "exhibitors",
+            "pageSize": 25,
+            "columns": ["organization", "boothCode", "boothSize", "status", "actions"]
+          },
+          "states": {
+            "loading": { "id": "exhibitors-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "exhibitors-table-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}

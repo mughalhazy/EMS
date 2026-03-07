@@ -1,0 +1,112 @@
+{
+  "id": "agenda-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Agenda",
+    "route": "/agenda",
+    "description": "Session schedule grid — time × room with day tabs",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "agenda-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Agenda",
+            "subtitle": "Session schedule and room assignments"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "event-selector",
+          "type": "select_input",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "eventId",
+            "label": "Event",
+            "placeholder": "Select event…"
+          }
+        },
+        {
+          "id": "day-tabs",
+          "type": "tabset",
+          "order": 1,
+          "props": {
+            "dataKey": "activeDay",
+            "variant": "underline",
+            "tabsFromData": true,
+            "tabsDataKey": "days"
+          },
+          "annotations": {
+            "aria-label": "Schedule day selector"
+          }
+        },
+        {
+          "id": "publish-agenda",
+          "type": "secondary_cta",
+          "order": 2,
+          "span": 2,
+          "props": {
+            "label": "Publish Agenda",
+            "variant": "ghost"
+          },
+          "annotations": {
+            "aria-label": "Publish agenda"
+          }
+        },
+        {
+          "id": "add-session",
+          "type": "primary_cta",
+          "order": 3,
+          "span": 2,
+          "props": {
+            "label": "Add Session",
+            "variant": "indigo"
+          },
+          "annotations": {
+            "aria-label": "Add a new session"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "schedule-grid",
+          "type": "schedule_grid",
+          "order": 0,
+          "span": 12,
+          "props": {
+            "dataKey": "sessions",
+            "activeDayKey": "activeDay",
+            "sessionTypeColors": {
+              "keynote": "i",
+              "talk": "f",
+              "panel": "g",
+              "workshop": "t",
+              "networking": "a"
+            }
+          },
+          "states": {
+            "loading": { "id": "schedule-grid-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "schedule-grid-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}

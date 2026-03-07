@@ -1,0 +1,98 @@
+{
+  "id": "ticketing-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Ticketing",
+    "route": "/ticketing",
+    "description": "Ticket inventory and sales management",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "ticketing-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Ticketing",
+            "subtitle": "Ticket inventory and sales performance"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "event-selector",
+          "type": "select_input",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "eventId",
+            "label": "Event",
+            "placeholder": "Select event…"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "kpi-total-sold",
+          "type": "metric_tile",
+          "order": 0,
+          "span": 3,
+          "props": { "label": "Total Sold", "dataKey": "totalSold", "color": "f" },
+          "states": { "loading": { "id": "kpi-total-sold", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-revenue",
+          "type": "metric_tile",
+          "order": 1,
+          "span": 3,
+          "props": { "label": "Revenue", "dataKey": "revenue", "color": "g" },
+          "states": { "loading": { "id": "kpi-revenue", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-available",
+          "type": "metric_tile",
+          "order": 2,
+          "span": 3,
+          "props": { "label": "Available", "dataKey": "available", "color": "i" },
+          "states": { "loading": { "id": "kpi-available", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-utilization",
+          "type": "metric_tile",
+          "order": 3,
+          "span": 3,
+          "props": { "label": "Utilization", "dataKey": "utilization", "color": "t" },
+          "states": { "loading": { "id": "kpi-utilization", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "tickets-table",
+          "type": "list_table",
+          "order": 4,
+          "span": 12,
+          "props": {
+            "dataKey": "tickets",
+            "pageSize": 25,
+            "columns": ["name", "price", "total", "sold", "available", "status", "salesWindow"]
+          },
+          "states": {
+            "loading": { "id": "tickets-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "tickets-table-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}

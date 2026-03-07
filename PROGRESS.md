@@ -385,3 +385,28 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 | `renderer/catalog/ComponentCatalog.ts` | Added `alert_banner` → `AlertBanner` entry; `schedule_grid` → `ScheduleGrid` entry |
 
 **Added:** `PENDING-TASKS.md` — ordered implementation anchor (Steps 1–6) parallel to this file.
+
+---
+
+## [22] Wireframe JSON Documents — Step 2
+
+All 12 `WireframeDocument` JSON files created at `ems/apps/web/renderer/samples/`.
+Each is a valid document with `id`, `version`, `surface`, `meta`, and all required `regions`.
+Status filter tabs derived directly from `domain-model.md` status enumerations.
+
+| File | Template | Regions |
+|------|----------|---------|
+| `notifications.wireframe.json` | list_page | top, filters (status tab), primary (list_table) |
+| `settings.wireframe.json` | dashboard_page | top, filters (tabs: Account/Team), primary (2 entity_cards + list_table) |
+| `sponsors.wireframe.json` | list_page | top, filters (event selector + status tab), primary (list_table) |
+| `exhibitors.wireframe.json` | list_page | top, filters (event selector + status tab), primary (list_table) |
+| `speakers.wireframe.json` | list_page | top, filters (event selector + status tab), primary (list_table) |
+| `attendees.wireframe.json` | list_page | top, filters (event selector + status tab), primary (list_table) |
+| `registrations.wireframe.json` | list_page | top, filters (event selector + status tab), primary (list_table) |
+| `ticketing.wireframe.json` | dashboard_page | top, filters (event selector), primary (4 metric_tiles + list_table) |
+| `analytics.wireframe.json` | dashboard_page | top, filters (event selector), primary (6 metric_tiles + 3 list_tables) |
+| `events.wireframe.json` | card_grid_page | top (header + view toggle), filters (search + status tab), primary (entity_card repeating + CTA) |
+| `events-detail.wireframe.json` | detail_page | top (header + status_chip), primary (entity_card + 2 list_tables) |
+| `agenda.wireframe.json` | schedule_page | top, filters (event selector + day tabs + 2 CTAs), primary (schedule_grid) |
+
+**Domain anchors used:** entity statuses from `domain-model.md`; color semantics from DL (forest=positive, amber=warning, gold=finance, teal=live, indigo=data, brick=danger).

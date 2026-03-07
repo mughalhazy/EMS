@@ -1,0 +1,144 @@
+{
+  "id": "analytics-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Analytics",
+    "route": "/analytics",
+    "description": "Event performance KPIs, revenue breakdown, funnel, and attendance trends",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "analytics-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Analytics",
+            "subtitle": "Event performance and revenue insights"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "event-selector",
+          "type": "select_input",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "eventId",
+            "label": "Event",
+            "placeholder": "Select event…"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "kpi-registrations",
+          "type": "metric_tile",
+          "order": 0,
+          "span": 4,
+          "props": { "label": "Registrations", "dataKey": "registrations", "color": "f" },
+          "states": { "loading": { "id": "kpi-registrations-skeleton", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-checkins",
+          "type": "metric_tile",
+          "order": 1,
+          "span": 4,
+          "props": { "label": "Check-ins", "dataKey": "checkins", "color": "t" },
+          "states": { "loading": { "id": "kpi-checkins-skeleton", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-revenue",
+          "type": "metric_tile",
+          "order": 2,
+          "span": 4,
+          "props": { "label": "Revenue", "dataKey": "revenue", "color": "g" },
+          "states": { "loading": { "id": "kpi-revenue-skeleton", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-conversion",
+          "type": "metric_tile",
+          "order": 3,
+          "span": 4,
+          "props": { "label": "Conversion Rate", "dataKey": "conversionRate", "color": "i" },
+          "states": { "loading": { "id": "kpi-conversion-skeleton", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-abandonment",
+          "type": "metric_tile",
+          "order": 4,
+          "span": 4,
+          "props": { "label": "Abandonment Rate", "dataKey": "abandonmentRate", "color": "a" },
+          "states": { "loading": { "id": "kpi-abandonment-skeleton", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "kpi-avg-order",
+          "type": "metric_tile",
+          "order": 5,
+          "span": 4,
+          "props": { "label": "Avg Order Value", "dataKey": "avgOrderValue", "color": "g" },
+          "states": { "loading": { "id": "kpi-avg-order-skeleton", "type": "loading_placeholder" } }
+        },
+        {
+          "id": "revenue-by-ticket",
+          "type": "list_table",
+          "order": 6,
+          "span": 12,
+          "props": {
+            "dataKey": "revenueByTicket",
+            "title": "Revenue by Ticket Type",
+            "columns": ["ticketType", "sold", "revenue", "percentOfTotal"]
+          },
+          "states": {
+            "loading": { "id": "revenue-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "revenue-table-empty",   "type": "empty_placeholder" }
+          }
+        },
+        {
+          "id": "checkout-funnel",
+          "type": "list_table",
+          "order": 7,
+          "span": 12,
+          "props": {
+            "dataKey": "checkoutFunnel",
+            "title": "Checkout Funnel",
+            "columns": ["stage", "count", "dropoffRate"]
+          },
+          "states": {
+            "loading": { "id": "funnel-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "funnel-table-empty",   "type": "empty_placeholder" }
+          }
+        },
+        {
+          "id": "attendance-by-day",
+          "type": "list_table",
+          "order": 8,
+          "span": 12,
+          "props": {
+            "dataKey": "attendanceByDay",
+            "title": "Attendance by Day",
+            "columns": ["date", "registrations", "checkins", "noShows"]
+          },
+          "states": {
+            "loading": { "id": "attendance-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "attendance-table-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}

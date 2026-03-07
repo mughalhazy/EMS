@@ -1,0 +1,91 @@
+{
+  "id": "events-detail-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Event Detail",
+    "route": "/events/[id]",
+    "description": "Event detail view — metadata header + sessions + speakers",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "event-detail-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "dataKey": "event",
+            "titleKey": "name",
+            "subtitleKey": "code"
+          }
+        },
+        {
+          "id": "event-status-chip",
+          "type": "event_status",
+          "order": 1,
+          "span": 2,
+          "props": {
+            "dataKey": "event",
+            "statusKey": "status"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "event-info-card",
+          "type": "entity_card",
+          "order": 0,
+          "span": 12,
+          "props": {
+            "dataKey": "event",
+            "variant": "detail",
+            "fields": ["description", "startAt", "endAt", "timezone", "venue"]
+          },
+          "states": {
+            "loading": { "id": "event-info-skeleton", "type": "loading_placeholder" }
+          }
+        },
+        {
+          "id": "sessions-table",
+          "type": "list_table",
+          "order": 1,
+          "span": 12,
+          "props": {
+            "dataKey": "sessions",
+            "title": "Sessions",
+            "pageSize": 25,
+            "columns": ["title", "sessionType", "startAt", "endAt", "room", "capacity", "status"]
+          },
+          "states": {
+            "loading": { "id": "sessions-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "sessions-table-empty",   "type": "empty_placeholder" }
+          }
+        },
+        {
+          "id": "speakers-table",
+          "type": "list_table",
+          "order": 2,
+          "span": 12,
+          "props": {
+            "dataKey": "speakers",
+            "title": "Speakers",
+            "pageSize": 25,
+            "columns": ["avatar", "name", "bio", "status"]
+          },
+          "states": {
+            "loading": { "id": "speakers-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "speakers-table-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}

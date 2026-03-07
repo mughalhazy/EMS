@@ -1,0 +1,98 @@
+{
+  "id": "events-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Events",
+    "route": "/events",
+    "description": "Event portfolio — card grid with list view toggle",
+    "roles": ["admin", "manager"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "events-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Events",
+            "subtitle": "Your event portfolio"
+          }
+        },
+        {
+          "id": "view-toggle",
+          "type": "tabset",
+          "order": 1,
+          "props": {
+            "tabs": ["Grid", "List"],
+            "dataKey": "viewMode",
+            "variant": "toggle"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "search-input",
+          "type": "text_input",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "searchQuery",
+            "placeholder": "Search events…"
+          }
+        },
+        {
+          "id": "status-filter",
+          "type": "tabset",
+          "order": 1,
+          "props": {
+            "tabs": ["All", "Draft", "Published", "Live", "Archived"],
+            "dataKey": "statusFilter"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "event-card-1",
+          "type": "entity_card",
+          "order": 0,
+          "span": 4,
+          "props": {
+            "dataKey": "events",
+            "variant": "event",
+            "repeating": true
+          },
+          "states": {
+            "loading": { "id": "event-cards-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "event-cards-empty",   "type": "empty_placeholder" }
+          }
+        },
+        {
+          "id": "create-event-cta",
+          "type": "primary_cta",
+          "order": 99,
+          "span": 4,
+          "props": {
+            "label": "Create new event",
+            "variant": "indigo",
+            "href": "/events/new"
+          },
+          "annotations": {
+            "aria-label": "Create a new event"
+          }
+        }
+      ]
+    }
+  }
+}

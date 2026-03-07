@@ -84,7 +84,7 @@ schedule_grid: {
 
 ---
 
-## STEP 2 — Wireframe JSON Documents [ ]
+## STEP 2 — Wireframe JSON Documents [x]
 
 **Location:** `ems/apps/web/renderer/samples/`
 **Format:** follow `dashboard.wireframe.json` as reference

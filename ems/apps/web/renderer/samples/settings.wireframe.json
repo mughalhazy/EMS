@@ -1,0 +1,89 @@
+{
+  "id": "settings-v1",
+  "version": "ui-renderer-spec/v1",
+  "surface": "app",
+  "meta": {
+    "title": "Settings",
+    "route": "/settings",
+    "description": "Workspace and team settings",
+    "roles": ["admin"]
+  },
+  "regions": {
+    "top": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "settings-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Settings",
+            "subtitle": "Workspace and team configuration"
+          }
+        }
+      ]
+    },
+    "filters": {
+      "layout": "stack",
+      "gap": "sm",
+      "blocks": [
+        {
+          "id": "settings-tabs",
+          "type": "tabset",
+          "order": 0,
+          "props": {
+            "tabs": ["Account", "Team"],
+            "dataKey": "activeTab"
+          },
+          "annotations": {
+            "aria-label": "Settings sections"
+          }
+        }
+      ]
+    },
+    "primary": {
+      "layout": "grid",
+      "gap": "md",
+      "blocks": [
+        {
+          "id": "workspace-card",
+          "type": "entity_card",
+          "order": 0,
+          "span": 12,
+          "props": {
+            "dataKey": "workspace",
+            "title": "Workspace",
+            "variant": "info"
+          }
+        },
+        {
+          "id": "platform-card",
+          "type": "entity_card",
+          "order": 1,
+          "span": 12,
+          "props": {
+            "dataKey": "platform",
+            "title": "Platform",
+            "variant": "info"
+          }
+        },
+        {
+          "id": "team-table",
+          "type": "list_table",
+          "order": 2,
+          "span": 12,
+          "props": {
+            "dataKey": "users",
+            "pageSize": 25,
+            "columns": ["avatar", "name", "email", "role", "status"]
+          },
+          "states": {
+            "loading": { "id": "team-table-skeleton", "type": "loading_placeholder" },
+            "empty":   { "id": "team-table-empty",   "type": "empty_placeholder" }
+          }
+        }
+      ]
+    }
+  }
+}
