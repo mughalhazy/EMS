@@ -1,27 +1,182 @@
+/* ============================================================
+   AuthLayout — Split-screen auth shell
+   Left: brand panel  |  Right: form panel
+   ============================================================ */
+
 .shell {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 420px 1fr;
+}
+
+/* ── Brand panel ──────────────────────────────────────────── */
+.brand {
+  background: var(--ink);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
-  padding: 24px;
+  padding: 56px 48px;
+  overflow: hidden;
 }
 
-.card {
-  width: 100%;
-  max-width: 400px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 40px;
-  box-shadow: var(--shadow-lg);
+/* Teal + indigo radial glows for depth */
+.brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 25%, rgba(13,148,136,.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 80%, rgba(79,70,229,.18) 0%, transparent 55%);
+  pointer-events: none;
 }
 
-.wordmark {
-  font-size: 13px;
+/* Subtle dot-grid pattern overlay */
+.brand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.brandInner {
+  position: relative;
+  z-index: 1;
+  max-width: 300px;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.logoMark {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--t-dk) 0%, var(--t-md) 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
   font-weight: 800;
-  letter-spacing: 0.1em;
+  font-size: 20px;
+  box-shadow: 0 8px 24px rgba(13,148,136,.45);
+  flex-shrink: 0;
+}
+
+.logoName {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+
+.tagline {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: rgba(255,255,255,.85);
+  margin-bottom: 36px;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.55);
+  line-height: 1.4;
+}
+
+.featureDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--t-md);
+  flex-shrink: 0;
+}
+
+/* ── Form panel ──────────────────────────────────────────── */
+.formPanel {
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.formInner {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* ── Mobile wordmark (shown only when brand panel is hidden) ─ */
+.mobileWordmark {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.mobileLogoMark {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--t-dk) 0%, var(--t-md) 100%);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 800;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.mobileLogoName {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--ink);
-  text-transform: uppercase;
-  margin-bottom: 32px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .formPanel {
+    min-height: 100vh;
+    padding: 40px 24px;
+    background: var(--surface);
+  }
+
+  .formInner {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 36px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .mobileWordmark {
+    display: flex;
+  }
 }

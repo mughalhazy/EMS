@@ -1,6 +1,5 @@
 /* ============================================================
    Card — surface container
-   Wireframe ref: .card / .card-header / .card-body in _base.css
    ============================================================ */
 
 .card {
@@ -12,12 +11,13 @@
 
 /* ── Header ─────────────────────────────────────────────────── */
 .header {
-  padding: 18px 24px 14px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-height: 52px;
 }
 
 .title {
@@ -36,7 +36,7 @@
 
 /* ── Body ────────────────────────────────────────────────────── */
 .body {
-  padding: 20px 24px;
+  padding: 20px;
 }
 
 /* flush: no padding — tables, lists, and grids bleed to card edges */

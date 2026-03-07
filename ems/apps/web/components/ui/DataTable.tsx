@@ -73,7 +73,16 @@ export function DataTable<T extends Record<string, unknown>>({
 
         {!loading && rows.length === 0 && (
           <div className={styles.empty} role="status">
-            {emptyMessage}
+            <div className={styles.emptyIcon} aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="1.5" y="3.5" width="13" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
+                <path d="M1.5 6.5h13" stroke="currentColor" strokeWidth="1.25"/>
+                <path d="M5 9.5h6" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+                <path d="M5 11.5h3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <p className={styles.emptyTitle}>{emptyMessage}</p>
+            <p className={styles.emptyDesc}>No records match the current filters.</p>
           </div>
         )}
       </div>

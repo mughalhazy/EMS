@@ -2,7 +2,7 @@
   font-family: var(--font);
   font-size: 13px;
   font-weight: 700;
-  padding: 9px 18px;
+  padding: 9px 16px;
   border-radius: var(--radius);
   border: 1px solid transparent;
   cursor: pointer;
@@ -15,35 +15,39 @@
   line-height: 1;
   white-space: nowrap;
   user-select: none;
+  letter-spacing: -0.01em;
 }
 
 .btn:disabled {
-  opacity: 0.48;
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Variants */
+/* ── Variants ────────────────────────────────────────────────── */
 .primary { background: var(--ink); color: var(--white); }
-.primary:hover { background: var(--ink-2); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.primary:hover { background: var(--ink-2); box-shadow: var(--shadow-md); }
+.primary:active { background: var(--ink); box-shadow: none; }
 
 .forest { background: var(--f-md); color: var(--white); }
-.forest:hover { background: var(--f-dk); transform: translateY(-1px); box-shadow: var(--shadow-color-forest); }
+.forest:hover { background: var(--f-dk); box-shadow: var(--shadow-color-forest); }
+.forest:active { background: var(--f-dk); box-shadow: none; }
 
 .indigo { background: var(--i-md); color: var(--white); }
-.indigo:hover { background: var(--i-dk); transform: translateY(-1px); box-shadow: var(--shadow-color-indigo); }
+.indigo:hover { background: var(--i-dk); box-shadow: var(--shadow-color-indigo); }
+.indigo:active { background: var(--i-dk); box-shadow: none; }
 
 .ghost { background: transparent; color: var(--ink-2); border-color: var(--border); }
-.ghost:hover { background: var(--surface); border-color: var(--border-strong); }
+.ghost:hover { background: var(--surface); border-color: var(--border-strong); color: var(--ink); }
 
 .soft { background: var(--surface); color: var(--ink-2); border-color: var(--border); }
-.soft:hover { background: var(--border); }
+.soft:hover { background: var(--border); color: var(--ink); }
 
-/* Sizes */
-.sm { font-size: 11px; padding: 6px 12px; }
-.lg { font-size: 14px; padding: 12px 24px; }
+/* ── Sizes ───────────────────────────────────────────────────── */
+.sm { font-size: 12px; padding: 6px 11px; }
+.lg { font-size: 14px; padding: 11px 22px; }
 
-/* Spinner */
+/* ── Spinner ─────────────────────────────────────────────────── */
 .spinner {
   width: 12px;
   height: 12px;

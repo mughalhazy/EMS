@@ -1,21 +1,29 @@
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
 
 .eventLink {
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--ink);
   text-decoration: none;
-  font-size: 13px;
+  transition: color var(--transition-fast);
 }
 .eventLink:hover {
   color: var(--i-md);
 }
 
+@media (max-width: 1100px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .kpiGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
