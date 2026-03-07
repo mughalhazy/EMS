@@ -26,22 +26,22 @@
 
 /* ── Variants ────────────────────────────────────────────────── */
 .primary { background: var(--ink); color: var(--white); }
-.primary:hover { background: var(--ink-2); box-shadow: var(--shadow-md); }
-.primary:active { background: var(--ink); box-shadow: none; }
+.primary:hover { background: var(--ink-2); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.primary:active { background: var(--ink); box-shadow: none; transform: none; }
 
-.forest { background: var(--f-md); color: var(--white); }
-.forest:hover { background: var(--f-dk); box-shadow: var(--shadow-color-forest); }
-.forest:active { background: var(--f-dk); box-shadow: none; }
+.forest { background: var(--f-dk); color: var(--white); }
+.forest:hover { background: var(--f-dk); box-shadow: var(--shadow-color-forest); transform: translateY(-1px); filter: brightness(1.1); }
+.forest:active { background: var(--f-dk); box-shadow: none; transform: none; filter: none; }
 
 .indigo { background: var(--i-md); color: var(--white); }
-.indigo:hover { background: var(--i-dk); box-shadow: var(--shadow-color-indigo); }
-.indigo:active { background: var(--i-dk); box-shadow: none; }
+.indigo:hover { background: var(--i-dk); box-shadow: var(--shadow-color-indigo); transform: translateY(-1px); }
+.indigo:active { background: var(--i-dk); box-shadow: none; transform: none; }
 
-.ghost { background: transparent; color: var(--ink-2); border-color: var(--border); }
+.ghost { background: var(--white); color: var(--ink-2); border-color: var(--border-strong); }
 .ghost:hover { background: var(--surface); border-color: var(--border-strong); color: var(--ink); }
 
-.soft { background: var(--surface); color: var(--ink-2); border-color: var(--border); }
-.soft:hover { background: var(--border); color: var(--ink); }
+.soft { background: var(--f-lt); color: var(--f-dk); border-color: var(--f-border); }
+.soft:hover { background: var(--f-lt); filter: brightness(0.96); color: var(--f-dk); }
 
 /* ── Sizes ───────────────────────────────────────────────────── */
 .sm { font-size: 12px; padding: 6px 11px; }

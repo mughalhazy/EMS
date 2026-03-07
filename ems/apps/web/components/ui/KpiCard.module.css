@@ -1,13 +1,25 @@
 .card {
   padding: 20px;
   border-radius: var(--radius-lg);
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-top: 4px solid var(--border);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base), transform var(--transition-base);
   overflow: hidden;
   position: relative;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, currentColor 0%, transparent 70%);
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 .card:hover {
@@ -15,12 +27,12 @@
   box-shadow: var(--shadow-lg);
 }
 
-.f { border-top-color: var(--f-md); }
-.g { border-top-color: var(--g-md); }
-.b { border-top-color: var(--b-md); }
-.i { border-top-color: var(--i-md); }
-.a { border-top-color: var(--a-md); }
-.t { border-top-color: var(--t-md); }
+.f { background: var(--f-lt); border-color: var(--f-border); color: var(--f-dk); }
+.g { background: var(--g-lt); border-color: var(--g-border); color: var(--g-dk); }
+.b { background: var(--b-lt); border-color: var(--b-border); color: var(--b-dk); }
+.i { background: var(--i-lt); border-color: var(--i-border); color: var(--i-dk); }
+.a { background: var(--a-lt); border-color: var(--a-border); color: var(--a-dk); }
+.t { background: var(--t-lt); border-color: var(--t-border); color: var(--t-dk); }
 
 .icon {
   width: 36px;
@@ -54,7 +66,7 @@
   font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.04em;
-  color: var(--ink);
+  color: inherit;
   line-height: 1;
   margin-bottom: 8px;
 }

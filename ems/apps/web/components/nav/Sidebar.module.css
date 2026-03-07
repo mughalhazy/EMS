@@ -36,7 +36,7 @@
 .logoMark {
   width: 30px;
   height: 30px;
-  background: linear-gradient(135deg, var(--t-dk) 0%, var(--t-md) 100%);
+  background: linear-gradient(135deg, var(--f-dk) 0%, var(--f-md) 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -45,7 +45,7 @@
   font-weight: 800;
   font-size: 13px;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(13,148,136,.28);
+  box-shadow: var(--shadow-color-forest);
 }
 
 .wordmark {
