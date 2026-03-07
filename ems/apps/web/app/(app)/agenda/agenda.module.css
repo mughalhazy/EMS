@@ -1,18 +1,18 @@
 .page { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
+/* ── Toolbar: event selector + day tabs ──────────────────────────── */
 .toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 10px 20px;
+  gap: 16px;
+  padding: 14px 24px;
   border-bottom: 1px solid var(--border);
   background: var(--white);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
-.selectorRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.selectorRow { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
 .selectorLabel {
   font-size: 11px;
@@ -29,78 +29,211 @@
   font-weight: 600;
   padding: 7px 32px 7px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8880' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
   background-size: 10px 6px;
   color: var(--ink);
   appearance: none;
   cursor: pointer;
   outline: none;
-  max-width: 320px;
+  max-width: 300px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .select:focus { border-color: var(--i-md); box-shadow: 0 0 0 3px var(--i-border); }
 .select:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.count {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-3);
-  background: var(--surface);
-  padding: 3px 10px;
-  border-radius: var(--radius);
-}
-
-.filters { display: flex; gap: 4px; }
-
-.filterBtn {
+.dayTabs { display: flex; gap: 0; flex: 1; overflow-x: auto; }
+.dayTab {
   font-family: var(--font);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border: none;
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--ink-3);
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
   line-height: 1;
 }
-.filterBtn:hover { background: var(--surface); color: var(--ink-2); }
-.active           { background: var(--ink); color: var(--white); }
-.active:hover     { background: var(--ink-2); }
+.dayTab:hover { color: var(--ink-2); }
+.dayActive { color: var(--i-md); border-bottom-color: var(--i-md); }
 
-.content { flex: 1; overflow-y: auto; padding: 20px; }
+.topbarActions { display: flex; gap: 8px; flex-shrink: 0; }
+.actionBtn {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.actionBtn:hover { background: var(--surface); border-color: var(--border-strong); }
+.actionBtnPrimary {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid transparent;
+  background: var(--ink);
+  color: var(--white);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.actionBtnPrimary:hover { background: var(--ink-2); transform: translateY(-1px); }
 
-/* ── Cell styles ── */
-.mono { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
-.na   { color: var(--ink-4); }
-
-/* Speaker / Attendee cell */
-.speakerCell, .attendeeCell {
+/* ── Filter bar: track legend ────────────────────────────────────── */
+.filterBar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
 }
-.name  { font-size: 13px; font-weight: 700; color: var(--ink); }
-.email { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 1px; }
-.bio   { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
 
-/* Agenda */
-.title { font-size: 13px; font-weight: 700; color: var(--ink); }
-.type  { font-size: 12px; font-weight: 600; color: var(--ink-2); }
-.time  { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; }
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
 
-/* Attendee */
-.badge  { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+/* ── Schedule scroll container ───────────────────────────────────── */
+.scheduleWrap {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  background: var(--off);
+}
 
-/* Sponsors / Exhibitors */
-.orgId  { font-size: 12px; font-weight: 600; color: var(--i-dk); font-family: var(--font-mono); }
-.amount { font-size: 13px; font-weight: 700; color: var(--g-dk); }
-.size   { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+/* ── Schedule grid ───────────────────────────────────────────────── */
+.scheduleGrid {
+  display: grid;
+  grid-template-columns: 80px repeat(var(--room-count, 1), minmax(180px, 1fr));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--white);
+  min-width: 500px;
+  box-shadow: var(--shadow-sm);
+}
 
-/* Notifications */
+.schedHeader {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.schedHeaderRoom {
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+
+.timeSlot {
+  padding: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  text-align: right;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  font-family: var(--font-mono);
+}
+
+.schedCell {
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.schedCellSpan {
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+  min-height: 80px;
+}
+.schedCellEmpty { background: var(--off); }
+
+/* ── Session block ───────────────────────────────────────────────── */
+.sessionBlock {
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  border-left: 3px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+  flex: 1;
+}
+.sessionBlock:hover { filter: brightness(0.96); }
+
+.sessionTime {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+.sessionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.sessionType {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Empty / loading states ──────────────────────────────────────── */
+.loadingState, .emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Utility classes (shared across pages) ───────────────────────── */
+.mono     { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.name     { font-size: 13px; font-weight: 700; color: var(--ink); }
+.email    { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 1px; }
+.time     { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.orgId    { font-size: 12px; font-weight: 600; color: var(--i-dk); font-family: var(--font-mono); }
+.amount   { font-size: 13px; font-weight: 700; color: var(--g-dk); }
+.size     { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .channel  { font-size: 12px; font-weight: 700; color: var(--ink-2); }
 .template { font-size: 12px; font-weight: 600; color: var(--ink-2); font-family: var(--font-mono); }
 .subject  { font-size: 12px; color: var(--ink-3); }
-

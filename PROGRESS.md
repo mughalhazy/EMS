@@ -315,3 +315,48 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 | `settings/settings.module.css` | Tabs `padding: 0 16px`; skeleton opacity-pulse | → `0 20px`; shimmer gradient |
 
 **Commit:** `7cbc38b` — `fix(ui): design-language audit — token/spacing/state violations [19]`
+
+---
+
+## [20] Design System Reconciliation + Agenda/Events Rebuild
+
+**Source hierarchy re-established:** `design-language.html` = single source of truth. `wireframes/_base.css` = prototype tool only. `components.css` was outdated — now reconciled.
+
+**`styles/components.css` fixes (all derived from design-language.html):**
+
+| Rule | Before | After |
+|------|--------|-------|
+| `.badge-*` borders | `1px solid` | `1.5px solid` |
+| `.btn` border | `1px solid transparent` | `1.5px solid transparent` |
+| `.input` border | `1px solid` (no shadow) | `1.5px solid` + `box-shadow: var(--shadow-sm)` |
+| `.kpi-card` hover | `shadow-md` | `translateY(-3px)` + `shadow-lg` |
+| `.kpi-card` transition | `box-shadow` only | `box-shadow, transform` |
+| `.kpi-card.*` border-top | `3px solid` | `4px solid` |
+| `.alert-card` radius | `var(--radius)` | `var(--radius-lg)` |
+| `.alert-card` border | `1px solid` | `1.5px solid` |
+| `.data-table th/td` padding | `10/12px 16px` | `10/12px 20px` |
+
+**Batch padding fix across 10 page module.css files:**
+- Content padding: `20px` → `24px`
+- Toolbar padding: `10px 20px` → `14px 24px`
+- Files: analytics, ticketing, notifications, sponsors, exhibitors, speakers, registrations, attendees, settings, events/[id]
+
+**Agenda page — complete rebuild (DataTable → Schedule Grid):**
+- Day tabs in toolbar with indigo active underline (from wireframe spec)
+- Track legend (Keynote/Talk/Panel/Workshop/Networking) with colored 8×8 marker
+- CSS grid schedule: 80px time column + N×1fr room columns
+- Session blocks color-coded by type: keynote=indigo, talk=forest, panel=gold, workshop=teal, networking=amber
+- Keynotes with no roomId span all room columns automatically
+- Time slots computed dynamically from session startAt/endAt range
+- "Publish Agenda" + "Add Session" action buttons in toolbar
+- Empty/loading states handled
+
+**Events page — card grid + view toggle:**
+- Default view: 3-col card grid (per wireframe spec) with responsive 2-col/1-col breakpoints
+- Card: name, status chip (1.5px border), date range, timezone, stats row, action buttons
+- Draft cards: dashed border, `--surface` background, muted name color
+- "Create new event" CTA card: indigo-lt dashed border with centered plus
+- View toggle (Grid / List) in TopBar actions with `--border-strong` active state
+- List view: retains existing DataTable with Badge status column
+- Search input + status filter tabs + count in filter bar
+- Hover: `translateY(-2px)` + `shadow-md`

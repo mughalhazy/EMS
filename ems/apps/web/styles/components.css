@@ -15,13 +15,13 @@
   line-height: 1;
 }
 
-.badge-forest { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
-.badge-amber  { background: var(--a-lt); color: var(--a-dk); border: 1px solid var(--a-border); }
-.badge-brick  { background: var(--b-lt); color: var(--b-dk); border: 1px solid var(--b-border); }
-.badge-indigo { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
-.badge-gold   { background: var(--g-lt); color: var(--g-dk); border: 1px solid var(--g-border); }
-.badge-teal   { background: var(--t-lt); color: var(--t-dk); border: 1px solid var(--t-border); }
-.badge-neutral { background: var(--surface); color: var(--ink-2); border: 1px solid var(--border); }
+.badge-forest { background: var(--f-lt); color: var(--f-dk); border: 1.5px solid var(--f-border); }
+.badge-amber  { background: var(--a-lt); color: var(--a-dk); border: 1.5px solid var(--a-border); }
+.badge-brick  { background: var(--b-lt); color: var(--b-dk); border: 1.5px solid var(--b-border); }
+.badge-indigo { background: var(--i-lt); color: var(--i-dk); border: 1.5px solid var(--i-border); }
+.badge-gold   { background: var(--g-lt); color: var(--g-dk); border: 1.5px solid var(--g-border); }
+.badge-teal   { background: var(--t-lt); color: var(--t-dk); border: 1.5px solid var(--t-border); }
+.badge-neutral { background: var(--surface); color: var(--ink-2); border: 1.5px solid var(--border); }
 
 /* ── Status Chip ────────────────────────────────────────── */
 .status-chip {
@@ -52,7 +52,7 @@
   font-weight: 700;
   padding: 9px 18px;
   border-radius: var(--radius);
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -109,10 +109,11 @@
   font-weight: 600;
   padding: 10px 14px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   background: var(--white);
   color: var(--ink);
   width: 100%;
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
   outline: none;
   appearance: none;
@@ -143,19 +144,20 @@
   background: var(--white);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-base);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
 }
 
 .kpi-card:hover {
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
-.kpi-card.f { border-top: 3px solid var(--f-md); }
-.kpi-card.g { border-top: 3px solid var(--g-md); }
-.kpi-card.b { border-top: 3px solid var(--b-md); }
-.kpi-card.i { border-top: 3px solid var(--i-md); }
-.kpi-card.a { border-top: 3px solid var(--a-md); }
-.kpi-card.t { border-top: 3px solid var(--t-md); }
+.kpi-card.f { border-top: 4px solid var(--f-md); }
+.kpi-card.g { border-top: 4px solid var(--g-md); }
+.kpi-card.b { border-top: 4px solid var(--b-md); }
+.kpi-card.i { border-top: 4px solid var(--i-md); }
+.kpi-card.a { border-top: 4px solid var(--a-md); }
+.kpi-card.t { border-top: 4px solid var(--t-md); }
 
 .kpi-icon {
   width: 36px;
@@ -218,7 +220,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink-3);
-  padding: 10px 16px;
+  padding: 10px 20px;
   text-align: left;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
@@ -226,7 +228,7 @@
 }
 
 .data-table td {
-  padding: 12px 16px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border);
   color: var(--ink-2);
   font-weight: 600;
@@ -248,8 +250,8 @@
 /* ── Alert Card ─────────────────────────────────────────── */
 .alert-card {
   padding: 14px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -257,10 +259,10 @@
   font-weight: 600;
 }
 
-.alert-card.forest { background: var(--f-lt); border-color: var(--f-border); color: var(--f-dk); }
-.alert-card.amber  { background: var(--a-lt); border-color: var(--a-border); color: var(--a-dk); }
-.alert-card.brick  { background: var(--b-lt); border-color: var(--b-border); color: var(--b-dk); }
-.alert-card.indigo { background: var(--i-lt); border-color: var(--i-border); color: var(--i-dk); }
+.alert-card.forest { background: var(--f-lt); border-color: var(--f-border); color: var(--f-dk); border-width: 1.5px; }
+.alert-card.amber  { background: var(--a-lt); border-color: var(--a-border); color: var(--a-dk); border-width: 1.5px; }
+.alert-card.brick  { background: var(--b-lt); border-color: var(--b-border); color: var(--b-dk); border-width: 1.5px; }
+.alert-card.indigo { background: var(--i-lt); border-color: var(--i-border); color: var(--i-dk); border-width: 1.5px; }
 
 .alert-live-dot {
   width: 8px;

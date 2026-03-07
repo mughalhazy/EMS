@@ -5,26 +5,58 @@
   overflow: hidden;
 }
 
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
+/* ── Topbar right: view toggle + CTA ────────────────────────────── */
+.topbarRight { display: flex; align-items: center; gap: 10px; }
+
+.viewToggle { display: flex; gap: 2px; }
+.viewBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+.viewBtnActive {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--border-strong);
 }
 
-/* ── Toolbar ─────────────────────────────────────────────────── */
+/* ── Filter/toolbar bar ─────────────────────────────────────────── */
 .toolbar {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
+  padding: 14px 24px;
   border-bottom: 1px solid var(--border);
   gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
-.filters {
-  display: flex;
-  gap: 4px;
+.searchInput {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--ink);
+  outline: none;
+  min-width: 240px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
+.searchInput::placeholder { color: var(--ink-4); font-weight: 500; }
+.searchInput:focus { border-color: var(--i-md); box-shadow: 0 0 0 3px var(--i-border); }
 
+.filters { display: flex; gap: 4px; }
 .filterBtn {
   font-family: var(--font);
   font-size: 12px;
@@ -42,9 +74,201 @@
 .active           { background: var(--ink); color: var(--white); }
 .active:hover     { background: var(--ink-2); }
 
-/* ── Table cell ──────────────────────────────────────────────── */
-.name {
-  font-weight: 700;
-  color: var(--ink);
-  font-size: 13px;
+.count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-left: auto;
 }
+
+/* ── Content ────────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ── Event card grid ────────────────────────────────────────────── */
+.eventGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) { .eventGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px)  { .eventGrid { grid-template-columns: 1fr; } }
+
+/* ── Event card ─────────────────────────────────────────────────── */
+.eventCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  cursor: pointer;
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+.eventCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.eventCardDraft {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: var(--surface);
+  box-shadow: none;
+}
+.eventCardDraft:hover { box-shadow: none; transform: none; }
+
+.eventCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eventInfo { flex: 1; min-width: 0; }
+
+.eventName {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.eventNameDraft { color: var(--ink-2); }
+
+.eventMeta { display: flex; flex-direction: column; gap: 3px; }
+.eventMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+/* Status chip */
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1.5px solid;
+}
+.chipForest  { background: var(--f-lt); color: var(--f-dk); border-color: var(--f-border); }
+.chipTeal    { background: var(--t-lt); color: var(--t-dk); border-color: var(--t-border); }
+.chipAmber   { background: var(--a-lt); color: var(--a-dk); border-color: var(--a-border); }
+.chipNeutral { background: var(--surface); color: var(--ink-2); border-color: var(--border); }
+
+/* Event stats */
+.eventStats {
+  display: flex;
+  gap: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.eventStat { display: flex; flex-direction: column; gap: 2px; }
+.statVal {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.statLbl {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+/* Action buttons inside card */
+.eventActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.cardBtnGhost {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.cardBtnGhost:hover { background: var(--surface); border-color: var(--border-strong); }
+.cardBtnSoft {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.cardBtnSoft:hover { background: var(--border); }
+.cardBtnIndigo {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1.5px solid transparent;
+  background: var(--i-md);
+  color: var(--white);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.cardBtnIndigo:hover { background: var(--i-dk); }
+
+/* ── New event CTA card ─────────────────────────────────────────── */
+.ctaCard {
+  border: 1.5px dashed var(--i-border);
+  background: var(--i-lt);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-base);
+}
+.ctaCard:hover { background: color-mix(in srgb, var(--i-lt) 80%, var(--white)); box-shadow: var(--shadow-sm); }
+.ctaInner { text-align: center; }
+.ctaPlus { font-size: 32px; font-weight: 800; color: var(--i-md); margin-bottom: 8px; }
+.ctaLabel { font-size: 14px; font-weight: 700; color: var(--i-dk); }
+.ctaSub { font-size: 12px; color: var(--i-md); margin-top: 4px; }
+
+/* ── Loading / empty state ──────────────────────────────────────── */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── List view cell ─────────────────────────────────────────────── */
+.cellName { font-weight: 700; color: var(--ink); font-size: 13px; }
