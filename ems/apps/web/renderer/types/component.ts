@@ -36,6 +36,8 @@ export type CanonicalComponent =
   | 'TenantSwitcher'
   | 'VenueSelector'
   | 'AttendeeList'
+  | 'AlertBanner'
+  | 'ScheduleGrid'
   | 'UnknownBlock'
 
 // ── Default span heuristics ──────────────────────────────────
@@ -64,6 +66,8 @@ export const DEFAULT_SPANS: Partial<Record<BlockType, number>> = {
   venue_picker:        6,
   status_chip:         2,
   event_status:        2,
+  alert_banner:       12,
+  schedule_grid:      12,
 }
 
 // ── Catalog entry ────────────────────────────────────────────

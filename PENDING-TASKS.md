@@ -36,7 +36,7 @@ Wireframe JSON (structure)
 
 ---
 
-## STEP 1 — Extend BlockType Schema [ ]
+## STEP 1 — Extend BlockType Schema [x]
 
 **Files to change:**
 

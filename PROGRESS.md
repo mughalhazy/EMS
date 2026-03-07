@@ -360,3 +360,28 @@ Base client (`api.ts`), domain types (`types/domain.ts`), and API types (`types/
 - List view: retains existing DataTable with Badge status column
 - Search input + status filter tabs + count in filter bar
 - Hover: `translateY(-2px)` + `shadow-md`
+
+---
+
+## [21] Design Language Gap Fixes + Renderer Step 1
+
+**Gap fixes (6 components):**
+
+| Component | Fix |
+|-----------|-----|
+| `KpiCard.module.css` | Tinted-background architecture: `--*-lt` bg, `1.5px` all-around border, `color: inherit` on value, `::after` radial gradient accent |
+| `Button.module.css` | `forest` base `--f-dk`; `ghost` white bg + `border-strong`; `soft` forest-tinted (`--f-lt/--f-dk/--f-border`); `translateY(-1px)` on solid hovers |
+| `Badge.module.css` | `::before` 5×5px dot indicator; `:hover { transform: scale(1.04) }` |
+| `TopBar.module.css` | Title `font-size: 16px` → `18px` |
+| `DashboardLayout.module.css` | Body `padding: 20px` → `24px` |
+| `Sidebar.module.css` | Logomark gradient teal → forest; `box-shadow` rgba literal → `var(--shadow-color-forest)` |
+
+**Renderer Step 1 — Extend BlockType Schema:**
+
+| File | Change |
+|------|--------|
+| `renderer/types/wireframe.ts` | Added `alert_banner`, `schedule_grid` to `BlockType` union |
+| `renderer/types/component.ts` | Added `AlertBanner`, `ScheduleGrid` to `CanonicalComponent`; added `DEFAULT_SPANS` entries (both span 12) |
+| `renderer/catalog/ComponentCatalog.ts` | Added `alert_banner` → `AlertBanner` entry; `schedule_grid` → `ScheduleGrid` entry |
+
+**Added:** `PENDING-TASKS.md` — ordered implementation anchor (Steps 1–6) parallel to this file.

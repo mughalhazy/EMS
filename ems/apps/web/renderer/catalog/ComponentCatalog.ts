@@ -269,6 +269,26 @@ export const COMPONENT_CATALOG: ComponentCatalogMap = {
     notes: 'Venue + room selection flow.',
   },
 
+  // ── Informational / Alert ──────────────────────────────────
+  alert_banner: {
+    component: 'AlertBanner',
+    defaultSpan: 12,
+    defaultProps: { variant: 'amber' },
+    requiresA11yLabel: false,
+    supportsStates: false,
+    notes: 'Informational / warning banner. Variants: forest, amber, brick, indigo.',
+  },
+
+  // ── Schedule Grid ──────────────────────────────────────────
+  schedule_grid: {
+    component: 'ScheduleGrid',
+    defaultSpan: 12,
+    defaultProps: {},
+    requiresA11yLabel: false,
+    supportsStates: true,
+    notes: 'Time × room grid. Sessions colored by SessionType. Day tabs in toolbar.',
+  },
+
   // ── Unknown Fallback ───────────────────────────────────────
   unknown: {
     component: 'UnknownBlock',

@@ -38,6 +38,8 @@ export type BlockType =
   | 'tenant_selector'
   | 'venue_picker'
   | 'attendee_list'
+  | 'alert_banner'
+  | 'schedule_grid'
   | 'unknown'
 
 // ── Surface Types ────────────────────────────────────────────
