@@ -6,8 +6,8 @@
 # ── Stage 1: deps ─────────────────────────────────────────────
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY ems/apps/web/package.json ems/apps/web/package-lock.json* ./
-RUN npm ci --ignore-scripts
+COPY ems/apps/web/package.json ./
+RUN npm install --ignore-scripts
 
 # ── Stage 2: builder ──────────────────────────────────────────
 FROM node:20-alpine AS builder
