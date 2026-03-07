@@ -11,7 +11,7 @@
 
 import { ApiError, ApiRequestError, PaginationParams, PaginatedResponse } from '@/types/api'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 const API_VERSION = '/api/v1'
 
 function getAuthToken(): string | null {
