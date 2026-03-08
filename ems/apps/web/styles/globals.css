@@ -116,3 +116,13 @@ img, video {
 ul, ol {
   list-style: none;
 }
+
+/* ── Table row hover — applies to all data tables ───────── */
+table tbody tr {
+  transition: background 0.12s ease;
+}
+
+table tbody tr:hover {
+  background: var(--surface);
+  cursor: default;
+}

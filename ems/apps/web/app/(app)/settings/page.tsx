@@ -21,8 +21,8 @@ function fmtDate(iso: string | undefined) {
 }
 
 const TABS = ['Workspace', 'Team']
-const TH: React.CSSProperties = { padding: '10px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
-const TD: React.CSSProperties = { padding: '12px 20px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle' }
+const TH: React.CSSProperties = { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border-strong)', whiteSpace: 'nowrap' }
+const TD: React.CSSProperties = { padding: '16px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', fontSize: 14 }
 
 export default function SettingsPage() {
   const [tab, setTab] = useState('Workspace')
@@ -41,7 +41,7 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      <div style={{ padding: '20px 24px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ padding: '24px 32px 40px', display: 'flex', flexDirection: 'column', gap: 16 }}>
         {tab === 'Workspace' && (
           <Card>
             <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>

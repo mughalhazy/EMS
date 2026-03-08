@@ -11,17 +11,17 @@
 
 /* ── Header ─────────────────────────────────────────────────── */
 .header {
-  padding: 14px 20px;
+  padding: 18px 24px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 52px;
+  min-height: 60px;
 }
 
 .title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -36,7 +36,7 @@
 
 /* ── Body ────────────────────────────────────────────────────── */
 .body {
-  padding: 20px;
+  padding: 24px;
 }
 
 /* flush: no padding — tables, lists, and grids bleed to card edges */

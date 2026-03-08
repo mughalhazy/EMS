@@ -29,8 +29,8 @@ function fmtAmount(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(cents / 100)
 }
 
-const TH: React.CSSProperties = { padding: '10px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
-const TD: React.CSSProperties = { padding: '12px 20px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle' }
+const TH: React.CSSProperties = { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border-strong)', whiteSpace: 'nowrap' }
+const TD: React.CSSProperties = { padding: '16px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', fontSize: 14 }
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
   const event    = useMemo(() => events.find(e => e.id === params.id) ?? null, [params.id])
@@ -60,7 +60,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         <Badge color={STATUS_COLOR[event.status] ?? 'neutral'}>{event.status}</Badge>
       </PageHeader>
 
-      <div style={{ padding: '20px 24px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ padding: '24px 32px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* Overview stat strip */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>

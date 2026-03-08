@@ -41,7 +41,7 @@ export default function AgendaPage() {
       <PageHeader title="Agenda" subtitle="Event schedule and session management" />
 
       {/* Event selector + stats */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 24px', borderBottom: '1px solid var(--border)', background: 'var(--white)', flexShrink: 0, flexWrap: 'wrap' as const }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 32px', borderBottom: '1px solid var(--border)', background: 'var(--white)', flexShrink: 0, flexWrap: 'wrap' as const }}>
         <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em', color: 'var(--ink-3)' }}>Event</span>
         <select value={eventId} onChange={e => { setEventId(e.target.value); setActiveDay('') }} style={{ fontFamily: 'var(--font)', fontSize: 13, fontWeight: 600, padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--border)', background: 'var(--white)', color: 'var(--ink)', cursor: 'pointer', outline: 'none' }}>
           {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
@@ -62,7 +62,7 @@ export default function AgendaPage() {
         </div>
       )}
 
-      <div style={{ padding: '16px 24px 32px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ padding: '24px 32px 40px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {sessions.length === 0 ? (
           <Card>
             <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>No sessions for this event</div>

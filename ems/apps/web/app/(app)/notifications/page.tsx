@@ -22,8 +22,8 @@ function fmtTime(iso: string | undefined) {
   return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
-const TH: React.CSSProperties = { padding: '10px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
-const TD: React.CSSProperties = { padding: '12px 20px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle' }
+const TH: React.CSSProperties = { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border-strong)', whiteSpace: 'nowrap' }
+const TD: React.CSSProperties = { padding: '16px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', fontSize: 14 }
 
 export default function NotificationsPage() {
   const [tab, setTab] = useState('All')
@@ -40,7 +40,7 @@ export default function NotificationsPage() {
       <PageHeader title="Notifications" subtitle="Transactional messages sent across all channels" />
 
       {/* Stats bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '12px 24px', borderBottom: '1px solid var(--border)', background: 'var(--white)', flexShrink: 0, flexWrap: 'wrap' as const }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '14px 32px', borderBottom: '1px solid var(--border)', background: 'var(--white)', flexShrink: 0, flexWrap: 'wrap' as const }}>
         <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>Total <strong style={{ color: 'var(--ink)' }}>{notifications.length}</strong></span>
         <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>Delivered <strong style={{ color: 'var(--f-dk)' }}>{delivered}</strong></span>
         <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>Queued <strong style={{ color: 'var(--a-dk)' }}>{queued}</strong></span>
@@ -56,7 +56,7 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      <div style={{ padding: '16px 24px 32px' }}>
+      <div style={{ padding: '24px 32px 40px' }}>
         <Card flush>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
