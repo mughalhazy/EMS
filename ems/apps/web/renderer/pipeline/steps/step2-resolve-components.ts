@@ -20,18 +20,26 @@ export function stepResolveComponents(ctx: PipelineContext): PipelineContext {
       ? { data: ctx.data[dataKey], dataKey }
       : {}
 
+    // Populate a11y from block.annotations (aria-label, aria-live, etc.)
+    const ann = block.annotations ?? {}
+    const a11y: RenderedNode['a11y'] = {}
+    if (ann['aria-label'])       a11y['aria-label']       = ann['aria-label']
+    if (ann['aria-describedby']) a11y['aria-describedby'] = ann['aria-describedby']
+    if (ann['aria-live'])        a11y['aria-live']        = ann['aria-live']
+    if (ann['role'])             a11y['role']             = ann['role']
+
     const node: RenderedNode = {
       component: entry.component,
       props: { ...resolvedProps, ...injectedData },
       layout: {
         region,
-        span: entry.defaultSpan,
+        span: block.span ?? entry.defaultSpan,
         order: block.order ?? 0,
         responsive: {},
       },
       styleTokens: [],
       state: 'default',
-      a11y: {},
+      a11y,
       children: [],
       _blockId: block.id,
     }

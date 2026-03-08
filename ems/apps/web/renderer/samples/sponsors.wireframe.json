@@ -46,6 +46,9 @@
           "props": {
             "tabs": ["All", "Active", "Pending", "Inactive"],
             "dataKey": "statusFilter"
+          },
+          "annotations": {
+            "aria-label": "Sponsor status filter"
           }
         }
       ]

@@ -35,6 +35,9 @@
           "props": {
             "tabs": ["All", "Sent", "Pending", "Failed"],
             "dataKey": "statusFilter"
+          },
+          "annotations": {
+            "aria-label": "Notification status filter"
           }
         }
       ]

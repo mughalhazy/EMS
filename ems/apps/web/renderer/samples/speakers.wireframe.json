@@ -46,6 +46,9 @@
           "props": {
             "tabs": ["All", "Confirmed", "Invited", "Declined", "Withdrawn"],
             "dataKey": "statusFilter"
+          },
+          "annotations": {
+            "aria-label": "Speaker status filter"
           }
         }
       ]

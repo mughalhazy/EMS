@@ -46,6 +46,9 @@
           "props": {
             "tabs": ["All", "Registered", "Checked In", "Prospect", "Cancelled"],
             "dataKey": "statusFilter"
+          },
+          "annotations": {
+            "aria-label": "Attendee status filter"
           }
         }
       ]

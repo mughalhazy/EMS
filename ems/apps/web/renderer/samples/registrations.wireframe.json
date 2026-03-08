@@ -46,6 +46,9 @@
           "props": {
             "tabs": ["All", "Pending", "Approved", "Confirmed", "Cancelled"],
             "dataKey": "statusFilter"
+          },
+          "annotations": {
+            "aria-label": "Registration status filter"
           }
         }
       ]

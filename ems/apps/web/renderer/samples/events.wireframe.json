@@ -30,6 +30,9 @@
             "tabs": ["Grid", "List"],
             "dataKey": "viewMode",
             "variant": "toggle"
+          },
+          "annotations": {
+            "aria-label": "View mode toggle"
           }
         }
       ]
@@ -45,6 +48,7 @@
           "span": 4,
           "props": {
             "dataKey": "searchQuery",
+            "label": "Search events",
             "placeholder": "Search events…"
           }
         },
@@ -55,6 +59,9 @@
           "props": {
             "tabs": ["All", "Draft", "Published", "Live", "Archived"],
             "dataKey": "statusFilter"
+          },
+          "annotations": {
+            "aria-label": "Event status filter"
           }
         }
       ]
