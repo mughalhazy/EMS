@@ -17,7 +17,8 @@ import dynamic from 'next/dynamic'
 const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unknown>>> = {
   // ── Data display ─────────────────────────────────────────
   StatCard:    dynamic(() => import('@/components/ui/KpiCard').then(m => ({ default: m.KpiCard as React.ComponentType<Record<string, unknown>> }))),
-  DataTable:   dynamic(() => import('@/components/ui/DataTable').then(m => ({ default: m.DataTable as React.ComponentType<Record<string, unknown>> }))),
+  // DataTable omitted: expects typed Column<T>[] objects — not compatible with wireframe string columns.
+  // Resolves to getComponent() placeholder until a renderer adapter is built in Step 6.
   EventCard:   dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
   Card:        dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
 

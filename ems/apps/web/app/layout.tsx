@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import '@/styles/globals.css'
 import '@/styles/components.css'
+import '@/renderer/renderer.css'
 
 export const metadata: Metadata = {
   title: { default: 'EMS', template: '%s | EMS' },

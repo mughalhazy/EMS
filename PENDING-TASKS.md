@@ -237,7 +237,7 @@ For each block, if `block.props.dataKey` exists, resolve `data[dataKey]` and mer
 
 ---
 
-## STEP 5 — Page Migration (renderer-first) [ ]
+## STEP 5 — Page Migration (renderer-first) [x]
 
 Migrate pages one by one. Each migration:
 1. `page.tsx` becomes a data-fetching shell

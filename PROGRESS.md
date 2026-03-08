@@ -457,3 +457,33 @@ Threaded `data?: Record<string, unknown>` through the full renderer pipeline:
 <RenderedPage wireframe={eventsWireframe} data={{ events: apiEvents, total: count }} />
 // Block with props.dataKey="events" receives node.props.data = apiEvents
 ```
+
+---
+
+## [25] Page Migration — Step 5
+
+All 13 pages migrated to renderer-first architecture. Each page is now a thin data-fetching shell feeding `<RenderedPage wireframe={...} data={...} />`.
+
+**Pre-migration fixes:**
+- `app/layout.tsx`: added `import '@/renderer/renderer.css'` — renderer grid/region styles were not applied globally
+- `RenderedBlock.tsx`: `DataTable` removed from `COMPONENT_REGISTRY` — expects typed `Column<T>[]`, not wireframe string arrays; safely falls back to dev placeholder
+
+**Migrated pages:**
+
+| Page | Route | Data keys passed |
+|------|-------|-----------------|
+| Dashboard | `/dashboard` | `kpis`, `events`, `loading` + kpi spread |
+| Events | `/events` | `events`, `loading` |
+| Events Detail | `/events/[id]` | `event`, `sessions`, `speakers`, `loading` |
+| Agenda | `/agenda` | `events`, `eventId`, `sessions`, `activeDay`, `days`, `loading` |
+| Speakers | `/speakers` | `events`, `eventId`, `speakers`, `loading` |
+| Attendees | `/attendees` | `events`, `eventId`, `attendees`, `loading` |
+| Registrations | `/registrations` | `events`, `eventId`, `registrations`, `loading` |
+| Ticketing | `/ticketing` | `events`, `eventId`, `tickets`, `totalSold`, `revenue`, `available`, `utilization`, `loading` |
+| Sponsors | `/sponsors` | `events`, `eventId`, `sponsors`, `loading` |
+| Exhibitors | `/exhibitors` | `events`, `eventId`, `exhibitors`, `loading` |
+| Analytics | `/analytics` | `events`, `eventId`, all 6 KPI metrics, 3 table arrays, `loading` |
+| Notifications | `/notifications` | `notifications`, `loading` |
+| Settings | `/settings` | `workspace`, `users`, `loading` |
+
+**Current renderer output per page:** registered blocks (Card, KpiCard, Button, Badge, AlertCard, Input, Avatar, StatusChip) render with wireframe props; DataTable and Tabs blocks show dev placeholders until Step 6 adapters are built. `showDebug` overlay active in development. `renderer.css` now globally available via root layout.

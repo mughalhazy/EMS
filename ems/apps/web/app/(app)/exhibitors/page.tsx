@@ -1,96 +1,41 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
-import { TopBar } from '@/components/nav/TopBar'
-import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { DataTable, Column } from '@/components/ui/DataTable'
+import { useEffect, useState } from 'react'
+import { RenderedPage } from '@/renderer'
+import wireframe from '@/renderer/samples/exhibitors.wireframe.json'
 import { eventsService } from '@/services/events.service'
 import { exhibitorsService } from '@/services/exhibitors.service'
-import { api } from '@/services/api'
-import { Event, Exhibitor, ExhibitorStatus, Organization } from '@/types/domain'
+import { Event, Exhibitor } from '@/types/domain'
 import styles from './exhibitors.module.css'
 
-type StatusFilter = ExhibitorStatus | 'all'
-
-const STATUS_COLOR: Record<ExhibitorStatus, 'amber' | 'forest' | 'teal' | 'brick'> = {
-  invited: 'amber', confirmed: 'forest', checked_in: 'teal', cancelled: 'brick',
-}
-const FILTERS: Array<{ label: string; value: StatusFilter }> = [
-  { label: 'All', value: 'all' }, { label: 'Confirmed', value: 'confirmed' },
-  { label: 'Checked In', value: 'checked_in' }, { label: 'Invited', value: 'invited' },
-  { label: 'Cancelled', value: 'cancelled' },
-]
-
 export default function ExhibitorsPage() {
-  const [events, setEvents]         = useState<Event[]>([])
-  const [eventId, setEventId]       = useState('')
+  const [events, setEvents]       = useState<Event[]>([])
+  const [eventId, setEventId]     = useState<string>('')
   const [exhibitors, setExhibitors] = useState<Exhibitor[]>([])
-  const [orgMap, setOrgMap]         = useState<Record<string, string>>({})
-  const [filter, setFilter]         = useState<StatusFilter>('all')
-  const [loadingEvents, setLoadingEvents]         = useState(true)
-  const [loadingExhibitors, setLoadingExhibitors] = useState(false)
+  const [loading, setLoading]     = useState(true)
 
   useEffect(() => {
-    Promise.all([
-      eventsService.list({ limit: 100 }),
-      api.get<Organization[]>('/organizations').catch(() => [] as Organization[]),
-    ]).then(([evRes, orgs]) => {
-      setEvents(evRes.data)
-      if (evRes.data.length > 0) setEventId(evRes.data[0].id)
-      const map: Record<string, string> = {}
-      orgs.forEach(o => { map[o.id] = o.name })
-      setOrgMap(map)
-    }).catch(() => {}).finally(() => setLoadingEvents(false))
+    eventsService.list({ limit: 100 })
+      .then(r => { setEvents(r.data); if (r.data[0]) setEventId(r.data[0].id) })
+      .catch(() => setEvents([]))
   }, [])
 
   useEffect(() => {
     if (!eventId) return
-    setLoadingExhibitors(true)
+    setLoading(true)
     exhibitorsService.list(eventId, { limit: 100 })
       .then(r => setExhibitors(r.data))
       .catch(() => setExhibitors([]))
-      .finally(() => setLoadingExhibitors(false))
+      .finally(() => setLoading(false))
   }, [eventId])
-
-  const filtered = useMemo(() =>
-    filter === 'all' ? exhibitors : exhibitors.filter(e => e.status === filter),
-    [exhibitors, filter])
-
-  const columns: Column<Exhibitor>[] = [
-    {
-      key: 'organizationId',
-      header: 'Organization',
-      render: e => <span className={styles.orgName}>{orgMap[e.organizationId] ?? e.organizationId}</span>,
-    },
-    { key: 'boothCode', header: 'Booth', width: '100px', render: e => <span className={styles.mono}>{e.boothCode}</span> },
-    { key: 'boothSize', header: 'Size',  width: '100px', render: e => <span className={styles.size}>{e.boothSize}</span> },
-    { key: 'status',    header: 'Status', width: '130px', render: e => <Badge color={STATUS_COLOR[e.status]}>{e.status.replace('_', ' ')}</Badge> },
-  ]
 
   return (
     <div className={styles.page}>
-      <TopBar title="Exhibitors" />
-      <div className={styles.toolbar}>
-        <div className={styles.selectorRow}>
-          <span className={styles.selectorLabel}>Event</span>
-          <select className={styles.select} value={eventId} onChange={e => setEventId(e.target.value)} disabled={loadingEvents}>
-            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
-          </select>
-        </div>
-        <div className={styles.filters}>
-          {FILTERS.map(f => (
-            <button key={f.value} className={[styles.filterBtn, filter === f.value ? styles.active : ''].join(' ')} onClick={() => setFilter(f.value)}>
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className={styles.content}>
-        <Card flush>
-          <DataTable<Exhibitor> columns={columns} rows={filtered} loading={loadingExhibitors} emptyMessage="No exhibitors found for this event." />
-        </Card>
-      </div>
+      <RenderedPage
+        wireframe={wireframe}
+        data={{ events, eventId, exhibitors, loading }}
+        showDebug={process.env.NODE_ENV === 'development'}
+      />
     </div>
   )
 }
