@@ -1,0 +1,139 @@
+.wrap {
+  width: 100%;
+  overflow: auto;
+  background: var(--off);
+  border-radius: var(--radius-lg);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 80px repeat(var(--room-count, 1), minmax(180px, 1fr));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--white);
+  min-width: 500px;
+  box-shadow: var(--shadow-sm);
+}
+
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.headerRoom {
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+
+.timeSlot {
+  padding: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  text-align: right;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  font-family: var(--font-mono, monospace);
+}
+
+.cell {
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cellEmpty { background: var(--off); }
+
+.session {
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  border-left: 3px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+  flex: 1;
+}
+.session:hover { filter: brightness(0.96); }
+
+.sessionTime {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  font-family: var(--font-mono, monospace);
+}
+.sessionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.sessionType {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Session type color map */
+.keynote    { background: var(--i-lt);  border-left-color: var(--i-md);  }
+.keynote    .sessionType { color: var(--i-dk); }
+.talk       { background: var(--f-lt);  border-left-color: var(--f-md);  }
+.talk       .sessionType { color: var(--f-dk); }
+.panel      { background: var(--t-lt);  border-left-color: var(--t-md);  }
+.panel      .sessionType { color: var(--t-dk); }
+.workshop   { background: var(--a-lt);  border-left-color: var(--a-md);  }
+.workshop   .sessionType { color: var(--a-dk); }
+.networking { background: var(--g-lt);  border-left-color: var(--g-md);  }
+.networking .sessionType { color: var(--g-dk); }
+.other      { background: var(--surface); border-left-color: var(--border-strong); }
+.other      .sessionType { color: var(--ink-3); }
+
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  margin-bottom: 12px;
+}
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}

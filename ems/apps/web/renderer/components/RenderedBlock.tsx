@@ -17,10 +17,17 @@ import dynamic from 'next/dynamic'
 const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unknown>>> = {
   // ── Data display ─────────────────────────────────────────
   StatCard:    dynamic(() => import('@/components/ui/KpiCard').then(m => ({ default: m.KpiCard as React.ComponentType<Record<string, unknown>> }))),
-  // DataTable omitted: expects typed Column<T>[] objects — not compatible with wireframe string columns.
-  // Resolves to getComponent() placeholder until a renderer adapter is built in Step 6.
+  DataTable:   dynamic(() => import('@/components/ui/RendererDataTable').then(m => ({ default: m.RendererDataTable as React.ComponentType<Record<string, unknown>> }))),
   EventCard:   dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
   Card:        dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
+  ScheduleGrid: dynamic(() => import('@/components/ui/ScheduleGrid').then(m => ({ default: m.ScheduleGrid as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Feedback / loading ───────────────────────────────────
+  EmptyState:  dynamic(() => import('@/components/ui/EmptyState').then(m => ({ default: m.EmptyState as React.ComponentType<Record<string, unknown>> }))),
+  Skeleton:    dynamic(() => import('@/components/ui/Skeleton').then(m => ({ default: m.Skeleton as React.ComponentType<Record<string, unknown>> }))),
+
+  // ── Navigation / tabs ────────────────────────────────────
+  Tabs:        dynamic(() => import('@/components/ui/Tabs').then(m => ({ default: m.Tabs as React.ComponentType<Record<string, unknown>> }))),
 
   // ── Actions ──────────────────────────────────────────────
   Button:      dynamic(() => import('@/components/ui/Button').then(m => ({ default: m.Button as React.ComponentType<Record<string, unknown>> }))),
@@ -39,9 +46,7 @@ const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unkn
   Input:       dynamic(() => import('@/components/ui/Input').then(m => ({ default: m.Input as React.ComponentType<Record<string, unknown>> }))),
 
   // ── Not yet built — resolved by getComponent() placeholder ──
-  // Skeleton, EmptyState, Toast, Drawer, Popover, Tabs,
-  // CommandPalette, TenantSwitcher, VenueSelector,
-  // AttendeeList, ScheduleGrid, UnknownBlock
+  // Toast, Drawer, Popover, CommandPalette, TenantSwitcher, VenueSelector
 }
 
 // Populated lazily to avoid circular imports at module init

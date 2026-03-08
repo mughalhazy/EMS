@@ -1,0 +1,32 @@
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.wrap { display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 8px 0; }
+
+.line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.line:nth-child(2) { animation-delay: 0.1s; width: 88%; }
+.line:nth-child(3) { animation-delay: 0.2s; width: 76%; }
+.line:nth-child(4) { animation-delay: 0.3s; width: 92%; }
+.line:nth-child(5) { animation-delay: 0.4s; width: 70%; }
+.line:nth-child(6) { animation-delay: 0.1s; width: 85%; }
+.line:nth-child(7) { animation-delay: 0.25s; width: 78%; }
+.line:nth-child(8) { animation-delay: 0.15s; width: 90%; }
+
+/* Stat variant — wider, taller blocks for KPI cards */
+.stat .line { height: 32px; border-radius: var(--radius); }
+
+/* Card variant — card-shaped blocks */
+.card .line {
+  height: 80px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+}
