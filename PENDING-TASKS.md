@@ -297,6 +297,15 @@ Design rules for each:
 - [x] `page_header` → `PageHeader` in ComponentCatalog + COMPONENT_REGISTRY
 - **Commit:** `b294ae5`
 
+---
+
+## STEP 8 — RendererEntityCard adapter [x]
+
+- [x] `RendererEntityCard` — 3 variants: event grid, detail kv-table, info kv-table
+- [x] `EventCard` → `RendererEntityCard` in COMPONENT_REGISTRY
+- [x] `events.wireframe.json`: entity_card span 4 → 12
+- **Commit:** `3366bf8`
+
 After all 13 pages migrated:
 
 - [ ] Run renderer in `showDebug` mode on each page — zero validation errors

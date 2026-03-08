@@ -572,3 +572,26 @@ const displayValue = value ?? (data !== undefined ? String(data) : '—')
 Backward-compatible. Dashboard, Ticketing, Analytics KPIs now show real numbers.
 
 **Commit:** `b294ae5` — pushed to GitHub + deployed to Render
+
+---
+
+## [29] RendererEntityCard — entity_card adapter [step-8]
+
+Built `RendererEntityCard` adapter replacing the empty `Card` shell for all `entity_card` blocks.
+
+| Variant | Page | Rendering |
+|---------|------|-----------|
+| `event` + `repeating: true` | Events `/events` | 3→2→1 col grid of event cards with status pills, dates, code badge, action buttons, Create CTA card |
+| `detail` | Events[id] `/events/[id]` | Ordered key-value table from `fields[]` prop; dates auto-formatted |
+| `info` | Settings `/settings` | Auto-derived key-value pairs from entity object; card header with title |
+
+Key design:
+- Status pills: draft=neutral/dashed, published=forest, live=teal, archived=muted
+- Draft cards: dashed border + surface bg
+- ISO dates → "Mar 15, 2025" auto-formatting
+- Empty/loading states handled for all variants
+
+`COMPONENT_REGISTRY`: `EventCard` → `RendererEntityCard` (was `Card`)
+`events.wireframe.json`: entity_card `span: 4 → 12` (component owns internal grid)
+
+**Commit:** `3366bf8` — pushed to GitHub + deployed to Render (`dep-d6mcsgf5r7bs73cc3fp0`)
