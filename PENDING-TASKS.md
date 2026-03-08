@@ -266,7 +266,7 @@ Migrate pages one by one. Each migration:
 
 ---
 
-## STEP 6 — Missing UI Components (build as needed during Step 5) [ ]
+## STEP 6 — Missing UI Components [x]
 
 Build these only when a migrating page actually requires them.
 
@@ -286,7 +286,7 @@ Design rules for each:
 
 ---
 
-## Post-Migration Validation [ ]
+## Post-Migration Validation [ ] ← NEXT
 
 After all 13 pages migrated:
 

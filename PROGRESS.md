@@ -487,3 +487,24 @@ All 13 pages migrated to renderer-first architecture. Each page is now a thin da
 | Settings | `/settings` | `workspace`, `users`, `loading` |
 
 **Current renderer output per page:** registered blocks (Card, KpiCard, Button, Badge, AlertCard, Input, Avatar, StatusChip) render with wireframe props; DataTable and Tabs blocks show dev placeholders until Step 6 adapters are built. `showDebug` overlay active in development. `renderer.css` now globally available via root layout.
+
+---
+
+## [26] Step 6 — Missing UI Components
+
+Built 5 new components and wired them into `COMPONENT_REGISTRY`:
+
+| Component | File | Notes |
+|-----------|------|-------|
+| `EmptyState` | `components/ui/EmptyState.tsx` | SVG calendar icon + bold title + descriptor + optional CTA button |
+| `Skeleton` | `components/ui/Skeleton.tsx` | Shimmer lines, 3 variants: `table` / `card` / `stat`, staggered delays |
+| `Tabs` | `components/ui/Tabs.tsx` | Underline + pill variants, indigo active state, `aria-selected`, internal `useState` |
+| `ScheduleGrid` | `components/ui/ScheduleGrid.tsx` | Time×room grid, 6 SessionType color classes, legend, derived from agenda CSS patterns |
+| `RendererDataTable` | `components/ui/RendererDataTable.tsx` | Adapter bridging wireframe `string[]` columns to typed `Column<T>[]` via camelCase→Title Case |
+
+`COMPONENT_REGISTRY` updates in `RenderedBlock.tsx`:
+- `DataTable` now resolves to `RendererDataTable` (no longer a placeholder)
+- `ScheduleGrid`, `EmptyState`, `Skeleton`, `Tabs` all wired
+- All 5 new components exported from `ui/index.ts`
+
+**Commit:** `74c5cc4` — pushed to GitHub + deployed to Render
