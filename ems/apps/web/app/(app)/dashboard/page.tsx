@@ -28,11 +28,7 @@ const checkinRate       = allAtts.length > 0 ? Math.round((checkedIn / allAtts.l
 const capacityRate      = totalCap > 0 ? Math.round((totalSold / totalCap) * 100) : 0
 const revenueTarget     = 1_500_000
 const revenueRate       = Math.min(Math.round((totalRevenue / revenueTarget) * 100), 100)
-
-const AVATAR_COLORS = ['indigo', 'forest', 'amber', 'teal', 'gold', 'brick'] as const
-function avatarColor(s: string): typeof AVATAR_COLORS[number] {
-  return AVATAR_COLORS[s.charCodeAt(0) % AVATAR_COLORS.length]
-}
+const regRate           = Math.min(Math.round((allRegs.length / 2000) * 100), 100)
 
 function fmtCurrency(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
@@ -86,21 +82,21 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* KPI Cards */}
+      {/* KPI strip — 4 semantic metrics */}
       <div className={styles.kpiSection}>
         <div className={styles.kpiGrid}>
-          <KpiCard label="Total Attendees"    value={allAtts.length.toLocaleString()}  color="t" delta="+18 this week"      deltaType="positive" />
-          <KpiCard label="Ticket Revenue"     value={fmtCurrency(totalRevenue)}         color="g" delta="+12% vs target"     deltaType="positive" />
-          <KpiCard label="Active Events"      value={String(liveEvents.length + events.filter(e => e.status === 'published').length)} color="i" delta={`${liveEvents.length} live now`} deltaType="positive" />
-          <KpiCard label="Check-in Rate"      value={`${checkinRate}%`}                 color="f" delta="+2.3% improvement"  deltaType="positive" />
+          <KpiCard label="Total Attendees"  value={allAtts.length.toLocaleString()}  color="t" delta="+18 this week"      deltaType="positive" />
+          <KpiCard label="Ticket Revenue"   value={fmtCurrency(totalRevenue)}         color="g" delta="+12% vs target"     deltaType="positive" />
+          <KpiCard label="Active Events"    value={String(liveEvents.length + events.filter(e => e.status === 'published').length)} color="i" delta={`${liveEvents.length} live now`} deltaType="positive" />
+          <KpiCard label="Check-in Rate"    value={`${checkinRate}%`}                 color="f" delta="+2.3% improvement"  deltaType="positive" />
         </div>
       </div>
 
-      {/* Content Grid */}
+      {/* Main content — events list + right panel */}
       <div className={styles.contentGrid}>
 
         {/* Events */}
-        <Card title="Events" actions={<Link href="/events" className={styles.viewAll}>View all →</Link>} flush>
+        <Card title="Events" actions={<Link href="/events" className={styles.viewAll}>View all</Link>} flush>
           {events.map(ev => {
             const { month, day } = getDateParts(ev.startAt)
             const regCount = getRegCount(ev.id)
@@ -124,7 +120,7 @@ export default function DashboardPage() {
                         <div className={styles.eventStatLabel}>Registered</div>
                       </div>
                       <div className={styles.eventStat}>
-                        <div className={styles.eventStatValue}>{fmtCurrency(revenue)}</div>
+                        <div className={`${styles.eventStatValue} ${styles.revenue}`}>{fmtCurrency(revenue)}</div>
                         <div className={styles.eventStatLabel}>Revenue</div>
                       </div>
                       <div className={styles.eventStat}>
@@ -146,17 +142,17 @@ export default function DashboardPage() {
           <Card title="Performance">
             <div className={styles.quickStat}>
               <div className={styles.quickStatHeader}>
-                <span className={styles.quickStatLabel}>Registration Rate</span>
-                <span className={styles.quickStatValue}>{allRegs.length}</span>
+                <span className={styles.quickStatLabel}>Registrations</span>
+                <span className={styles.quickStatValue}>{allRegs.length.toLocaleString()}</span>
               </div>
               <div className={styles.bar}>
-                <div className={`${styles.barFill} ${styles.teal}`} style={{ width: `${Math.min(Math.round((allRegs.length / 2000) * 100), 100)}%` }} />
+                <div className={`${styles.barFill} ${styles.teal}`} style={{ width: `${regRate}%` }} />
               </div>
               <div className={styles.quickStatNote}>{totalSold.toLocaleString()} of {totalCap.toLocaleString()} seats filled</div>
             </div>
             <div className={styles.quickStat}>
               <div className={styles.quickStatHeader}>
-                <span className={styles.quickStatLabel}>Revenue vs Target</span>
+                <span className={styles.quickStatLabel}>Revenue</span>
                 <span className={styles.quickStatValue}>{revenueRate}%</span>
               </div>
               <div className={styles.bar}>
@@ -166,7 +162,7 @@ export default function DashboardPage() {
             </div>
             <div className={styles.quickStat}>
               <div className={styles.quickStatHeader}>
-                <span className={styles.quickStatLabel}>Capacity Utilization</span>
+                <span className={styles.quickStatLabel}>Capacity</span>
                 <span className={styles.quickStatValue}>{capacityRate}%</span>
               </div>
               <div className={styles.bar}>
@@ -177,7 +173,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Registrations */}
-          <Card title="Recent Registrations" actions={<Link href="/registrations" className={styles.viewAll}>View all →</Link>}>
+          <Card title="Recent Registrations" actions={<Link href="/registrations" className={styles.viewAll}>View all</Link>}>
             <div className={styles.regList}>
               {allRegs.slice(0, 6).map(reg => {
                 const att = allAtts.find(a => a.id === reg.attendeeId)
@@ -185,7 +181,8 @@ export default function DashboardPage() {
                 if (!att) return null
                 return (
                   <div key={reg.id} className={styles.regRow}>
-                    <Avatar initials={att.firstName[0] + att.lastName[0]} color={avatarColor(att.firstName)} size="sm" />
+                    {/* Single color family for all avatars — no color pot */}
+                    <Avatar initials={att.firstName[0] + att.lastName[0]} color="indigo" size="sm" />
                     <div className={styles.regInfo}>
                       <div className={styles.regName}>{att.firstName} {att.lastName}</div>
                       <div className={styles.regEvent}>{ev?.code ?? reg.eventId}</div>

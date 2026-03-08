@@ -11,18 +11,17 @@
 
 /* ── Header ─────────────────────────────────────────────────── */
 .header {
-  padding: 18px 24px;
+  padding: var(--space-4) var(--space-6);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  min-height: 60px;
+  gap: var(--space-3);
 }
 
 .title {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
   letter-spacing: -0.01em;
   color: var(--ink);
 }
@@ -30,13 +29,13 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
 /* ── Body ────────────────────────────────────────────────────── */
 .body {
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 /* flush: no padding — tables, lists, and grids bleed to card edges */
