@@ -288,6 +288,15 @@ Design rules for each:
 
 ## Post-Migration Validation [x]
 
+---
+
+## STEP 7 — Frontend Rendering Fixes [x]
+
+- [x] `PageHeader` component — replaces `Card variant="header"` for all `page_header` blocks
+- [x] `KpiCard` data bridge — `data` prop fallback for renderer-injected values
+- [x] `page_header` → `PageHeader` in ComponentCatalog + COMPONENT_REGISTRY
+- **Commit:** `b294ae5`
+
 After all 13 pages migrated:
 
 - [ ] Run renderer in `showDebug` mode on each page — zero validation errors

@@ -545,3 +545,30 @@ Built 5 new components and wired them into `COMPONENT_REGISTRY`:
 | Alert aria-live (dashboard live-alert) | PASS — `annotations["aria-live": "polite"]` now flows to `node.a11y` |
 | Span 1–12 constraint | PASS — no out-of-range spans |
 | Singleton components (TopNav, Sidebar) | PASS — none appear in page wireframes (handled by AppLayout) |
+
+---
+
+## [28] Frontend Rendering Fixes — PageHeader + KpiCard data bridge
+
+Two prop-contract gaps between renderer pipeline output and component interfaces, fixed.
+
+**Gap 1 — `page_header` → `Card` (broken):**
+`Card` requires `children`. Renderer passes `{ title, subtitle }` with no children → empty body. `subtitle` not a Card prop.
+
+**Fix:** Standalone `PageHeader` component:
+- `title` (18px, 800 weight) + `subtitle` (13px, ink-3) left-aligned
+- `children` slot for right-side action buttons
+- White bg, `border-bottom`, 16px 24px padding, 900px responsive
+- `ComponentCatalog.ts`: `page_header.component = 'PageHeader'`
+- `PageHeader` added to `CanonicalComponent` union + `COMPONENT_REGISTRY` + `ui/index.ts`
+
+**Gap 2 — `metric_tile` → `KpiCard` (silent blank):**
+Renderer injects `{ data: <api value>, dataKey }` via data bridge — `value` was never set.
+
+**Fix:** `KpiCard` now accepts `data?: unknown`:
+```ts
+const displayValue = value ?? (data !== undefined ? String(data) : '—')
+```
+Backward-compatible. Dashboard, Ticketing, Analytics KPIs now show real numbers.
+
+**Commit:** `b294ae5` — pushed to GitHub + deployed to Render
