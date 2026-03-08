@@ -35,6 +35,7 @@
           "span": 4,
           "props": {
             "dataKey": "eventId",
+            "optionsKey": "events",
             "label": "Event",
             "placeholder": "Select event…"
           }

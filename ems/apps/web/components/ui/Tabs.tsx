@@ -11,28 +11,40 @@ interface Tab {
 type TabVariant = 'underline' | 'pill'
 
 interface TabsProps {
-  tabs?: Tab[]
+  /** Static tabs — string[] auto-converted to { label, value }[] */
+  tabs?: Tab[] | string[]
+  /** Dynamic tabs injected by data bridge via tabsDataKey */
+  tabsData?: string[]
   defaultTab?: string
   variant?: TabVariant
   onChange?: (value: string) => void
 }
 
-export function Tabs({ tabs = [], defaultTab, variant = 'underline', onChange }: TabsProps) {
-  const [active, setActive] = useState<string>(defaultTab ?? tabs[0]?.value ?? '')
+function normalise(tabs: Tab[] | string[]): Tab[] {
+  return tabs.map(t => typeof t === 'string' ? { label: t, value: t } : t)
+}
+
+export function Tabs({ tabs = [], tabsData, defaultTab, variant = 'underline', onChange }: TabsProps) {
+  // tabsData (dynamic, from data bridge) wins over static tabs prop
+  const resolved: Tab[] = tabsData && tabsData.length > 0
+    ? tabsData.map(d => ({ label: d, value: d }))
+    : normalise(tabs as Tab[] | string[])
+
+  const [active, setActive] = useState<string>(defaultTab ?? resolved[0]?.value ?? '')
 
   function select(value: string) {
     setActive(value)
     onChange?.(value)
   }
 
-  if (!tabs.length) return null
+  if (!resolved.length) return null
 
   const wrapClass = variant === 'pill' ? styles.pill : ''
 
   return (
     <div className={wrapClass}>
       <div className={styles.tabBar} role="tablist">
-        {tabs.map(tab => (
+        {resolved.map(tab => (
           <button
             key={tab.value}
             role="tab"

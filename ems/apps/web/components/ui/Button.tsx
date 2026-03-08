@@ -12,6 +12,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   loading?: boolean
   as?: 'button' | 'a'
   href?: string
+  /** Renderer data bridge — used as button text when children are absent */
+  label?: string
 }
 
 export function Button({
@@ -20,11 +22,13 @@ export function Button({
   loading = false,
   className = '',
   children,
+  label,
   disabled,
   as: Tag = 'button',
   href,
   ...props
 }: ButtonProps) {
+  const content = children ?? label
   const classes = [styles.btn, styles[variant], styles[size], className]
     .filter(Boolean)
     .join(' ')
@@ -33,7 +37,7 @@ export function Button({
     return (
       <a href={href} className={classes}>
         {loading && <span className={styles.spinner} aria-hidden="true" />}
-        {children}
+        {content}
       </a>
     )
   }
@@ -41,7 +45,7 @@ export function Button({
   return (
     <button className={classes} disabled={disabled || loading} {...props}>
       {loading && <span className={styles.spinner} aria-hidden="true" />}
-      {children}
+      {content}
     </button>
   )
 }

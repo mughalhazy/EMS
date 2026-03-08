@@ -14,16 +14,12 @@
       "gap": "sm",
       "blocks": [
         {
-          "id": "top-nav",
-          "type": "top_navigation",
-          "order": 0
-        },
-        {
-          "id": "breadcrumb",
-          "type": "breadcrumbs",
-          "order": 1,
-          "annotations": {
-            "aria-label": "Page breadcrumb"
+          "id": "dashboard-header",
+          "type": "page_header",
+          "order": 0,
+          "props": {
+            "title": "Dashboard",
+            "subtitle": "Event operations overview"
           }
         }
       ]
@@ -32,15 +28,6 @@
       "layout": "grid",
       "gap": "md",
       "blocks": [
-        {
-          "id": "page-header",
-          "type": "page_header",
-          "order": 0,
-          "props": {
-            "title": "Dashboard",
-            "subtitle": "Event operations overview"
-          }
-        },
         {
           "id": "kpi-total-events",
           "type": "metric_tile",

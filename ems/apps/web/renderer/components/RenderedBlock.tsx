@@ -29,14 +29,15 @@ const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unkn
   EmptyState:  dynamic(() => import('@/components/ui/EmptyState').then(m => ({ default: m.EmptyState as React.ComponentType<Record<string, unknown>> }))),
   Skeleton:    dynamic(() => import('@/components/ui/Skeleton').then(m => ({ default: m.Skeleton as React.ComponentType<Record<string, unknown>> }))),
 
-  // ── Navigation / tabs ────────────────────────────────────
+  // ── Navigation / tabs / form ─────────────────────────────
   Tabs:        dynamic(() => import('@/components/ui/Tabs').then(m => ({ default: m.Tabs as React.ComponentType<Record<string, unknown>> }))),
+  Select:      dynamic(() => import('@/components/ui/RendererSelect').then(m => ({ default: m.RendererSelect as React.ComponentType<Record<string, unknown>> }))),
 
   // ── Actions ──────────────────────────────────────────────
   Button:      dynamic(() => import('@/components/ui/Button').then(m => ({ default: m.Button as React.ComponentType<Record<string, unknown>> }))),
 
   // ── Status / badges ──────────────────────────────────────
-  EventStatusPill: dynamic(() => import('@/components/ui/StatusChip').then(m => ({ default: m.StatusChip as React.ComponentType<Record<string, unknown>> }))),
+  EventStatusPill: dynamic(() => import('@/components/ui/RendererStatusChip').then(m => ({ default: m.RendererStatusChip as React.ComponentType<Record<string, unknown>> }))),
   Badge:           dynamic(() => import('@/components/ui/Badge').then(m => ({ default: m.Badge as React.ComponentType<Record<string, unknown>> }))),
   Avatar:          dynamic(() => import('@/components/ui/Avatar').then(m => ({ default: m.Avatar as React.ComponentType<Record<string, unknown>> }))),
 
