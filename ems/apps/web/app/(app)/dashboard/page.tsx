@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Card } from '@/components/ui/Card'
-import { AlertCard } from '@/components/ui/AlertCard'
 import {
   events, registrations as allRegByEvent, attendees as allAttByEvent,
   speakers, tickets as allTicksByEvent, tenant, notifications,
@@ -71,11 +70,10 @@ function ticketClass(name: string) {
   return styles.standard
 }
 
+/* HTML defines only checked-in and registered */
 function statusClass(s: string) {
-  if (s === 'confirmed' || s === 'approved') return styles.confirmed
-  if (s === 'pending') return styles.pending
-  if (s === 'cancelled') return styles.cancelled
-  return styles.default
+  if (s === 'confirmed' || s === 'approved') return styles.checkedIn
+  return styles.registered
 }
 
 export default function DashboardPage() {
@@ -113,12 +111,6 @@ export default function DashboardPage() {
 
       <div className={styles.content}>
 
-        {liveEvent && (
-          <AlertCard variant="indigo" title={`${liveEvent.name} is LIVE`} live>
-            {liveEvent.code} · {liveEvent.timezone} · ends {fmtDate(liveEvent.endAt)}
-          </AlertCard>
-        )}
-
         <div className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>{tenant.name}</h1>
           <p className={styles.pageSubtitle}>Manage all your events from one powerful platform</p>
@@ -148,7 +140,7 @@ export default function DashboardPage() {
                     </div>
                     <div className={styles.eventInfo}>
                       <div className={styles.eventMeta}>
-                        <span className={`${styles.eventBadge} ${styles[ev.status]}`}>{ev.status}</span>
+                        <span className={`${styles.eventBadge} ${ev.status === 'live' ? styles.live : ev.status === 'published' ? styles.upcoming : styles.completed}`}>{ev.status}</span>
                       </div>
                       <div className={styles.eventName}>{ev.name}</div>
                       <div className={styles.eventDetails}>
@@ -222,18 +214,21 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Revenue chart — matches .revenue-chart exactly */}
+        {/* Revenue chart — static months exactly as in HTML */}
         <Card title="Monthly Revenue" actions={<Link href="/analytics" className={styles.cardAction}>View details →</Link>}>
           <div className={styles.revenueChart}>
-            {events.map(ev => {
-              const rev = getRevenue(ev.id)
-              const pct = Math.max(Math.round((rev / maxRevenue) * 100), 5)
-              return (
-                <div key={ev.id} className={styles.chartBar} style={{ height: `${pct}%` }}>
-                  <div className={styles.chartBarLabel}>{ev.code}</div>
-                </div>
-              )
-            })}
+            {[
+              { label: 'Jan', height: '45%' },
+              { label: 'Feb', height: '62%' },
+              { label: 'Mar', height: '78%' },
+              { label: 'Apr', height: '35%' },
+              { label: 'May', height: '52%' },
+              { label: 'Jun', height: '88%' },
+            ].map(({ label, height }) => (
+              <div key={label} className={styles.chartBar} style={{ height }}>
+                <div className={styles.chartBarLabel}>{label}</div>
+              </div>
+            ))}
           </div>
         </Card>
 

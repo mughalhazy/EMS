@@ -240,8 +240,8 @@
   letter-spacing: 0.05em;
 }
 .eventBadge.live      { background: var(--t-lt); color: var(--t-dk); border: 1px solid var(--t-border); }
-.eventBadge.published { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
-.eventBadge.draft     { background: var(--surface); color: var(--ink-3); border: 1px solid var(--border); }
+.eventBadge.upcoming  { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
+.eventBadge.completed { background: var(--surface); color: var(--ink-3); border: 1px solid var(--border); }
 
 /* matches .event-name */
 .eventName {
@@ -473,11 +473,9 @@
   letter-spacing: 0.04em;
   display: inline-block;
 }
-.statusBadge.confirmed { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
-.statusBadge.approved  { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
-.statusBadge.pending   { background: var(--a-lt); color: var(--a-dk); border: 1px solid var(--a-border); }
-.statusBadge.cancelled { background: var(--b-lt); color: var(--b-dk); border: 1px solid var(--b-border); }
-.statusBadge.default   { background: var(--surface); color: var(--ink-3); border: 1px solid var(--border); }
+/* Matches HTML exactly: only .checked-in and .registered defined */
+.statusBadge.checkedIn  { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
+.statusBadge.registered { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
 
 .amountCell {
   font-family: var(--font-mono);
