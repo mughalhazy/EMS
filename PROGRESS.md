@@ -712,3 +712,21 @@ Removed `top_navigation` + `breadcrumbs` blocks (AppLayout already renders nav).
 Moved `page_header` to `top` region, removed duplicate from `primary`.
 
 **Commit:** `2bdee64` — pushed to GitHub + deployed to Render (`dep-d6mdaflactks7380foe0`)
+
+---
+
+## [33] Dashboard HTML-Spec Deviation Fixes
+
+Full re-audit of `dashboard/page.tsx` against `Design Samples/ems-dashboard.html` as pixel-perfect spec.
+
+**5 deviations fixed (commit `1702e41`):**
+
+| Location | Was | HTML Spec |
+|----------|-----|-----------|
+| Page title | `tenant.name` (dynamic) | `"Event Dashboard"` (static) |
+| KPI 3rd card delta | `` `${liveEvents.length} live now` `` | `"+3 this week"` |
+| Event detail 2nd item | `ev.timezone` | `"Convention Center"` |
+| Quick stat 3rd note | `{confirmedSpeakers} confirmed speakers` | `"Great attendance rate!"` |
+| Dead imports/vars | `tenant`, `speakers`, `fmtDate`, `liveEvent`, `maxRevenue`, `confirmedSpeakers` | — removed |
+
+**Rule reinforced:** treat HTML reference as pixel-perfect spec — no dynamic substitutions where HTML uses static text, no invented content.
