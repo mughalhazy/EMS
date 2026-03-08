@@ -286,7 +286,7 @@ Design rules for each:
 
 ---
 
-## Post-Migration Validation [ ] ← NEXT
+## Post-Migration Validation [x]
 
 After all 13 pages migrated:
 

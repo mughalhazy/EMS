@@ -508,3 +508,40 @@ Built 5 new components and wired them into `COMPONENT_REGISTRY`:
 - All 5 new components exported from `ui/index.ts`
 
 **Commit:** `74c5cc4` — pushed to GitHub + deployed to Render
+
+---
+
+## [27] Post-Migration Validation
+
+**Audit scope:** All 13 pages, all 13 wireframe JSONs, renderer pipeline, TokenResolver, renderer.css.
+
+### Validation errors found and fixed (commit `88040c4`)
+
+**Root bug — `step2-resolve-components.ts`:** `node.a11y` was always initialized to `{}` — `block.annotations` with `aria-label`/`aria-live`/`role` were silently dropped, causing validator to fire for every annotated block. Fixed: read `block.annotations` and populate `node.a11y` before constructing the node.
+
+**Span override bug:** `layout.span` was always `entry.defaultSpan` — explicit `span` in wireframe blocks was ignored. Fixed: `span: block.span ?? entry.defaultSpan`.
+
+**A11Y_MISSING_LABEL errors (8 blocks):** All `tabset` → `Tabs` blocks require `aria-label`. 8 wireframe blocks lacked it:
+| Wireframe | Block | Fix |
+|-----------|-------|-----|
+| notifications | status-filter | added `annotations.aria-label` |
+| speakers | status-filter | added `annotations.aria-label` |
+| sponsors | status-filter | added `annotations.aria-label` |
+| exhibitors | status-filter | added `annotations.aria-label` |
+| attendees | status-filter | added `annotations.aria-label` |
+| registrations | status-filter | added `annotations.aria-label` |
+| events | view-toggle | added `annotations.aria-label` |
+| events | status-filter | added `annotations.aria-label` |
+
+**A11Y_MISSING_LABEL for Input (1 block):** `search-input` in events wireframe had no `label` prop. Fixed: added `"label": "Search events"` to props.
+
+### Validation passes (confirmed clean)
+
+| Check | Result |
+|-------|--------|
+| TokenResolver — no arbitrary CSS literals | PASS — derived tokens all use named prefixes; CSS module px values are scoped, not validated |
+| renderer.css responsive | PASS — `@media (max-width: 900px)` 4-col grid; `640px` single-col |
+| `requiresA11yLabel` blocks with aria-label | PASS — all 9 fixed above; remaining annotated blocks (dashboard breadcrumb, agenda day-tabs/CTAs, settings tabs) now propagate via step2 fix |
+| Alert aria-live (dashboard live-alert) | PASS — `annotations["aria-live": "polite"]` now flows to `node.a11y` |
+| Span 1–12 constraint | PASS — no out-of-range spans |
+| Singleton components (TopNav, Sidebar) | PASS — none appear in page wireframes (handled by AppLayout) |
