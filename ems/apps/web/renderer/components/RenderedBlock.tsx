@@ -15,6 +15,9 @@ import dynamic from 'next/dynamic'
 // Maps CanonicalComponent name → lazy-loaded React component
 // Falls back to placeholder for components not yet built.
 const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unknown>>> = {
+  // ── Page chrome ──────────────────────────────────────────
+  PageHeader:  dynamic(() => import('@/components/ui/PageHeader').then(m => ({ default: m.PageHeader as React.ComponentType<Record<string, unknown>> }))),
+
   // ── Data display ─────────────────────────────────────────
   StatCard:    dynamic(() => import('@/components/ui/KpiCard').then(m => ({ default: m.KpiCard as React.ComponentType<Record<string, unknown>> }))),
   DataTable:   dynamic(() => import('@/components/ui/RendererDataTable').then(m => ({ default: m.RendererDataTable as React.ComponentType<Record<string, unknown>> }))),

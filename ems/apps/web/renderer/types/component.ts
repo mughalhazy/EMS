@@ -38,6 +38,7 @@ export type CanonicalComponent =
   | 'AttendeeList'
   | 'AlertBanner'
   | 'ScheduleGrid'
+  | 'PageHeader'
   | 'UnknownBlock'
 
 // ── Default span heuristics ──────────────────────────────────

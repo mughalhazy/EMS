@@ -51,12 +51,12 @@ export const COMPONENT_CATALOG: ComponentCatalogMap = {
 
   // ── Content Headers ────────────────────────────────────────
   page_header: {
-    component: 'Card',
+    component: 'PageHeader',
     defaultSpan: 12,
-    defaultProps: { variant: 'header' },
+    defaultProps: {},
     requiresA11yLabel: false,
     supportsStates: false,
-    notes: 'Title, subtitle, top-level actions.',
+    notes: 'Page title + subtitle strip. Actions slot via children.',
   },
 
   // ── Actions ───────────────────────────────────────────────
