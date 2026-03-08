@@ -25,7 +25,11 @@ export function KpiCard({
   color = 'i',
   className = '',
 }: KpiCardProps) {
-  const displayValue = value ?? (data !== undefined ? String(data) : '—')
+  const displayValue = value ?? (
+    data !== undefined && data !== null && typeof data !== 'object'
+      ? String(data)
+      : '—'
+  )
   return (
     <div className={[styles.card, styles[color], className].filter(Boolean).join(' ')}>
       {icon && (

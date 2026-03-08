@@ -12,6 +12,46 @@ import { REGION_ORDER } from '../types/wireframe'
 import type { RegionName } from '../types/wireframe'
 import type { RenderedNode } from '../types/output'
 
+// ── Error Boundary ────────────────────────────────────────────
+interface ErrorBoundaryState { hasError: boolean; error?: Error }
+class RendererErrorBoundary extends React.Component<
+  { children: React.ReactNode; documentId: string },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode; documentId: string }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error }
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          role="alert"
+          style={{
+            padding: 24, margin: 16,
+            background: 'var(--b-lt, #fee2e2)',
+            border: '1px solid var(--b-border, #fca5a5)',
+            borderRadius: 'var(--radius, 8px)',
+            color: 'var(--b-dk, #991b1b)',
+            fontFamily: 'var(--font, sans-serif)',
+          }}
+        >
+          <strong>A component crashed on this page</strong>
+          {process.env.NODE_ENV === 'development' && this.state.error && (
+            <pre style={{ marginTop: 8, fontSize: 12, whiteSpace: 'pre-wrap', color: 'inherit' }}>
+              {this.state.error.message}
+            </pre>
+          )}
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 interface RenderedPageProps {
   /** Raw wireframe document (plain JS object matching WireframeDocument) */
   wireframe: unknown
@@ -24,30 +64,30 @@ interface RenderedPageProps {
 export function RenderedPage({ wireframe, data, showDebug = false }: RenderedPageProps) {
   const result = render(wireframe, data)
 
-  // Failed render — show error state
+  // Failed render — show error details in dev, degraded fallback in prod
   if (result.status === 'failed') {
-    const isDevMode = process.env.NODE_ENV === 'development'
-    if (!isDevMode) return null
-
     return (
       <div
         role="alert"
         aria-live="assertive"
         style={{
           padding: 24,
-          background: 'var(--b-lt)',
-          border: '1px solid var(--b-border)',
-          borderRadius: 'var(--radius)',
-          color: 'var(--b-dk)',
-          fontFamily: 'var(--font)',
+          background: 'var(--b-lt, #fee2e2)',
+          border: '1px solid var(--b-border, #fca5a5)',
+          borderRadius: 'var(--radius, 8px)',
+          color: 'var(--b-dk, #991b1b)',
+          fontFamily: 'var(--font, sans-serif)',
+          margin: 16,
         }}
       >
-        <strong>Renderer failed</strong>
-        <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
-          {result.errors.map((e, i) => (
-            <li key={i}>[{e.code}] {e.message}</li>
-          ))}
-        </ul>
+        <strong>Page failed to render</strong>
+        {process.env.NODE_ENV === 'development' && (
+          <ul style={{ margin: '8px 0 0', paddingLeft: 20, fontSize: 13 }}>
+            {result.errors.map((e, i) => (
+              <li key={i}>[{e.code}] {e.message}</li>
+            ))}
+          </ul>
+        )}
       </div>
     )
   }
@@ -61,30 +101,32 @@ export function RenderedPage({ wireframe, data, showDebug = false }: RenderedPag
   }
 
   return (
-    <div
-      className="renderer-page"
-      data-surface={
-        (wireframe as Record<string, unknown>)?.surface ?? 'app'
-      }
-      data-document-id={result.documentId}
-    >
-      {/* Render regions in canonical order */}
-      {REGION_ORDER.map(region => {
-        const nodes = nodesByRegion.get(region as RegionName) ?? []
-        return (
-          <RenderedRegion
-            key={region}
-            region={region as RegionName}
-            nodes={nodes}
-          />
-        )
-      })}
+    <RendererErrorBoundary documentId={result.documentId}>
+      <div
+        className="renderer-page"
+        data-surface={
+          (wireframe as Record<string, unknown>)?.surface ?? 'app'
+        }
+        data-document-id={result.documentId}
+      >
+        {/* Render regions in canonical order */}
+        {REGION_ORDER.map(region => {
+          const nodes = nodesByRegion.get(region as RegionName) ?? []
+          return (
+            <RenderedRegion
+              key={region}
+              region={region as RegionName}
+              nodes={nodes}
+            />
+          )
+        })}
 
-      {/* Debug overlay — development only */}
-      {showDebug && process.env.NODE_ENV === 'development' && (
-        <RendererDebugOverlay result={result} />
-      )}
-    </div>
+        {/* Debug overlay — development only */}
+        {showDebug && process.env.NODE_ENV === 'development' && (
+          <RendererDebugOverlay result={result} />
+        )}
+      </div>
+    </RendererErrorBoundary>
   )
 }
 

@@ -95,7 +95,9 @@
           "order": 6,
           "span": 12,
           "props": {
-            "pageSize": 10
+            "dataKey": "events",
+            "pageSize": 10,
+            "columns": ["name", "status", "startAt", "endAt"]
           },
           "states": {
             "loading": { "id": "events-table", "type": "loading_placeholder" },

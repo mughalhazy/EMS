@@ -5,24 +5,29 @@ import type { Session, SessionType } from '@/types/domain'
 import styles from './ScheduleGrid.module.css'
 
 interface ScheduleGridProps {
+  /** Sessions array — passed directly or via renderer data bridge as `data` */
   sessions?: Session[]
+  /** Renderer data bridge alias: injected as `data` when dataKey is set */
+  data?: unknown
   activeDay?: string
   /** Called when a session block is clicked */
   onSessionClick?: (session: Session) => void
 }
 
 function isoDay(iso: string): string {
-  return new Date(iso).toISOString().slice(0, 10)
+  try { return new Date(iso).toISOString().slice(0, 10) } catch { return '' }
 }
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+  try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) } catch { return '' }
 }
 
 function fmtHour(iso: string): string {
-  const d = new Date(iso)
-  const h = d.getHours().toString().padStart(2, '0')
-  return `${h}:00`
+  try {
+    const d = new Date(iso)
+    const h = d.getHours().toString().padStart(2, '0')
+    return `${h}:00`
+  } catch { return '??' }
 }
 
 const SESSION_STYLE_MAP: Record<SessionType, string> = {
@@ -43,11 +48,15 @@ const LEGEND_ITEMS: { type: SessionType; label: string; color: string }[] = [
   { type: 'other',      label: 'Other',      color: 'var(--border-strong)' },
 ]
 
-export function ScheduleGrid({ sessions = [], activeDay = '', onSessionClick }: ScheduleGridProps) {
+export function ScheduleGrid({ sessions, data, activeDay = '', onSessionClick }: ScheduleGridProps) {
+  // Accept sessions via either the `sessions` prop (direct use) or `data` prop (renderer bridge)
+  const resolvedSessions: Session[] = Array.isArray(sessions) ? sessions
+    : Array.isArray(data) ? (data as Session[])
+    : []
   // Filter to active day
   const daySessions = activeDay
-    ? sessions.filter(s => isoDay(s.startAt) === activeDay)
-    : sessions
+    ? resolvedSessions.filter(s => isoDay(s.startAt) === activeDay)
+    : resolvedSessions
 
   if (!daySessions.length) {
     return (

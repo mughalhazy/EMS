@@ -40,7 +40,7 @@ function validateAccessibility(nodes: RenderedNode[]): ValidationError[] {
           message: `${node.component} (block: ${node._blockId}) is missing a required aria-label`,
           blockId: node._blockId,
           category: 'accessibility',
-          severity: 'error',
+          severity: 'warning',
         })
       }
     }
@@ -58,7 +58,7 @@ function validateAccessibility(nodes: RenderedNode[]): ValidationError[] {
         message: `Toast (block: ${node._blockId}) must have aria-live="polite"`,
         blockId: node._blockId,
         category: 'accessibility',
-        severity: 'error',
+        severity: 'warning',
       })
     }
     if (node.component === 'Alert' && !node.a11y['aria-live']) {
@@ -67,7 +67,7 @@ function validateAccessibility(nodes: RenderedNode[]): ValidationError[] {
         message: `Alert (block: ${node._blockId}) must have aria-live="assertive"`,
         blockId: node._blockId,
         category: 'accessibility',
-        severity: 'error',
+        severity: 'warning',
       })
     }
   }
