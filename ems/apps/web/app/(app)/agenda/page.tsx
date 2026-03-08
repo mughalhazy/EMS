@@ -49,6 +49,8 @@ export default function AgendaPage() {
         wireframe={wireframe}
         data={{ events, eventId, sessions, activeDay, days, loading }}
         showDebug={process.env.NODE_ENV === 'development'}
+        onSelectChange={(blockId, value) => { if (blockId === 'event-selector') setEventId(value) }}
+        onTabChange={(blockId, value) => { if (blockId === 'day-tabs') setActiveDay(value) }}
       />
     </div>
   )

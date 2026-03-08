@@ -35,6 +35,7 @@ export default function RegistrationsPage() {
         wireframe={wireframe}
         data={{ events, eventId, registrations, loading }}
         showDebug={process.env.NODE_ENV === 'development'}
+        onSelectChange={(blockId, value) => { if (blockId === 'event-selector') setEventId(value) }}
       />
     </div>
   )

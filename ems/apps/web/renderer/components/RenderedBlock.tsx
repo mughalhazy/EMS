@@ -112,6 +112,7 @@ export function RenderedBlock({ node, depth = 0 }: RenderedBlockProps) {
   const combinedProps: Record<string, unknown> = {
     ...props,
     ...ariaAttrs,
+    blockId: _blockId,
     'data-state': state,
     'data-block-id': _blockId,
     'data-tokens': styleTokens.join(' '),

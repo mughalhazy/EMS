@@ -11,6 +11,8 @@ import { RenderedRegion } from './RenderedRegion'
 import { REGION_ORDER } from '../types/wireframe'
 import type { RegionName } from '../types/wireframe'
 import type { RenderedNode } from '../types/output'
+import { RendererActionsProvider } from '../context/RendererActionsContext'
+import type { RendererActions } from '../context/RendererActionsContext'
 
 // ── Error Boundary ────────────────────────────────────────────
 interface ErrorBoundaryState { hasError: boolean; error?: Error }
@@ -59,9 +61,13 @@ interface RenderedPageProps {
   data?: Record<string, unknown>
   /** Show validation errors/warnings overlay in development */
   showDebug?: boolean
+  /** Called when a select_input block changes — (blockId, value) */
+  onSelectChange?: RendererActions['onSelectChange']
+  /** Called when a tabset block changes — (blockId, value) */
+  onTabChange?: RendererActions['onTabChange']
 }
 
-export function RenderedPage({ wireframe, data, showDebug = false }: RenderedPageProps) {
+export function RenderedPage({ wireframe, data, showDebug = false, onSelectChange, onTabChange }: RenderedPageProps) {
   const result = render(wireframe, data)
 
   // Failed render — show error details in dev, degraded fallback in prod
@@ -101,6 +107,7 @@ export function RenderedPage({ wireframe, data, showDebug = false }: RenderedPag
   }
 
   return (
+    <RendererActionsProvider actions={{ onSelectChange, onTabChange }}>
     <RendererErrorBoundary documentId={result.documentId}>
       <div
         className="renderer-page"
@@ -127,6 +134,7 @@ export function RenderedPage({ wireframe, data, showDebug = false }: RenderedPag
         )}
       </div>
     </RendererErrorBoundary>
+    </RendererActionsProvider>
   )
 }
 

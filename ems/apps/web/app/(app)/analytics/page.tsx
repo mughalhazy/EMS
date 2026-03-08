@@ -46,6 +46,7 @@ export default function AnalyticsPage() {
           attendanceByDay: kpis.attendanceByDay  ?? [],
         }}
         showDebug={process.env.NODE_ENV === 'development'}
+        onSelectChange={(blockId, value) => { if (blockId === 'event-selector') setEventId(value) }}
       />
     </div>
   )
