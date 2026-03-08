@@ -83,4 +83,5 @@ export interface PipelineContext {
   errors: ValidationError[]
   warnings: RenderWarning[]
   resolutionLog: ResolutionEntry[]
+  data?: Record<string, unknown>  // page-level API data, keyed by dataKey
 }

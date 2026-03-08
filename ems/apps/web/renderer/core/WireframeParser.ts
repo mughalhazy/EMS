@@ -24,6 +24,7 @@ export interface ParseResult {
 export function parseWireframe(
   doc: unknown,
   version: string,
+  data?: Record<string, unknown>,
 ): ParseResult {
   // 1. Type-guard: must be a plain object
   if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
@@ -74,6 +75,7 @@ export function parseWireframe(
       errors: [],
       warnings: [],
       resolutionLog: [],
+      data,
     },
   }
 }

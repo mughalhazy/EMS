@@ -8,9 +8,9 @@ import { RENDERER_VERSION } from '../types/wireframe'
 import type { RenderResult } from '../types/output'
 
 // ── Main render function ──────────────────────────────────────
-export function render(doc: unknown): RenderResult {
+export function render(doc: unknown, data?: Record<string, unknown>): RenderResult {
   try {
-    return runPipeline(doc)
+    return runPipeline(doc, data)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return {

@@ -14,9 +14,15 @@ export function stepResolveComponents(ctx: PipelineContext): PipelineContext {
 
     const region = getBlockRegion(ctx.document, block.id) ?? 'primary'
 
+    // Data bridge: if block declares a dataKey, inject the matching slice from ctx.data
+    const dataKey = block.props?.dataKey as string | undefined
+    const injectedData = dataKey && ctx.data?.[dataKey] !== undefined
+      ? { data: ctx.data[dataKey], dataKey }
+      : {}
+
     const node: RenderedNode = {
       component: entry.component,
-      props: resolvedProps,
+      props: { ...resolvedProps, ...injectedData },
       layout: {
         region,
         span: entry.defaultSpan,

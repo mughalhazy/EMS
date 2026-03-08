@@ -435,3 +435,25 @@ Populated `COMPONENT_REGISTRY` with `dynamic()` lazy imports for all currently b
 | `Input` | `Input` | `components/ui/Input.tsx` |
 
 Still resolving to `getComponent()` placeholder (not yet built): `Skeleton`, `EmptyState`, `Toast`, `Drawer`, `Popover`, `Tabs`, `CommandPalette`, `TenantSwitcher`, `VenueSelector`, `AttendeeList`, `ScheduleGrid`, `UnknownBlock`.
+
+---
+
+## [24] Data Bridge — Step 4
+
+Threaded `data?: Record<string, unknown>` through the full renderer pipeline:
+
+| File | Change |
+|------|--------|
+| `renderer/types/output.ts` | Added `data?` field to `PipelineContext` |
+| `renderer/core/WireframeParser.ts` | `parseWireframe(doc, version, data?)` — sets `ctx.data` |
+| `renderer/pipeline/steps/step1-normalize.ts` | `stepNormalize(doc, version, data?)` — forwards to parser |
+| `renderer/pipeline/Pipeline.ts` | `runPipeline(doc, data?)` — forwards to step 1 |
+| `renderer/core/RendererEngine.ts` | `render(doc, data?)` — forwards to pipeline |
+| `renderer/pipeline/steps/step2-resolve-components.ts` | Data injection: if `block.props.dataKey` exists and `ctx.data[dataKey]` is defined, merges `{ data: ctx.data[dataKey], dataKey }` into `node.props` |
+| `renderer/components/RenderedPage.tsx` | `data?: Record<string, unknown>` prop added; passed to `render()` |
+
+**Usage pattern:**
+```tsx
+<RenderedPage wireframe={eventsWireframe} data={{ events: apiEvents, total: count }} />
+// Block with props.dataKey="events" receives node.props.data = apiEvents
+```

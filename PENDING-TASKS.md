@@ -195,7 +195,7 @@ Components not yet built (leave as placeholder): `Skeleton`, `EmptyState`, `Toas
 
 ---
 
-## STEP 4 — Data Bridge [ ]
+## STEP 4 — Data Bridge [x]
 
 **Goal:** Pages pass API data into the renderer so blocks receive real values.
 

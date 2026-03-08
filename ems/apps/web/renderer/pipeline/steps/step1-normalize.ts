@@ -8,8 +8,9 @@ import type { PipelineContext, ValidationError } from '../../types/output'
 export function stepNormalize(
   doc: unknown,
   version: string,
+  data?: Record<string, unknown>,
 ): { ok: true; context: PipelineContext } | { ok: false; error: ValidationError } {
-  const result = parseWireframe(doc, version)
+  const result = parseWireframe(doc, version, data)
 
   if (!result.ok || !result.context) {
     return {

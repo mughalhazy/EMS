@@ -15,9 +15,9 @@ import { stepValidate }            from './steps/step6-validate'
 import { stepProduceOutput }       from './steps/step7-produce-output'
 
 // ── Run the full 7-step pipeline ─────────────────────────────
-export function runPipeline(doc: unknown): RenderResult {
+export function runPipeline(doc: unknown, data?: Record<string, unknown>): RenderResult {
   // Step 1: Normalize & parse
-  const normalized = stepNormalize(doc, RENDERER_VERSION)
+  const normalized = stepNormalize(doc, RENDERER_VERSION, data)
   if (!normalized.ok) {
     return {
       status: 'failed',

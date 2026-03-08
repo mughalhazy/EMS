@@ -15,12 +15,14 @@ import type { RenderedNode } from '../types/output'
 interface RenderedPageProps {
   /** Raw wireframe document (plain JS object matching WireframeDocument) */
   wireframe: unknown
+  /** Page-level API data — keyed by block dataKey values */
+  data?: Record<string, unknown>
   /** Show validation errors/warnings overlay in development */
   showDebug?: boolean
 }
 
-export function RenderedPage({ wireframe, showDebug = false }: RenderedPageProps) {
-  const result = render(wireframe)
+export function RenderedPage({ wireframe, data, showDebug = false }: RenderedPageProps) {
+  const result = render(wireframe, data)
 
   // Failed render — show error state
   if (result.status === 'failed') {
