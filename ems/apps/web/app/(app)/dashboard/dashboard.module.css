@@ -6,170 +6,180 @@
   background: var(--off);
 }
 
-/* ── Header action button ────────────────────────────────────── */
 .headerBtn {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   padding: 10px 20px;
-  background: var(--ink);
+  background: var(--t-md);
   color: var(--white);
   border-radius: var(--radius);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   text-decoration: none;
-  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-  gap: 6px;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(13,148,136,.2);
 }
 .headerBtn:hover {
-  background: var(--ink-2);
+  background: var(--t-dk);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(13,148,136,.25);
   color: var(--white);
 }
 
-/* ── Alert row ───────────────────────────────────────────────── */
 .alertRow {
-  padding: 20px 32px 0;
+  padding: var(--space-5) var(--space-8) 0;
 }
 
-/* ── KPI section ─────────────────────────────────────────────── */
-.kpiSection {
-  padding: 24px 32px;
-}
+/* ── KPI Grid ─────────────────────────────────────────────── */
+.kpiSection { padding: var(--space-6) var(--space-8); }
 
 .kpiGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
 }
 
-/* Stagger fade-in on KPI cards */
-.kpiGrid > :nth-child(1) { animation-delay: 0s;    }
-.kpiGrid > :nth-child(2) { animation-delay: 0.05s; }
-.kpiGrid > :nth-child(3) { animation-delay: 0.10s; }
-.kpiGrid > :nth-child(4) { animation-delay: 0.15s; }
-.kpiGrid > :nth-child(5) { animation-delay: 0.20s; }
-.kpiGrid > :nth-child(6) { animation-delay: 0.25s; }
-
-/* ── Bottom row ──────────────────────────────────────────────── */
-.bottomRow {
+/* ── Content Grid ─────────────────────────────────────────── */
+.contentGrid {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 20px;
-  padding: 0 32px 32px;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--space-5);
+  padding: 0 var(--space-8) var(--space-8);
   align-items: start;
 }
 
-/* ── View all link ───────────────────────────────────────────── */
-.viewAll {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--t-md);
-  text-decoration: none;
-  transition: color 0.15s;
+/* ── Event Cards ──────────────────────────────────────────── */
+.eventCard {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition-fast);
+  cursor: pointer;
 }
-.viewAll:hover { color: var(--t-dk); }
+.eventCard:hover { background: var(--surface); }
+.eventCard:last-child { border-bottom: none; }
 
-/* ── Events table ────────────────────────────────────────────── */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.thead {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-strong);
-}
-
-.th {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink-2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-.thRight { text-align: right; }
-
-.tr     { border-bottom: 1px solid var(--border); transition: background 0.12s; }
-.trLast { border-bottom: none; transition: background 0.12s; }
-.tr:hover, .trLast:hover { background: var(--surface); }
-
-.td {
-  padding: 16px;
-  vertical-align: middle;
-}
-.tdRight { text-align: right; }
-
-.evName {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink);
-  white-space: nowrap;
-}
-.evCode {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-3);
-  margin-top: 3px;
-}
-.tdMuted {
-  font-size: 13px;
-  color: var(--ink-2);
-}
-.tdMono {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink-2);
-}
-
-/* ── Recent registrations ────────────────────────────────────── */
-.regList {
+.dateBlock {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius);
+  background: var(--t-lt);
+  border: 1.5px solid var(--t-border);
   display: flex;
   flex-direction: column;
-}
-
-.regRow {
-  display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.12s;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.regRow:last-child { border-bottom: none; }
-
-.regInfo {
-  flex: 1;
-  min-width: 0;
+.dateMonth {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--t-dk);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
-
-.regName {
-  font-size: 14px;
-  font-weight: 600;
+.dateDay {
+  font-size: 22px;
+  font-weight: var(--weight-extrabold);
   color: var(--ink);
+  line-height: 1;
+}
+
+.eventInfo { flex: 1; min-width: 0; }
+.eventMeta { display: flex; align-items: center; gap: var(--space-2); margin-bottom: 6px; }
+
+.eventBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.eventBadge.live      { background: var(--t-lt); color: var(--t-dk); border: 1px solid var(--t-border); }
+.eventBadge.published { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
+.eventBadge.draft     { background: var(--surface); color: var(--ink-3); border: 1px solid var(--border); }
+
+.eventName {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.regEvent {
-  font-family: var(--font-mono);
-  font-size: 11px;
+.eventStats { display: flex; gap: var(--space-6); margin-top: var(--space-3); }
+.eventStat { text-align: center; }
+.eventStatValue {
+  font-size: 18px;
+  font-weight: var(--weight-extrabold);
+  color: var(--ink);
+  line-height: 1;
+}
+.eventStatLabel {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
   color: var(--ink-3);
-  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 1100px) {
+/* ── Quick Stats ──────────────────────────────────────────── */
+.quickStat {
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+.quickStat:last-child { border-bottom: none; }
+
+.quickStatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+.quickStatLabel { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--ink-2); }
+.quickStatValue { font-size: 22px; font-weight: var(--weight-extrabold); color: var(--ink); }
+
+.bar {
+  height: 8px;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+.barFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width var(--transition-slow);
+}
+.barFill.teal   { background: var(--t-md); }
+.barFill.gold   { background: var(--g-md); }
+.barFill.indigo { background: var(--i-md); }
+.barFill.forest { background: var(--f-md); }
+
+.quickStatNote { font-size: var(--text-xs); color: var(--ink-3); }
+
+/* ── View all ─────────────────────────────────────────────── */
+.viewAll {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--t-md);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.viewAll:hover { color: var(--t-dk); }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1200px) {
   .kpiGrid { grid-template-columns: repeat(2, 1fr); }
+  .contentGrid { grid-template-columns: 1fr; }
 }
-
 @media (max-width: 900px) {
-  .kpiGrid    { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .bottomRow  { grid-template-columns: 1fr; }
-  .kpiSection, .alertRow, .bottomRow { padding-left: 20px; padding-right: 20px; }
+  .kpiGrid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+  .kpiSection, .alertRow, .contentGrid { padding-left: var(--space-5); padding-right: var(--space-5); }
 }
