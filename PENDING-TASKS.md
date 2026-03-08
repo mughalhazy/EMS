@@ -306,6 +306,34 @@ Design rules for each:
 - [x] `events.wireframe.json`: entity_card span 4 → 12
 - **Commit:** `3366bf8`
 
+---
+
+## STEP 9 — Full Pipeline Audit Gap Resolution [x]
+
+9 gaps identified and fixed (`2bdee64`):
+
+**P0 fixed:**
+- [x] Button blank → added `label` prop (`children ?? label`)
+- [x] Tabs string[] → normalise() + tabsData for dynamic tabs
+- [x] Select not built → RendererSelect with DL styling
+
+**P1 fixed:**
+- [x] step2 multi-*Key injection (activeDayKey, optionsKey, tabsDataKey)
+- [x] 8 wireframes: added `optionsKey:"events"` to all select_input blocks
+- [x] StatusChip blank entity → RendererStatusChip adapter (20+ status → color map)
+
+**P2 fixed:**
+- [x] Dashboard wireframe: removed top_navigation + breadcrumbs, moved page_header to top region
+
+---
+
+## NEXT — Remaining known gaps [ ]
+
+- [ ] ScheduleGrid `activeDay` now injected via multi-Key bridge — verify filtering works end-to-end on Agenda
+- [ ] RendererSelect is display-only (no onChange wiring back to page state) — pages that need event switching need a client-side bridge
+- [ ] P3: Breadcrumb component (low priority)
+- [ ] Visual QA pass on deployed Render URL
+
 After all 13 pages migrated:
 
 - [ ] Run renderer in `showDebug` mode on each page — zero validation errors

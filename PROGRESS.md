@@ -595,3 +595,48 @@ Key design:
 `events.wireframe.json`: entity_card `span: 4 → 12` (component owns internal grid)
 
 **Commit:** `3366bf8` — pushed to GitHub + deployed to Render (`dep-d6mcsgf5r7bs73cc3fp0`)
+
+---
+
+## [30] Full Pipeline Audit + 9-Fix Resolution [step-9]
+
+Systematic audit across registry, prop contracts, data bridge, and all 13 wireframes. 9 gaps found and fixed.
+
+### P0 — Prop contract fixes (visible blank UI)
+
+**Button `label` prop (`Button.tsx`):**
+Button renders `{children}` but renderer passes `label` prop with no children → blank buttons on every CTA.
+Fix: added `label?: string` to ButtonProps; renders `children ?? label`.
+
+**Tabs string[] normalisation (`Tabs.tsx`):**
+Wireframes send `tabs: ["All","Sent","Pending"]` (strings). Tabs expected `{ label, value }[]` objects → `tabs[0]?.value` was `undefined` → zero tabs rendered on 10+ filter bars.
+Fix: `normalise()` converts `string[]` → `Tab[]`; added `tabsData?: string[]` for dynamic day tabs from data bridge.
+
+### P0 — Missing component
+
+**`RendererSelect` (`RendererSelect.tsx` + CSS):**
+`select_input` → `Select` not in registry → invisible in production on 8 pages.
+Built styled `<select>`: DL tokens, chevron background, focus ring. `options[]` from `optionsKey`, current value from `dataKey`. Wired as `Select` in COMPONENT_REGISTRY.
+
+### P1 — Data bridge multi-Key injection (`step2-resolve-components.ts`)
+
+Single `dataKey` limit meant secondary data never reached components.
+Fix: scan all block props ending in `Key` (except `dataKey`), resolve each from `ctx.data`, inject with stripped name:
+- `activeDayKey:"activeDay"` → `activeDay: ctx.data["activeDay"]` (ScheduleGrid)
+- `optionsKey:"events"` → `options: ctx.data["events"]` (RendererSelect on 8 pages)
+- `tabsDataKey:"days"` → `tabsData: ctx.data["days"]` (Tabs day tabs)
+
+**8 wireframes updated** — added `optionsKey:"events"` to all `select_input` blocks (speakers, attendees, registrations, sponsors, exhibitors, ticketing, analytics, agenda).
+
+### P1 — StatusChip fix
+
+**`RendererStatusChip` (`RendererStatusChip.tsx`):**
+`EventStatusPill` was raw `StatusChip` requiring `children` string. Renderer passed `data: Event` (whole object).
+Built adapter: extracts status via `statusKey` prop, maps 20+ domain status values to DL color tokens (forest/teal/amber/brick/indigo/neutral). Wired as `EventStatusPill` in registry.
+
+### P2 — Dashboard wireframe cleanup
+
+Removed `top_navigation` + `breadcrumbs` blocks (AppLayout already renders nav).
+Moved `page_header` to `top` region, removed duplicate from `primary`.
+
+**Commit:** `2bdee64` — pushed to GitHub + deployed to Render (`dep-d6mdaflactks7380foe0`)
