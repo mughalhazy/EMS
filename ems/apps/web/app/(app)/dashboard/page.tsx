@@ -5,7 +5,7 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import { Card } from '@/components/ui/Card'
 import {
   events, registrations as allRegByEvent, attendees as allAttByEvent,
-  speakers, tickets as allTicksByEvent, tenant, notifications,
+  tickets as allTicksByEvent, notifications,
 } from '@/lib/mock-data'
 import styles from './dashboard.module.css'
 
@@ -18,16 +18,13 @@ const totalRevenue      = allTix.reduce((s, t) => s + (t.priceAmount / 100) * t.
 const totalCap          = allTix.reduce((s, t) => s + t.quantityTotal, 0)
 const totalSold         = allTix.reduce((s, t) => s + t.quantitySold, 0)
 const checkedIn         = allAtts.filter(a => a.status === 'checked_in').length
-const confirmedSpeakers = speakers.filter(s => s.status === 'confirmed').length
 const liveEvents        = events.filter(e => e.status === 'live')
-const liveEvent         = liveEvents[0]
 const checkinRate       = allAtts.length > 0 ? Math.round((checkedIn / allAtts.length) * 100) : 0
 const capacityRate      = totalCap > 0 ? Math.round((totalSold / totalCap) * 100) : 0
 const revenueTarget     = 1_500_000
 const revenueRate       = Math.min(Math.round((totalRevenue / revenueTarget) * 100), 100)
 const regRate           = Math.min(Math.round((allRegs.length / 2000) * 100), 100)
 const pendingNotifs     = notifications.filter(n => n.status === 'sent' || n.status === 'queued' || n.status === 'failed').length
-const maxRevenue        = Math.max(...events.map(ev => getRevenue(ev.id)), 1)
 
 function getRegCount(id: string) { return (allRegByEvent[id] ?? []).length }
 function getRevenue(id: string) {
@@ -45,9 +42,6 @@ function fmtCurrency(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000)     return `$${(n / 1_000).toFixed(0)}K`
   return `$${n}`
-}
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
@@ -112,7 +106,7 @@ export default function DashboardPage() {
       <div className={styles.content}>
 
         <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>{tenant.name}</h1>
+          <h1 className={styles.pageTitle}>Event Dashboard</h1>
           <p className={styles.pageSubtitle}>Manage all your events from one powerful platform</p>
         </div>
 
@@ -120,7 +114,7 @@ export default function DashboardPage() {
         <div className={styles.statsGrid}>
           <KpiCard label="Total Attendees" value={allAtts.length.toLocaleString()}  color="t" delta="+24.8% this month"   deltaType="positive" />
           <KpiCard label="Ticket Revenue"  value={fmtCurrency(totalRevenue)}         color="g" delta="+18.2% vs last month" deltaType="positive" />
-          <KpiCard label="Active Events"   value={String(liveEvents.length + events.filter(e => e.status === 'published').length)} color="i" delta={`${liveEvents.length} live now`} deltaType="positive" />
+          <KpiCard label="Active Events"   value={String(liveEvents.length + events.filter(e => e.status === 'published').length)} color="i" delta="+3 this week" deltaType="positive" />
           <KpiCard label="Check-in Rate"   value={`${checkinRate}%`}                 color="f" delta="+2.3% improvement"   deltaType="positive" />
         </div>
 
@@ -155,7 +149,7 @@ export default function DashboardPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          {ev.timezone}
+                          Convention Center
                         </span>
                       </div>
                       <div className={styles.eventStats}>
@@ -209,7 +203,7 @@ export default function DashboardPage() {
               <div className={styles.bar}>
                 <div className={`${styles.barFill} ${styles.indigo}`} style={{ width: `${capacityRate}%` }} />
               </div>
-              <div className={styles.quickStatNote}>{confirmedSpeakers} confirmed speakers</div>
+              <div className={styles.quickStatNote}>Great attendance rate!</div>
             </div>
           </Card>
         </div>
