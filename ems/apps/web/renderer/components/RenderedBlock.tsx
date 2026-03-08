@@ -21,7 +21,7 @@ const COMPONENT_REGISTRY: Record<string, React.ComponentType<Record<string, unkn
   // ── Data display ─────────────────────────────────────────
   StatCard:    dynamic(() => import('@/components/ui/KpiCard').then(m => ({ default: m.KpiCard as React.ComponentType<Record<string, unknown>> }))),
   DataTable:   dynamic(() => import('@/components/ui/RendererDataTable').then(m => ({ default: m.RendererDataTable as React.ComponentType<Record<string, unknown>> }))),
-  EventCard:   dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
+  EventCard:   dynamic(() => import('@/components/ui/RendererEntityCard').then(m => ({ default: m.RendererEntityCard as React.ComponentType<Record<string, unknown>> }))),
   Card:        dynamic(() => import('@/components/ui/Card').then(m => ({ default: m.Card as React.ComponentType<Record<string, unknown>> }))),
   ScheduleGrid: dynamic(() => import('@/components/ui/ScheduleGrid').then(m => ({ default: m.ScheduleGrid as React.ComponentType<Record<string, unknown>> }))),
 
