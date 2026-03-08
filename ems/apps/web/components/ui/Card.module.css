@@ -1,26 +1,30 @@
-/* ============================================================
-   Card — surface container
-   ============================================================ */
+/* Matches HTML .card exactly */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 .card {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out both;
 }
 
-/* ── Header ─────────────────────────────────────────────────── */
+/* Matches .card-header */
 .header {
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
 }
 
+/* Matches .card-title */
 .title {
-  font-size: var(--text-md);
+  font-size: 16px;
   font-weight: var(--weight-bold);
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -33,12 +37,12 @@
   flex-shrink: 0;
 }
 
-/* ── Body ────────────────────────────────────────────────────── */
+/* Matches .card-body */
 .body {
   padding: var(--space-6);
 }
 
-/* flush: no padding — tables, lists, and grids bleed to card edges */
+/* flush: no padding — tables, lists bleed to edges */
 .bodyFlush {
   overflow: hidden;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);

@@ -1,18 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { Badge } from '@/components/ui/Badge'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Card } from '@/components/ui/Card'
 import { AlertCard } from '@/components/ui/AlertCard'
-import { Avatar } from '@/components/ui/Avatar'
 import {
   events, registrations as allRegByEvent, attendees as allAttByEvent,
   speakers, tickets as allTicksByEvent, tenant, notifications,
 } from '@/lib/mock-data'
 import styles from './dashboard.module.css'
 
-/* ── Pre-compute data ──────────────────────────────────────── */
+/* ── Data ──────────────────────────────────────────────────── */
 const allRegs = Object.values(allRegByEvent).flat()
 const allAtts = Object.values(allAttByEvent).flat()
 const allTix  = Object.values(allTicksByEvent).flat()
@@ -30,22 +28,20 @@ const revenueTarget     = 1_500_000
 const revenueRate       = Math.min(Math.round((totalRevenue / revenueTarget) * 100), 100)
 const regRate           = Math.min(Math.round((allRegs.length / 2000) * 100), 100)
 const pendingNotifs     = notifications.filter(n => n.status === 'sent' || n.status === 'queued' || n.status === 'failed').length
+const maxRevenue        = Math.max(...events.map(ev => getRevenue(ev.id)), 1)
 
-/* Per-event helpers */
-function getRegCount(eventId: string) { return (allRegByEvent[eventId] ?? []).length }
-function getRevenue(eventId: string) {
-  return (allTicksByEvent[eventId] ?? []).reduce((s, t) => s + (t.priceAmount / 100) * t.quantitySold, 0)
+function getRegCount(id: string) { return (allRegByEvent[id] ?? []).length }
+function getRevenue(id: string) {
+  return (allTicksByEvent[id] ?? []).reduce((s, t) => s + (t.priceAmount / 100) * t.quantitySold, 0)
 }
-function getCapacityPct(eventId: string) {
-  const tix  = allTicksByEvent[eventId] ?? []
+function getCapacityPct(id: string) {
+  const tix  = allTicksByEvent[id] ?? []
   const cap  = tix.reduce((s, t) => s + t.quantityTotal, 0)
   const sold = tix.reduce((s, t) => s + t.quantitySold, 0)
   return cap > 0 ? Math.round((sold / cap) * 100) : 0
 }
 
-const maxRevenue = Math.max(...events.map(ev => getRevenue(ev.id)), 1)
-
-/* Formatters */
+/* ── Formatters ────────────────────────────────────────────── */
 function fmtCurrency(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000)     return `$${(n / 1_000).toFixed(0)}K`
@@ -68,11 +64,18 @@ function getDateParts(iso: string) {
   }
 }
 
-function regBadgeColor(status: string) {
-  if (status === 'confirmed' || status === 'approved') return 'forest' as const
-  if (status === 'pending') return 'amber' as const
-  if (status === 'cancelled') return 'brick' as const
-  return 'neutral' as const
+function ticketClass(name: string) {
+  const n = name.toLowerCase()
+  if (n.includes('vip') || n.includes('premium')) return styles.vip
+  if (n.includes('early')) return styles.early
+  return styles.standard
+}
+
+function statusClass(s: string) {
+  if (s === 'confirmed' || s === 'approved') return styles.confirmed
+  if (s === 'pending') return styles.pending
+  if (s === 'cancelled') return styles.cancelled
+  return styles.default
 }
 
 export default function DashboardPage() {
@@ -81,7 +84,7 @@ export default function DashboardPage() {
   return (
     <div className={styles.page}>
 
-      {/* Sticky topbar — date context + quick actions */}
+      {/* Sticky topbar */}
       <div className={styles.topbar}>
         <div className={styles.dateSelector}>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -100,7 +103,7 @@ export default function DashboardPage() {
             {pendingNotifs > 0 && <span className={styles.iconBtnBadge}>{pendingNotifs}</span>}
           </Link>
           <Link href="/events" className={styles.btnPrimary}>
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Create Event
@@ -110,43 +113,32 @@ export default function DashboardPage() {
 
       <div className={styles.content}>
 
-        {/* Live event alert */}
         {liveEvent && (
-          <div className={styles.alertWrap}>
-            <AlertCard variant="indigo" title={`${liveEvent.name} is LIVE`} live>
-              {liveEvent.code} · {liveEvent.timezone} · ends {fmtDate(liveEvent.endAt)}
-            </AlertCard>
-          </div>
+          <AlertCard variant="indigo" title={`${liveEvent.name} is LIVE`} live>
+            {liveEvent.code} · {liveEvent.timezone} · ends {fmtDate(liveEvent.endAt)}
+          </AlertCard>
         )}
 
-        {/* Page header */}
         <div className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>{tenant.name}</h1>
           <p className={styles.pageSubtitle}>Manage all your events from one powerful platform</p>
         </div>
 
-        {/* KPI strip */}
+        {/* KPI strip — staggered fade-in per HTML */}
         <div className={styles.statsGrid}>
-          <KpiCard label="Total Attendees"  value={allAtts.length.toLocaleString()}  color="t" delta="+24.8% this month"   deltaType="positive" />
-          <KpiCard label="Ticket Revenue"   value={fmtCurrency(totalRevenue)}         color="g" delta="+18.2% vs last month" deltaType="positive" />
-          <KpiCard label="Active Events"    value={String(liveEvents.length + events.filter(e => e.status === 'published').length)} color="i" delta={`${liveEvents.length} live now`} deltaType="positive" />
-          <KpiCard label="Check-in Rate"    value={`${checkinRate}%`}                 color="f" delta="+2.3% improvement"   deltaType="positive" />
+          <KpiCard label="Total Attendees" value={allAtts.length.toLocaleString()}  color="t" delta="+24.8% this month"   deltaType="positive" />
+          <KpiCard label="Ticket Revenue"  value={fmtCurrency(totalRevenue)}         color="g" delta="+18.2% vs last month" deltaType="positive" />
+          <KpiCard label="Active Events"   value={String(liveEvents.length + events.filter(e => e.status === 'published').length)} color="i" delta={`${liveEvents.length} live now`} deltaType="positive" />
+          <KpiCard label="Check-in Rate"   value={`${checkinRate}%`}                 color="f" delta="+2.3% improvement"   deltaType="positive" />
         </div>
 
-        {/* Main content grid */}
+        {/* Content grid */}
         <div className={styles.contentGrid}>
 
           {/* Upcoming Events */}
-          <Card
-            title="Upcoming Events"
-            actions={<Link href="/events" className={styles.cardAction}>View calendar →</Link>}
-            flush
-          >
+          <Card title="Upcoming Events" actions={<Link href="/events" className={styles.cardAction}>View calendar →</Link>} flush>
             {events.map(ev => {
               const { month, day } = getDateParts(ev.startAt)
-              const regCount = getRegCount(ev.id)
-              const revenue  = getRevenue(ev.id)
-              const capPct   = getCapacityPct(ev.id)
               return (
                 <Link key={ev.id} href={`/events/${ev.id}`} className={styles.eventLink}>
                   <div className={styles.eventCard}>
@@ -161,29 +153,30 @@ export default function DashboardPage() {
                       <div className={styles.eventName}>{ev.name}</div>
                       <div className={styles.eventDetails}>
                         <span className={styles.eventDetailItem}>
-                          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           {fmtTime(ev.startAt)} – {fmtTime(ev.endAt)}
                         </span>
                         <span className={styles.eventDetailItem}>
-                          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                           {ev.timezone}
                         </span>
                       </div>
                       <div className={styles.eventStats}>
                         <div className={styles.eventStat}>
-                          <div className={styles.eventStatValue}>{regCount.toLocaleString()}</div>
+                          <div className={styles.eventStatValue}>{getRegCount(ev.id).toLocaleString()}</div>
                           <div className={styles.eventStatLabel}>Registered</div>
                         </div>
                         <div className={styles.eventStat}>
-                          <div className={styles.eventStatValue}>{fmtCurrency(revenue)}</div>
+                          <div className={styles.eventStatValue}>{fmtCurrency(getRevenue(ev.id))}</div>
                           <div className={styles.eventStatLabel}>Revenue</div>
                         </div>
                         <div className={styles.eventStat}>
-                          <div className={styles.eventStatValue}>{capPct}%</div>
+                          <div className={styles.eventStatValue}>{getCapacityPct(ev.id)}%</div>
                           <div className={styles.eventStatLabel}>Capacity</div>
                         </div>
                       </div>
@@ -224,23 +217,19 @@ export default function DashboardPage() {
               <div className={styles.bar}>
                 <div className={`${styles.barFill} ${styles.indigo}`} style={{ width: `${capacityRate}%` }} />
               </div>
-              <div className={styles.quickStatNote}>{confirmedSpeakers} confirmed speakers across all events</div>
+              <div className={styles.quickStatNote}>{confirmedSpeakers} confirmed speakers</div>
             </div>
           </Card>
         </div>
 
-        {/* Revenue chart */}
-        <Card
-          title="Revenue by Event"
-          actions={<Link href="/analytics" className={styles.cardAction}>View details →</Link>}
-        >
+        {/* Revenue chart — matches .revenue-chart exactly */}
+        <Card title="Monthly Revenue" actions={<Link href="/analytics" className={styles.cardAction}>View details →</Link>}>
           <div className={styles.revenueChart}>
             {events.map(ev => {
               const rev = getRevenue(ev.id)
-              const pct = Math.max(Math.round((rev / maxRevenue) * 100), 4)
+              const pct = Math.max(Math.round((rev / maxRevenue) * 100), 5)
               return (
-                <div key={ev.id} className={styles.chartBarWrapper}>
-                  <div className={styles.chartBar} style={{ height: `${pct}%` }} />
+                <div key={ev.id} className={styles.chartBar} style={{ height: `${pct}%` }}>
                   <div className={styles.chartBarLabel}>{ev.code}</div>
                 </div>
               )
@@ -248,51 +237,56 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        {/* Recent Registrations table */}
-        <Card
-          title="Recent Registrations"
-          actions={<Link href="/registrations" className={styles.cardAction}>View all →</Link>}
-          flush
-        >
-          <table className={styles.regTable}>
-            <thead>
-              <tr>
-                <th>Attendee</th>
-                <th>Event</th>
-                <th>Ticket</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allRegs.slice(0, 8).map(reg => {
-                const att = allAtts.find(a => a.id === reg.attendeeId)
-                const ev  = events.find(e => e.id === reg.eventId)
-                const tix = allTix.find(t => t.id === reg.ticketId)
-                if (!att) return null
-                return (
-                  <tr key={reg.id}>
-                    <td>
-                      <div className={styles.attendeeCell}>
-                        <Avatar initials={att.firstName[0] + att.lastName[0]} color="indigo" size="sm" />
-                        <span className={styles.attendeeName}>{att.firstName} {att.lastName}</span>
-                      </div>
-                    </td>
-                    <td>{ev?.code ?? reg.eventId}</td>
-                    <td>
-                      {tix ? <span className={styles.ticketName}>{tix.name}</span> : '—'}
-                    </td>
-                    <td className={styles.amountCell}>
-                      {tix ? fmtAmount(tix.priceAmount) : '—'}
-                    </td>
-                    <td>
-                      <Badge color={regBadgeColor(reg.status)}>{reg.status}</Badge>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+        {/* Recent Registrations — matches .table exactly */}
+        <Card title="Recent Registrations" actions={<Link href="/registrations" className={styles.cardAction}>View all →</Link>} flush>
+          <div className={styles.tableWrap}>
+            <table className={styles.regTable}>
+              <thead>
+                <tr>
+                  <th>Attendee</th>
+                  <th>Event</th>
+                  <th>Ticket Type</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allRegs.slice(0, 8).map(reg => {
+                  const att = allAtts.find(a => a.id === reg.attendeeId)
+                  const ev  = events.find(e => e.id === reg.eventId)
+                  const tix = allTix.find(t => t.id === reg.ticketId)
+                  if (!att) return null
+                  return (
+                    <tr key={reg.id}>
+                      <td>
+                        <div className={styles.attendeeCell}>
+                          <div className={styles.attendeeAvatar}>
+                            {att.firstName[0]}{att.lastName[0]}
+                          </div>
+                          <span className={styles.attendeeName}>{att.firstName} {att.lastName}</span>
+                        </div>
+                      </td>
+                      <td>{ev?.name ?? reg.eventId}</td>
+                      <td>
+                        {tix
+                          ? <span className={`${styles.ticketBadge} ${ticketClass(tix.name)}`}>{tix.name}</span>
+                          : '—'
+                        }
+                      </td>
+                      <td className={styles.amountCell}>
+                        {tix ? fmtAmount(tix.priceAmount) : '—'}
+                      </td>
+                      <td>
+                        <span className={`${styles.statusBadge} ${statusClass(reg.status)}`}>
+                          {reg.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </Card>
 
       </div>
