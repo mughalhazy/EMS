@@ -6,11 +6,12 @@
   background: var(--off);
 }
 
+/* ── Header Button ─────────────────────────────────────────── */
 .headerBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
   background: var(--t-md);
   color: var(--white);
   border-radius: var(--radius);
@@ -18,15 +19,16 @@
   font-weight: var(--weight-bold);
   text-decoration: none;
   transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(13,148,136,.2);
+  box-shadow: var(--shadow-sm);
 }
 .headerBtn:hover {
   background: var(--t-dk);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(13,148,136,.25);
+  box-shadow: var(--shadow-md);
   color: var(--white);
 }
 
+/* ── Alert Row ─────────────────────────────────────────────── */
 .alertRow {
   padding: var(--space-5) var(--space-8) 0;
 }
@@ -49,6 +51,19 @@
   align-items: start;
 }
 
+/* ── Right Panel ───────────────────────────────────────────── */
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ── Event Link ────────────────────────────────────────────── */
+.eventLink {
+  display: block;
+  text-decoration: none;
+}
+
 /* ── Event Cards ──────────────────────────────────────────── */
 .eventCard {
   display: flex;
@@ -62,11 +77,11 @@
 .eventCard:last-child { border-bottom: none; }
 
 .dateBlock {
-  width: 64px;
-  height: 64px;
+  width: var(--space-16);
+  height: var(--space-16);
   border-radius: var(--radius);
   background: var(--t-lt);
-  border: 1.5px solid var(--t-border);
+  border: var(--border-width) solid var(--t-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -81,19 +96,19 @@
   letter-spacing: 0.05em;
 }
 .dateDay {
-  font-size: 22px;
+  font-size: var(--text-xl);
   font-weight: var(--weight-extrabold);
   color: var(--ink);
   line-height: 1;
 }
 
 .eventInfo { flex: 1; min-width: 0; }
-.eventMeta { display: flex; align-items: center; gap: var(--space-2); margin-bottom: 6px; }
+.eventMeta { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1); }
 
 .eventBadge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 10px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -106,7 +121,7 @@
   font-size: var(--text-md);
   font-weight: var(--weight-bold);
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: var(--space-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -115,18 +130,18 @@
 .eventStats { display: flex; gap: var(--space-6); margin-top: var(--space-3); }
 .eventStat { text-align: center; }
 .eventStatValue {
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: var(--weight-extrabold);
   color: var(--ink);
   line-height: 1;
 }
 .eventStatLabel {
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: var(--weight-bold);
   color: var(--ink-3);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-top: 3px;
+  margin-top: var(--space-1);
 }
 
 /* ── Quick Stats ──────────────────────────────────────────── */
@@ -143,18 +158,18 @@
   margin-bottom: var(--space-3);
 }
 .quickStatLabel { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--ink-2); }
-.quickStatValue { font-size: 22px; font-weight: var(--weight-extrabold); color: var(--ink); }
+.quickStatValue { font-size: var(--text-xl); font-weight: var(--weight-extrabold); color: var(--ink); }
 
 .bar {
-  height: 8px;
+  height: var(--space-2);
   background: var(--surface);
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: var(--space-2);
 }
 .barFill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition: width var(--transition-slow);
 }
 .barFill.teal   { background: var(--t-md); }
@@ -163,6 +178,37 @@
 .barFill.forest { background: var(--f-md); }
 
 .quickStatNote { font-size: var(--text-xs); color: var(--ink-3); }
+
+/* ── Recent Registrations ─────────────────────────────────── */
+.regList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+.regRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.regInfo {
+  flex: 1;
+  min-width: 0;
+}
+.regName {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.regEvent {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  margin-top: var(--space-1);
+}
 
 /* ── View all ─────────────────────────────────────────────── */
 .viewAll {
