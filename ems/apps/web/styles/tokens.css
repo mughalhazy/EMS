@@ -73,4 +73,35 @@
   --transition-fast:   0.12s ease;
   --transition-base:   0.2s ease;
   --transition-slow:   0.4s ease;
+
+  /* ── Spacing Scale (8px grid) ─────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-13: 52px;
+  --space-16: 64px;
+
+  /* ── Typography Scale (DL: 52 / 28 / 18 / 13 / 11px) ─── */
+  --text-xs:   11px;   /* badges, captions, micro labels */
+  --text-sm:   13px;   /* body text, table cells */
+  --text-md:   14px;   /* medium UI elements */
+  --text-lg:   18px;   /* card titles, page headers */
+  --text-xl:   28px;   /* section headings */
+  --text-2xl:  32px;   /* KPI stat values */
+  --text-hero: 52px;   /* display text */
+
+  /* ── Font Weights ─────────────────────────────────────── */
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-extrabold: 800;
+
+  /* ── Border ───────────────────────────────────────────── */
+  --border-width: 1.5px;
 }

@@ -327,20 +327,120 @@ Design rules for each:
 
 ---
 
+## STEP 10 — RendererActionsContext [x]
+
+- [x] `RendererActionsContext.tsx` — `onSelectChange` + `onTabChange` callback bridge
+- [x] `RenderedPage.tsx` — accepts + provides context
+- [x] `RenderedBlock.tsx` — injects `blockId` into `combinedProps`
+- [x] `RendererSelect.tsx` — controlled component, calls `onSelectChange` on change
+- [x] `Tabs.tsx` — `blockId` prop, `onTabChange` callback, `useEffect` for external sync
+- [x] 8 event-selector pages wired: speakers, attendees, registrations, sponsors, exhibitors, ticketing, analytics, agenda
+- [x] Agenda: additionally wired `onTabChange` for day-tabs → `setActiveDay`
+- **Commit:** `d73b8ee`
+
+---
+
+## STEP 11 — Protocol Token Sweep [x]
+
+- [x] `styles/tokens.css` — extended with spacing scale, typography scale, font weights, `--border-width`
+- [x] Component CSS modules swept: KpiCard, Button, Badge, DataTable, Input, Sidebar, TopBar
+- [x] Page CSS modules swept: dashboard, analytics, ticketing, registrations, speakers, events, agenda
+- **Commit:** (step-11 commit — this session)
+
+---
+
+## STEP 12 — Chart Components [ ]
+
+Build data visualization components for the Analytics and Dashboard pages.
+
+### 12a. `RevenueChart` — Bar / Line chart
+- **File:** `components/ui/RevenueChart.tsx` + `RevenueChart.module.css`
+- **Purpose:** Revenue over time (line) or by ticket type (bar); used in Analytics page
+- **Design:** DL color tokens only; Forest for revenue bars, Indigo for trend lines; Gold accent for totals
+- **Props:** `data: { label: string; value: number }[]`, `type: 'bar' | 'line'`, `title?: string`, `valuePrefix?: string`
+- **Implementation:** Pure CSS/SVG (no external lib) or lightweight approach (recharts/chart.js via dynamic import)
+- **Canonical name:** `RevenueChart` — add to `CanonicalComponent` union + `COMPONENT_REGISTRY`
+
+### 12b. `FunnelChart` — Registration funnel visualization
+- **File:** `components/ui/FunnelChart.tsx` + `FunnelChart.module.css`
+- **Purpose:** Checkout funnel (initiated → confirmed → checked-in); Analytics page
+- **Design:** Horizontal stacked bars; Indigo=total, Forest=converted, Amber=pending; conversion % labels
+- **Props:** `steps: { label: string; count: number; rate?: number }[]`
+- **Canonical name:** `FunnelChart`
+
+### 12c. `SparkLine` — Inline trend indicator
+- **File:** `components/ui/SparkLine.tsx`
+- **Purpose:** Tiny SVG line chart for KpiCard trend column
+- **Design:** `--f-md` (positive), `--b-md` (negative), 40×20px viewBox
+- **Props:** `values: number[]`, `positive?: boolean`
+
+---
+
+## STEP 13 — Enhancement Components [ ]
+
+Additional components to elevate UX to enterprise SaaS caliber.
+
+### 13a. `Toast` — Mutation feedback notifications
+- **File:** `components/ui/Toast.tsx` + `Toast.module.css`
+- **Purpose:** Inline success/error feedback after row actions (approve, cancel, etc.)
+- **Design:** Slide-in from bottom-right; Forest=success, Brick=error, Amber=warning; auto-dismiss 4s; close button
+- **Props:** `variant: 'success' | 'error' | 'warning'`, `message: string`, `onDismiss: () => void`
+- **Canonical name:** `Toast`
+
+### 13b. `Drawer` — Slide-over panel
+- **File:** `components/ui/Drawer.tsx` + `Drawer.module.css`
+- **Purpose:** Detail panel, quick-edit form, filter panel — opens from right edge
+- **Design:** 400px wide; backdrop overlay; ESC close; body scroll lock; header + scrollable body + footer slot
+- **Canonical name:** `Drawer`
+
+### 13c. `ActivityFeed` — Audit log / live event stream
+- **File:** `components/ui/ActivityFeed.tsx` + `ActivityFeed.module.css`
+- **Purpose:** Real-time activity stream for dashboard right panel; system events on Admin console
+- **Design:** Teal left border (live); icon + event description + timestamp; max 20 items; fade-in on new entry
+- **Props:** `items: { id: string; type: string; description: string; timestamp: string; color?: string }[]`
+- **Canonical name:** `ActivityFeed`
+
+### 13d. `CommandPalette` — ⌘K quick navigation
+- **File:** `components/ui/CommandPalette.tsx` + `CommandPalette.module.css`
+- **Purpose:** Keyboard-first navigation for power users
+- **Design:** Modal overlay; search input; grouped results (Pages / Events / Actions); keyboard navigation (↑↓ Enter)
+- **Trigger:** Global `⌘K` / `Ctrl+K` keyboard shortcut registered in AppLayout
+- **Canonical name:** `CommandPalette`
+
+### 13e. `DateRangePicker` — Date range selection
+- **File:** `components/ui/DateRangePicker.tsx` + `DateRangePicker.module.css`
+- **Purpose:** Filter analytics/registrations by date range
+- **Design:** Two-month calendar popover; DL tokens for selected range (Indigo tint); DL radius + shadow
+- **Canonical name:** `DateRangePicker`
+
+### 13f. `ProgressBar` — Capacity / utilization indicator
+- **File:** `components/ui/ProgressBar.tsx`
+- **Purpose:** Ticket utilization in Ticketing page; session capacity in Agenda
+- **Design:** Full-width track (`--surface`); fill color semantic (Forest <80%, Amber 80-95%, Brick 95%+); labeled with % value
+- **Props:** `value: number`, `max: number`, `label?: string`, `showPercent?: boolean`
+- **Canonical name:** `ProgressBar`
+
+### 13g. `Breadcrumb` — Page location trail
+- **File:** `components/ui/Breadcrumb.tsx`
+- **Purpose:** Secondary navigation for detail pages (Events[id], Admin sub-pages)
+- **Design:** `/`-separated path items; last item = current page (ink-2); clickable ancestors (indigo link); 13px semibold
+- **Canonical name:** `Breadcrumb`
+
+---
+
 ## NEXT — Remaining known gaps [ ]
 
-- [ ] ScheduleGrid `activeDay` now injected via multi-Key bridge — verify filtering works end-to-end on Agenda
-- [ ] RendererSelect is display-only (no onChange wiring back to page state) — pages that need event switching need a client-side bridge
-- [ ] P3: Breadcrumb component (low priority)
-- [ ] Visual QA pass on deployed Render URL
-
-After all 13 pages migrated:
-
-- [ ] Run renderer in `showDebug` mode on each page — zero validation errors
-- [ ] Confirm `TokenResolver` blocks no arbitrary CSS literals
+- [ ] Visual QA pass on deployed Render URL (full 13-page sweep)
+- [ ] Run renderer in `showDebug` mode on each page — confirm zero validation errors
 - [ ] Check responsive behavior at 900px breakpoint for each page
 - [ ] Verify all `requiresA11yLabel: true` blocks have `aria-label` in wireframe JSON
-- [ ] Visual QA against design-language.html reference panels
+- [ ] P3: Breadcrumb component (see STEP 13g)
+
+After STEP 12 + 13:
+- [ ] Wire `RevenueChart` + `FunnelChart` into Analytics page wireframe + data bridge
+- [ ] Wire `Toast` context into row-action mutations across all list pages
+- [ ] Wire `ActivityFeed` into Dashboard right panel (replace static table)
+- [ ] Register all new components in `COMPONENT_REGISTRY` + `CanonicalComponent` union + `ComponentCatalog`
 
 ---
 

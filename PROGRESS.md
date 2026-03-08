@@ -598,6 +598,78 @@ Key design:
 
 ---
 
+## [31] RendererActionsContext — Live Event Switching + Day-Tab Bridge [step-10]
+
+Built the client-side callback bridge so renderer components can communicate state changes back to page-level `useState`.
+
+**New file:** `renderer/context/RendererActionsContext.tsx`
+- `RendererActions` interface: `onSelectChange?(blockId, value)` + `onTabChange?(blockId, value)`
+- `RendererActionsProvider` + `useRendererActions()` hook
+
+**`RenderedPage.tsx`:** accepts `onSelectChange` + `onTabChange` props; wraps output in `<RendererActionsProvider>`.
+
+**`RenderedBlock.tsx`:** injects `blockId` into `combinedProps` so components know their identity.
+
+**`RendererSelect.tsx`:** converted from uncontrolled (`defaultValue`) to controlled (`value`); calls `onSelectChange(blockId, value)` via context.
+
+**`Tabs.tsx`:** added `blockId?` prop; calls `onTabChange(blockId, value)` on click; `useEffect` syncs active tab when `defaultTab`/`tabsData` changes externally.
+
+**8 event-selector pages updated** (speakers, attendees, registrations, sponsors, exhibitors, ticketing, analytics, agenda):
+```tsx
+onSelectChange={(blockId, value) => { if (blockId === 'event-selector') setEventId(value) }}
+```
+**Agenda** additionally:
+```tsx
+onTabChange={(blockId, value) => { if (blockId === 'day-tabs') setActiveDay(value) }}
+```
+
+**Commit:** `d73b8ee`
+
+---
+
+## [32] Protocol Token Sweep — Design System Protocol Implementation [step-11]
+
+Full implementation of EMS-Design-System-Protocol.md across token layer and all CSS modules.
+
+### Token Layer Extension (`styles/tokens.css`)
+Added complete missing token groups:
+- **Spacing scale** (8px grid): `--space-1` (4px) through `--space-16` (64px)
+- **Typography scale**: `--text-xs` (11px), `--text-sm` (13px), `--text-md` (14px), `--text-lg` (18px), `--text-xl` (28px), `--text-2xl` (32px), `--text-hero` (52px)
+- **Font weights**: `--weight-medium` (500), `--weight-semibold` (600), `--weight-bold` (700), `--weight-extrabold` (800)
+- **Border**: `--border-width: 1.5px`
+
+### Component CSS Modules Swept (anti-patterns → tokens)
+| File | Key Changes |
+|------|-------------|
+| `KpiCard.module.css` | `padding: 20px` → `var(--space-5)`, `translateY(-3px)` → `-2px`, all font literals → tokens |
+| `Button.module.css` | `font-size: 13px` → `var(--text-sm)`, `font-weight: 700` → `var(--weight-bold)`, size variants updated |
+| `Badge.module.css` | `font-size: 11px` → `var(--text-xs)`, `gap: 5px` → `var(--space-1)`, `letter-spacing: 0.02em` → `0.05em` |
+| `DataTable.module.css` | All font/spacing literals → tokens |
+| `Input.module.css` | All literals → tokens |
+| `Sidebar.module.css` | All literals → tokens |
+| `TopBar.module.css` | `gap: 10px` → `var(--space-2)` |
+
+### Page CSS Modules Swept
+| File | Key Changes |
+|------|-------------|
+| `dashboard.module.css` | `gap: 16px` → `var(--space-4)`, all font values → tokens |
+| `analytics.module.css` | All literals → tokens, `padding: 24px` → `var(--space-6)` |
+| `ticketing.module.css` | All literals → tokens |
+| `registrations.module.css` | All literals → tokens |
+| `speakers.module.css` | All literals → tokens (shared: attendees/sponsors/exhibitors/notifications/agenda) |
+| `events.module.css` | Full sweep — cards, status chips, CTAs, buttons, stats all tokenized |
+| `agenda.module.css` | Full sweep — toolbar, day tabs, schedule grid, session blocks, legend, loading states |
+
+**Protocol anti-patterns eliminated:**
+- Hardcoded hex values → semantic color tokens
+- Magic number spacing (10px, 14px, 20px…) → 8px-grid `--space-*` tokens
+- Inline `font-size: 11/13px` → `--text-xs/sm` scale tokens
+- `font-weight: 700/600` → `--weight-bold/semibold` tokens
+- `border: 1.5px solid` literals → `var(--border-width) solid`
+- Inconsistent hover translateY → standardized `-2px` for cards
+
+---
+
 ## [30] Full Pipeline Audit + 9-Fix Resolution [step-9]
 
 Systematic audit across registry, prop contracts, data bridge, and all 13 wireframes. 9 gaps found and fixed.
