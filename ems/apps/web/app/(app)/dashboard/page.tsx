@@ -57,14 +57,19 @@ function getDateParts(iso: string) {
   }
 }
 
+/* Maps mock ticket names to HTML's 3 visual categories: vip/early(workshop)/standard */
 function ticketClass(name: string) {
   const n = name.toLowerCase()
-  if (n.includes('vip') || n.includes('premium')) return styles.badgeVip
-  if (n.includes('early')) return styles.badgeEarly
+  if (n.includes('vip') || n.includes('premium'))              return styles.badgeVip
+  if (n.includes('workshop') || n.includes('add-on') || n.includes('sprint') || n.includes('early')) return styles.badgeEarly
   return styles.badgeStandard
 }
 
-/* HTML defines only checked-in and registered */
+/* Maps mock status values to HTML's 2 display labels: Checked In / Registered */
+function statusLabel(s: string): string {
+  if (s === 'confirmed' || s === 'approved') return 'Checked In'
+  return 'Registered'
+}
 function statusClass(s: string) {
   if (s === 'confirmed' || s === 'approved') return styles.badgeCheckedIn
   return styles.badgeRegistered
@@ -267,7 +272,7 @@ export default function DashboardPage() {
                       </td>
                       <td>
                         <span className={`${styles.badgeBase} ${statusClass(reg.status)}`}>
-                          {reg.status}
+                          {statusLabel(reg.status)}
                         </span>
                       </td>
                     </tr>
