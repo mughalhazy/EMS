@@ -18,7 +18,11 @@ function getEventMeta(ev: typeof events[0], index: number) {
     return { emoji: '🎨', imageClass: styles.imageDesign,   tags: ['Design', 'Workshop'] }
   if (n.includes('startup') || n.includes('pitch') || n.includes('networking') || n.includes('mixer'))
     return { emoji: '🚀', imageClass: styles.imageBusiness, tags: ['Business', 'Networking'] }
-  if (n.includes('tech') || n.includes('summit') || n.includes('ai') || n.includes('data'))
+  if (n.includes('ai') || n.includes('machine learning'))
+    return { emoji: '🔬', imageClass: styles.imageTech,     tags: ['Technology', 'Conference'] }
+  if (n.includes('analytics') || n.includes('data'))
+    return { emoji: '📊', imageClass: styles.imageBusiness, tags: ['Business', 'Workshop'] }
+  if (n.includes('tech') || n.includes('summit'))
     return { emoji: '💻', imageClass: styles.imageTech,     tags: ['Technology', 'Conference'] }
   const fallbacks = [
     { emoji: '💻', imageClass: styles.imageTech,     tags: ['Technology', 'Conference'] },
