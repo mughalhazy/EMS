@@ -177,3 +177,41 @@
 | P-007 | dashboard | [34] | CSS module compound selectors (.foo.bar) are unreliable — use flat self-contained classes instead | All future badge/chip variants should be flat classes, never compound selectors in CSS modules | resolved |
 | D-013 | dashboard | [34] | Ticket category mapping incomplete — workshop/add-on/sprint names all fell through to badgeStandard (indigo); HTML teal category never rendered | Added workshop/add-on/sprint/early detection → badgeEarly (teal) | fixed |
 | D-014 | dashboard | [34] | Status badge showed raw mock values (confirmed, approved, cancelled) instead of HTML labels (Checked In, Registered) | Added statusLabel() mapping: confirmed/approved → "Checked In", all else → "Registered" | fixed |
+
+---
+
+### Events Page (events-page.html)
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| C-021 | events | gradient `var(--i-dk) → var(--i-md)` | page header background | resolved |
+| C-022 | events | gradient `var(--t-dk) → var(--t-md)` | featured event background | resolved |
+| C-023 | events | `rgba(255,255,255,0.15)` | filters-bar + featured-stat background | logged |
+| C-024 | events | `rgba(255,255,255,0.2)` | featured-stat border | logged |
+| S-012 | events | `56px` header padding-top | raw — space-14 not defined | logged |
+| S-013 | events | `36px` view toggle button | raw — space-9 not defined | logged |
+| T-015 | events | `48px` header h1 font-size | raw — between text-2xl (32px) and text-hero (52px) | logged |
+| T-016 | events | `36px` featured title font-size | raw — between text-2xl (32px) and text-hero (52px) | logged |
+| T-017 | events | `16px` featured desc font-size | raw — between text-md (14px) and text-lg (18px) | logged |
+| T-018 | events | `20px` event-title font-size | raw — between text-lg (18px) and text-xl (28px) | logged |
+| R-011 | events | `padding: 6px 14px` event-status | raw — both off grid | logged |
+| R-012 | events | `border-radius: 20px` event-status | raw — pill shape, above radius-xl (20px = radius-xl actually) | logged |
+| R-013 | events | `padding: 14px 28px` btn-white | raw — 14px off grid, 28px not in scale | logged |
+| R-014 | events | `box-shadow: 0 8px 20px rgba(0,0,0,0.2)` btn-white hover | raw — custom shadow | logged |
+| R-015 | events | `gap: 10px` featured-meta-item + btn-white | raw — between space-2 (8px) and space-3 (12px) | logged |
+| R-016 | events | `font-size: 64px` emoji in event image | raw — display-only, not in type scale | logged |
+| R-017 | events | `border-radius: 6px` event-tag | raw — below --radius (8px) | logged |
+| M-009 | events | `.page-header` | `.pageHeader` CSS module class | resolved |
+| M-010 | events | `.event-card` | `<Link>` with `.eventCard` class | resolved |
+| M-011 | events | `.event-image.tech/design/business/social` | flat classes: `.imageTech/.imageDesign/.imageBusiness/.imageSocial` | resolved |
+| M-012 | events | `.event-status.live/upcoming/sold-out` | flat classes: `.statusLive/.statusUpcoming/.statusSoldOut` | resolved |
+| M-013 | events | `.event-price.free` | flat class `.eventPriceFree` overrides `.eventPrice` color | resolved |
+| M-014 | events | `.filter-btn.active` | flat class `.filterBtnActive` | resolved |
+| M-015 | events | `.view-btn.active` | flat class `.viewBtnActive` | resolved |
+| P-008 | events | event meta (emoji, image variant, tags) not in domain model | derived from event name string matching; cycle fallback for unmatched | resolved |
+| D-015 | events | page had 100% inline styles — zero CSS module usage | full rewrite: CSS module only, zero inline styles | fixed |
+| D-016 | events | missing featured event section entirely | added `.featuredEvent` matching HTML 1:1 | fixed |
+| D-017 | events | missing event image area (gradient + emoji + status badge) | added `.eventImage` + image variants + absolute status badge | fixed |
+| D-018 | events | missing category filter tabs + search in gradient header | added `.filtersBar` inside `.pageHeader` matching HTML exactly | fixed |
+| D-019 | events | card border-radius was radius-lg (14px); HTML uses radius-xl (20px) | changed to `var(--radius-xl)` | fixed |
+| D-020 | events | card hover was translateY(-2px) + shadow-md; HTML uses translateY(-4px) + shadow-xl | fixed to match HTML | fixed |
