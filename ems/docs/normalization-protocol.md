@@ -257,6 +257,20 @@ Any new raw value introduced must be added to this table before commit.
 
 ---
 
+## Verification Checklist (mandatory before commit)
+
+Run through every item after JSX + CSS are ported. No commit until all pass.
+
+- [ ] All hover states visually confirmed in browser (elevation, shadow, color change)
+- [ ] All `:last-child` / `:first-child` / `:nth-child` selectors verified against actual JSX DOM — account for any wrapper elements (Link, div) not in original HTML
+- [ ] All badge/chip/pill colors confirmed with actual mock data — check each variant renders correctly
+- [ ] No animation `fill-mode: both/forwards` animates `transform` — if it does, split into opacity-only animation so hover transform works freely
+- [ ] No CSS module compound selectors (`.foo.bar`) — use flat self-contained classes instead
+- [ ] Static text in HTML remains static in JSX — no dynamic substitution unless HTML shows a dynamic value
+- [ ] All raw value exceptions logged in normalization-registry.md before commit
+
+---
+
 ## Rules
 
 1. **HTML is the spec** — if the HTML says it, use it. If the HTML does not say it, do not add it.

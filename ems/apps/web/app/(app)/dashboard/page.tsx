@@ -59,15 +59,15 @@ function getDateParts(iso: string) {
 
 function ticketClass(name: string) {
   const n = name.toLowerCase()
-  if (n.includes('vip') || n.includes('premium')) return styles.vip
-  if (n.includes('early')) return styles.early
-  return styles.standard
+  if (n.includes('vip') || n.includes('premium')) return styles.badgeVip
+  if (n.includes('early')) return styles.badgeEarly
+  return styles.badgeStandard
 }
 
 /* HTML defines only checked-in and registered */
 function statusClass(s: string) {
-  if (s === 'confirmed' || s === 'approved') return styles.checkedIn
-  return styles.registered
+  if (s === 'confirmed' || s === 'approved') return styles.badgeCheckedIn
+  return styles.badgeRegistered
 }
 
 export default function DashboardPage() {
@@ -258,7 +258,7 @@ export default function DashboardPage() {
                       <td>{ev?.name ?? reg.eventId}</td>
                       <td>
                         {tix
-                          ? <span className={`${styles.ticketBadge} ${ticketClass(tix.name)}`}>{tix.name}</span>
+                          ? <span className={`${styles.badgeBase} ${ticketClass(tix.name)}`}>{tix.name}</span>
                           : '—'
                         }
                       </td>
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                         {tix ? fmtAmount(tix.priceAmount) : '—'}
                       </td>
                       <td>
-                        <span className={`${styles.statusBadge} ${statusClass(reg.status)}`}>
+                        <span className={`${styles.badgeBase} ${statusClass(reg.status)}`}>
                           {reg.status}
                         </span>
                       </td>

@@ -171,3 +171,7 @@
 | H-003 | dashboard | [33] | Hovers and interactions feel like speed bumps, not glides | Deferred to full HTML normalization pass | open |
 | H-004 | dashboard | [33] | Data not placed in simple understanding order and continuity | Deferred to full HTML normalization pass | open |
 | H-005 | dashboard | [33] | Solid colors should use only 1-2 extremely light variants to express info — rest should be grey/white | Reinforced in token rules: use --*-lt sparingly, default to neutrals | fixed |
+| D-010 | dashboard | [34] | fadeIn keyframes animated `transform` with `fill-mode: both` — animation fill overrides hover `transform: translateY(-2px)` making KPI hover non-functional | Changed fadeIn to opacity-only; transform freed for hover | fixed |
+| D-011 | dashboard | [34] | `.eventCard:last-child` selector never matched — eventCard is inside eventLink wrapper, not a direct child | Changed to `.eventLink:last-child .eventCard { border-bottom: none }` | fixed |
+| D-012 | dashboard | [34] | CSS module compound selectors `.ticketBadge.vip` / `.statusBadge.checkedIn` unreliable — badges rendered unstyled | Replaced with flat self-contained classes: `.badgeVip`, `.badgeEarly`, `.badgeStandard`, `.badgeCheckedIn`, `.badgeRegistered` | fixed |
+| P-007 | dashboard | [34] | CSS module compound selectors (.foo.bar) are unreliable — use flat self-contained classes instead | All future badge/chip variants should be flat classes, never compound selectors in CSS modules | resolved |

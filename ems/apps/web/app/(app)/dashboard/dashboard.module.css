@@ -142,10 +142,10 @@
   margin-bottom: var(--space-8);
 }
 
-/* Staggered fade-in — matches .stat-card:nth-child() delays */
+/* Staggered fade-in — opacity only; transform left free for hover */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .statsGrid > *:nth-child(1) { animation: fadeIn 0.3s ease-out 0s both; }
 .statsGrid > *:nth-child(2) { animation: fadeIn 0.3s ease-out 0.05s both; }
@@ -187,7 +187,8 @@
   cursor: pointer;
 }
 .eventCard:hover { background: var(--surface); }
-.eventCard:last-child { border-bottom: none; }
+/* :last-child targets .eventLink (the actual child), not .eventCard inside it */
+.eventLink:last-child .eventCard { border-bottom: none; }
 
 /* matches .event-date-block */
 .dateBlock {
@@ -449,8 +450,8 @@
   font-size: var(--text-sm);
 }
 
-/* matches .ticket-badge variants */
-.ticketBadge {
+/* matches .ticket-badge variants — flat classes, no compound selectors */
+.badgeBase {
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
@@ -459,23 +460,11 @@
   letter-spacing: 0.04em;
   display: inline-block;
 }
-.ticketBadge.vip      { background: var(--g-lt); color: var(--g-dk); border: 1px solid var(--g-border); }
-.ticketBadge.standard { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
-.ticketBadge.early    { background: var(--t-lt); color: var(--t-dk); border: 1px solid var(--t-border); }
-
-/* matches .status-badge variants */
-.statusBadge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  display: inline-block;
-}
-/* Matches HTML exactly: only .checked-in and .registered defined */
-.statusBadge.checkedIn  { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
-.statusBadge.registered { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
+.badgeVip      { background: var(--g-lt); color: var(--g-dk); border: 1px solid var(--g-border); }
+.badgeStandard { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
+.badgeEarly    { background: var(--t-lt); color: var(--t-dk); border: 1px solid var(--t-border); }
+.badgeCheckedIn  { background: var(--f-lt); color: var(--f-dk); border: 1px solid var(--f-border); }
+.badgeRegistered { background: var(--i-lt); color: var(--i-dk); border: 1px solid var(--i-border); }
 
 .amountCell {
   font-family: var(--font-mono);
