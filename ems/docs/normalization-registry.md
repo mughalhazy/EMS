@@ -215,3 +215,38 @@
 | D-018 | events | missing category filter tabs + search in gradient header | added `.filtersBar` inside `.pageHeader` matching HTML exactly | fixed |
 | D-019 | events | card border-radius was radius-lg (14px); HTML uses radius-xl (20px) | changed to `var(--radius-xl)` | fixed |
 | D-020 | events | card hover was translateY(-2px) + shadow-md; HTML uses translateY(-4px) + shadow-xl | fixed to match HTML | fixed |
+
+---
+
+### Agenda Page (agenda-page.html)
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| T-019 | agenda | `36px` h1 font-size | raw — between text-2xl (32px) and text-hero (52px) | logged |
+| T-020 | agenda | `15px` event-meta + time-text font-size | raw — R-001 (already logged) | logged |
+| T-021 | agenda | `10px` session-type badge | raw — R-005 (already logged) | logged |
+| R-018 | agenda | `80px` timeline left offset + time-marker width | raw — layout dimension | logged |
+| R-019 | agenda | `120px` sessions margin-left | raw — layout dimension | logged |
+| R-020 | agenda | `73px` time-dot left position | raw — layout dimension | logged |
+| R-021 | agenda | `0 0 0 4px var(--t-lt)` time-dot live box-shadow | raw — custom ring glow | logged |
+| R-022 | agenda | `2px` timeline::before width | raw — hairline rule | logged |
+| R-023 | agenda | `3px` time-dot border-width | raw — off border-width token | logged |
+| R-024 | agenda | `32px` break-icon font-size | raw — emoji display size | logged |
+| R-025 | agenda | `margin-left: -8px` speaker avatar overlap | raw — negative spacing (P-010) | logged |
+| R-026 | agenda | `2px` speaker-avatar border-width | raw — off token | logged |
+| R-027 | agenda | `6px` time-dot size (liveDot) + session-location padding-top | raw — off grid | logged |
+| M-016 | agenda | `.page-header` | `.pageHeader` CSS module class | resolved |
+| M-017 | agenda | `.day-tab.active` | flat class `.dayTabActive` (P-007) | resolved |
+| M-018 | agenda | `.track-filter.active` | flat class `.trackFilterActive` (P-007) | resolved |
+| M-019 | agenda | `.session-card.keynote/workshop/panel` | flat classes via `::before` color override: `.sessionCardKeynote/Workshop/Panel/Talk` | resolved |
+| M-020 | agenda | `.session-type.keynote/workshop/panel/talk` | flat classes: `.sessionTypeKeynote/Workshop/Panel/Talk` | resolved |
+| M-021 | agenda | `.time-dot.live/.break` | flat classes: `.timeDotLive/.timeDotBreak` (P-007) | resolved |
+| P-009 | agenda | Session card left accent — 4px ::before, color by type: keynote=gold, workshop=teal, panel=forest, talk=indigo | Use flat `::before` color class per type, no compound selectors | resolved |
+| P-010 | agenda | Speaker avatar overlap — `margin-left: -8px` on all except :first-child | pattern for stacked avatar rows | resolved |
+| P-011 | agenda | Static agenda data — timeline defined as page-level constant, not wired to mock sessions | Breaks are not domain entities; session placeholder content is design spec static text (P-005) | resolved |
+| D-021 | agenda | Page was 100% inline styles + grid/table layout | full rewrite: CSS module + vertical timeline structure | fixed |
+| D-022 | agenda | Day tabs were underline-style (border-bottom); HTML uses pill inside surface container | Changed to pill tabs matching HTML | fixed |
+| D-023 | agenda | Missing track filter buttons | Added `.trackFilters` with All Tracks / Main Stage / Innovation Lab / Developer Zone | fixed |
+| D-024 | agenda | Missing timeline structure entirely (no time markers, dots, session cards) | Full timeline ported: `.timeline`, `.timeBlock`, `.timeMarker`, `.timeDot`, `.sessions`, `.sessionCard` | fixed |
+| D-025 | agenda | Missing page header with h1, event meta, live badge | Added `.pageHeader` with title, date/location meta, teal live badge + pulse dot | fixed |
+| D-026 | agenda | Sessions were dynamic from mock data via event selector; HTML shows static Day 1 agenda | Replaced with static TIMELINE constant matching HTML 1:1 (P-011) | fixed |
