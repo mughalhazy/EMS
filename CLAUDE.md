@@ -15,11 +15,12 @@ networking, onsite check-in, analytics, notifications, commerce.
 - DB:       PostgreSQL | Cache: Redis | Events: Kafka | Search: OpenSearch
 
 ## Key Docs (read before any task)
-- `ems/docs/product.md`       — system definition
-- `ems/docs/architecture.md`  — architecture + data flow
-- `ems/docs/domain-model.md`  — 19 entities + relationships
-- `ems/docs/api-standards.md` — REST contracts, pagination, errors, auth
-- `ems/docs/service-map.md`   — 17 backend services + responsibilities
+- `ems/docs/product.md`                 — system definition
+- `ems/docs/architecture.md`            — architecture + data flow
+- `ems/docs/domain-model.md`            — 19 entities + relationships
+- `ems/docs/api-standards.md`           — REST contracts, pagination, errors, auth
+- `ems/docs/service-map.md`             — 17 backend services + responsibilities
+- `ems/docs/normalization-protocol.md`  — HTML → DL normalization rules, vocabulary, build contract
 
 ## Design Language — SINGLE SOURCE OF TRUTH
 Source: `ems/design-language/design-language.html`
