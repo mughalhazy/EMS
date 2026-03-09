@@ -730,3 +730,34 @@ Full re-audit of `dashboard/page.tsx` against `Design Samples/ems-dashboard.html
 | Dead imports/vars | `tenant`, `speakers`, `fmtDate`, `liveEvent`, `maxRevenue`, `confirmedSpeakers` | — removed |
 
 **Rule reinforced:** treat HTML reference as pixel-perfect spec — no dynamic substitutions where HTML uses static text, no invented content.
+
+---
+
+## [34] Dashboard Last-Mile Fixes
+
+**3 issues fixed (commits `25ff1cd`, `a586260`):**
+
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| KPI hover transform not working | fadeIn keyframes animated `transform` with `fill-mode: both` — animation fill overrode hover | Changed fadeIn to opacity-only; transform freed for hover (`translateY(-2px)` + `shadow-lg`) |
+| Event separator line missing | `.eventCard:last-child` never matched — eventCard is child of `<Link>` wrapper | Changed to `.eventLink:last-child .eventCard { border-bottom: none }` |
+| Badge colors not applied | CSS module compound selectors `.ticketBadge.vip` unreliable | Replaced with flat self-contained classes: `.badgeVip`, `.badgeEarly`, `.badgeStandard`, `.badgeCheckedIn`, `.badgeRegistered` |
+
+**Additional fixes:** ticket category detection (workshop/add-on/sprint → badgeEarly), `statusLabel()` mapping (confirmed/approved → "Checked In", else → "Registered").
+
+**Pattern P-007 established:** CSS module compound selectors unreliable — always use flat self-contained classes.
+
+---
+
+## [35] Events Page — Normalized to events-page.html Spec
+
+Full one-pass normalization of `events-page.html` → `events/page.tsx` + `events/events.module.css`.
+
+**Key changes:**
+- `events.module.css` — complete rewrite: indigo gradient page header, teal gradient featured event, filters bar, event grid, event cards with image area, status badges, tags, footer; opacity-only fadeIn (D-010), flat classes (P-007), all raw values documented
+- `page.tsx` — complete rewrite: zero inline styles, all CSS module classes; `getEventMeta()`, `statusLabel()`, `statusClass()`, `getPrice()`, `isFree()`, `FILTER_TABS`, `matchesFilter()`; featured event with live stats; event grid with full card structure
+- `normalization-registry.md` — C-021–024, S-012–013, T-015–018, R-011–017, M-009–015, P-008, D-015–020 logged
+
+**All dashboard lessons applied upfront:** opacity-only animation, flat badge classes, static text rule, raw value documentation.
+
+**Commit:** `c75a2b1`
