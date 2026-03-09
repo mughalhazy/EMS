@@ -281,3 +281,34 @@
 | D-032 | speakers | Missing speaker tags | `.speakerTags` + `.speakerTag` indigo chips | fixed |
 | D-033 | speakers | Missing session section per card | `.speakerSessions` with time + name + track | fixed |
 | D-034 | speakers | Missing social links | `.speakerSocial` + `SocialIcon` (twitter/linkedin/github) | fixed |
+
+---
+
+### Attendees Page (attendees-page.html)
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-039 | attendees | `36px` h1 font-size | raw — T-019 (already logged) | logged |
+| R-040 | attendees | `15px` header-subtitle font-size | raw — R-001 (already logged) | logged |
+| R-041 | attendees | `28px` header-stat-value font-size | raw — matches text-xl token | logged |
+| R-042 | attendees | `40px` attendee-avatar width/height | raw — layout dimension | logged |
+| R-043 | attendees | `44px` search-input left-padding (icon offset) | raw — layout dimension | logged |
+| R-044 | attendees | `12px` stat-label / table th font-size | raw — R-035 (already logged) | logged |
+| R-045 | attendees | `2px` attendee-name margin-bottom | raw — R-003 (already logged) | logged |
+| R-046 | attendees | `6px` ticket-badge padding-block | raw — off token | logged |
+| R-047 | attendees | `10px` company-tag padding-inline | raw — R-018 pattern (already logged) | logged |
+| R-048 | attendees | `6px` company-tag border-radius | raw — R-017 (already logged) | logged |
+| M-026 | attendees | `.filter-btn.active` | flat class `.filterBtnActive` (P-007) | resolved |
+| M-027 | attendees | `.ticket-badge.vip/.standard/.early` | flat classes `.ticketBadgeVip/.Standard/.Early` (P-007) | resolved |
+| M-028 | attendees | `.status-indicator.checked-in/.registered/.cancelled` | flat classes `.statusCheckedIn/.Registered/.Cancelled` (P-007) | resolved |
+| M-029 | attendees | `.status-indicator.checked-in .status-dot` etc. | flat classes `.statusDotCheckedIn/.Registered/.Cancelled` (P-007) | resolved |
+| M-030 | attendees | `.stat-value.teal/.forest/.gold/.indigo` | flat classes `.statValueTeal/.Forest/.Gold/.Indigo` (P-007) | resolved |
+| M-031 | attendees | `.pagination-btn.active` | flat class `.paginationBtnActive` (P-007) | resolved |
+| D-035 | attendees | Page was inline styles + DataTable layout, no stats grid | full rewrite: CSS module + stats grid + table container | fixed |
+| D-036 | attendees | Missing page header with h1, subtitle, right-aligned stats | Added `.pageHeader` / `.headerTop` / `.headerStats` matching HTML | fixed |
+| D-037 | attendees | Missing toolbar (search + filter group + add button) | Added `.toolbar` / `.searchBox` / `.filterGroup` / `.btnPrimary` | fixed |
+| D-038 | attendees | Missing 4-column stats grid | Added `.statsGrid` `repeat(4,1fr)` with `.statCard` hover | fixed |
+| D-039 | attendees | Attendee avatar was circle (Avatar component); HTML uses square (border-radius: var(--radius)) | Changed to 40px square with indigo→teal gradient, border-radius: radius | fixed |
+| D-040 | attendees | Status was Badge component; HTML uses dot + text inline | Replaced with `.statusIndicator` + `.statusDot` flat-class pattern | fixed |
+| D-041 | attendees | Table was wired to mock-data attendees by event selector | Replaced with static ATTENDEES constant — 8 rows matching HTML exactly (P-012) | fixed |
+| D-042 | attendees | Missing pagination row | Added `.pagination` with prev/next chevrons + 1-4…23 buttons | fixed |
