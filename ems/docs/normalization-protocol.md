@@ -3,6 +3,9 @@
 > The build contract for reverse-engineering every HTML design sample into the EMS design system.
 > This document is the single source of authority for the normalization process.
 > It must be read before touching any page file.
+>
+> **Before executing any normalization step, query `ems/docs/normalization-registry.md` first.**
+> If the token substitution, raw value, component mapping, drift fix, or pattern has been resolved before — apply it directly. Do not re-derive.
 
 ---
 
@@ -219,15 +222,17 @@ Every HTML file produces exactly these outputs in order:
 
 ```
 1. Read HTML file completely
-2. Identify all regions and blocks — map to vocabulary
-3. List every CSS class and its properties
-4. Apply normalization rules → produce .module.css
-5. Port HTML structure to JSX → produce page.tsx
-6. Wire mock data (use lib/mock-data.ts)
-7. Verify against HTML — zero deviations allowed
-8. Extract wireframe.json
-9. Commit: fix(page-name): normalize to HTML spec [N]
-10. Push to GitHub → auto-deploy to Render
+2. Query normalization-registry.md — apply all known resolutions before deriving anything new
+3. Identify all regions and blocks — map to vocabulary
+4. List every CSS class and its properties
+5. Apply normalization rules → produce .module.css
+6. Port HTML structure to JSX → produce page.tsx
+7. Wire mock data (use lib/mock-data.ts)
+8. Verify against HTML — zero deviations allowed
+9. Log all new entries (C/S/T/R/D/M/P) to normalization-registry.md
+10. Extract wireframe.json
+11. Commit: fix(page-name): normalize to HTML spec [N]
+12. Push to GitHub → auto-deploy to Render
 ```
 
 ---

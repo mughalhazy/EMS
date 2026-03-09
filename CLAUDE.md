@@ -21,6 +21,7 @@ networking, onsite check-in, analytics, notifications, commerce.
 - `ems/docs/api-standards.md`           — REST contracts, pagination, errors, auth
 - `ems/docs/service-map.md`             — 17 backend services + responsibilities
 - `ems/docs/normalization-protocol.md`  — HTML → DL normalization rules, vocabulary, build contract
+- `ems/docs/normalization-registry.md`  — flat lookup of every resolved token, raw value, drift fix, component map, human observation — query before deriving anything
 
 ## Design Language — SINGLE SOURCE OF TRUTH
 Source: `ems/design-language/design-language.html`
