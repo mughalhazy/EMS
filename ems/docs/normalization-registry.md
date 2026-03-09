@@ -250,3 +250,34 @@
 | D-024 | agenda | Missing timeline structure entirely (no time markers, dots, session cards) | Full timeline ported: `.timeline`, `.timeBlock`, `.timeMarker`, `.timeDot`, `.sessions`, `.sessionCard` | fixed |
 | D-025 | agenda | Missing page header with h1, event meta, live badge | Added `.pageHeader` with title, date/location meta, teal live badge + pulse dot | fixed |
 | D-026 | agenda | Sessions were dynamic from mock data via event selector; HTML shows static Day 1 agenda | Replaced with static TIMELINE constant matching HTML 1:1 (P-011) | fixed |
+
+---
+
+### Speakers Page (speakers-page.html)
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-028 | speakers | `96px` speaker avatar size | raw — layout dimension | logged |
+| R-029 | speakers | `160px` featured avatar size | raw — layout dimension | logged |
+| R-030 | speakers | `4px` avatar border-width | raw — off token | logged |
+| R-031 | speakers | `rgba(255,255,255,0.15)` featured avatar bg | raw — glass effect | logged |
+| R-032 | speakers | `0 8px 32px rgba(0,0,0,0.2)` featured avatar shadow | raw — custom shadow | logged |
+| R-033 | speakers | `rgba(255,255,255,0.3)` featured badge/avatar border | raw — glass border | logged |
+| R-034 | speakers | `56px` featured avatar initials font-size | raw — display size | logged |
+| R-035 | speakers | `12px` session-time + speaker-company font-size | raw — between text-xs (11px) and text-sm (13px) | logged |
+| R-036 | speakers | `18px` filter-btn padding-inline | raw — between space-4 (16px) and space-5 (20px) | logged |
+| R-037 | speakers | `2px` session-name margin-bottom | raw — off grid | logged |
+| R-038 | speakers | `6px` speaker-name margin-bottom | raw — R-003 (already logged) | logged |
+| M-022 | speakers | `.filter-btn.active` | flat class `.filterBtnActive` (P-007) | resolved |
+| M-023 | speakers | `.speaker-header` surface→white gradient | `.speakerHeader` CSS module class | resolved |
+| M-024 | speakers | `.speaker-tag` | `.speakerTag` — indigo lt/dk/border | resolved |
+| M-025 | speakers | `.social-link` + SVG icons | `SocialIcon` helper, 3 types: twitter/linkedin/github | resolved |
+| P-012 | speakers | Static speaker card content is design spec placeholder | SPEAKERS + FEATURED constants matching HTML (P-005/P-011 pattern) | resolved |
+| D-027 | speakers | Page was 100% inline styles + DataTable/table layout | full rewrite: CSS module + card grid | fixed |
+| D-028 | speakers | Missing featured speaker banner | `.featuredSpeaker` indigo gradient with avatar, badge, bio, session row | fixed |
+| D-029 | speakers | Missing search bar in page header | `.searchBar` + `.searchInput` with absolute SVG icon | fixed |
+| D-030 | speakers | Missing speaker cards — was table rows | `.speakerCard` with gradient header + body (bio, tags, session, social) | fixed |
+| D-031 | speakers | Missing topic filter tabs | All Speakers / Keynote / AI & ML / DevOps / Cloud / Security | fixed |
+| D-032 | speakers | Missing speaker tags | `.speakerTags` + `.speakerTag` indigo chips | fixed |
+| D-033 | speakers | Missing session section per card | `.speakerSessions` with time + name + track | fixed |
+| D-034 | speakers | Missing social links | `.speakerSocial` + `SocialIcon` (twitter/linkedin/github) | fixed |

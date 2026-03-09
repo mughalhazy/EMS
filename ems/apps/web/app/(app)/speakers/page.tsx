@@ -1,72 +1,228 @@
 'use client'
 
 import { useState } from 'react'
-import { Badge } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
-import { Avatar } from '@/components/ui/Avatar'
-import { PageHeader } from '@/components/ui/PageHeader'
-import { events, speakers as allSpeakers } from '@/lib/mock-data'
-import type { BadgeColor } from '@/components/ui/Badge'
+import styles from './speakers.module.css'
 
-const STATUS_COLOR: Record<string, BadgeColor> = {
-  confirmed: 'forest', invited: 'amber', declined: 'brick', withdrawn: 'neutral',
+/* ── Types ───────────────────────────────────────────────── */
+type Social  = 'twitter' | 'linkedin' | 'github'
+type Session = { time: string; name: string; track: string }
+type Speaker = {
+  initials: string
+  name:     string
+  role:     string
+  company:  string
+  bio:      string
+  tags:     string[]
+  session:  Session
+  social:   Social[]
 }
-const AVATAR_COLORS = ['indigo', 'forest', 'amber', 'teal', 'gold', 'brick'] as const
-function avatarColor(s: string): typeof AVATAR_COLORS[number] {
-  return AVATAR_COLORS[s.charCodeAt(0) % AVATAR_COLORS.length]
+
+/* ── Static data — matches speakers-page.html exactly ───── */
+const FEATURED = {
+  initials: 'DR',
+  badge:    '⭐ Featured Keynote Speaker',
+  name:     'Dr. Rachel Martinez',
+  title:    'Chief AI Officer at TechCorp · Former MIT Professor',
+  bio:      'Dr. Martinez is a leading expert in artificial intelligence with over 15 years of experience. She has published 40+ research papers and led breakthrough AI projects at Google and Microsoft before joining TechCorp.',
+  session:  { time: 'Day 1 · 9:00 AM', name: "The Future of AI: What's Next in 2026" },
 }
 
-const TH: React.CSSProperties = { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border-strong)', whiteSpace: 'nowrap' }
-const TD: React.CSSProperties = { padding: '16px', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', fontSize: 14 }
+const SPEAKERS: Speaker[] = [
+  {
+    initials: 'JC',
+    name:    'James Chen',
+    role:    'Senior ML Engineer',
+    company: 'DataCorp',
+    bio:     'Specializes in building scalable machine learning systems. Previously at Amazon, where he led the ML infrastructure team for 5 years.',
+    tags:    ['Machine Learning', 'Python', 'MLOps'],
+    session: { time: 'Day 1 · 10:45', name: 'Building Scalable ML Pipelines', track: 'Innovation Lab' },
+    social:  ['twitter', 'linkedin'],
+  },
+  {
+    initials: 'SK',
+    name:    'Sarah Kim',
+    role:    'AI Research Scientist',
+    company: 'OpenMind AI',
+    bio:     'PhD in Computer Science from Stanford. Her research focuses on natural language processing and multi-modal AI systems that push the boundaries of human-computer interaction.',
+    tags:    ['NLP', 'Deep Learning', 'Research'],
+    session: { time: 'Day 1 · 10:45', name: 'Building Scalable ML Pipelines', track: 'Innovation Lab' },
+    social:  ['twitter', 'linkedin'],
+  },
+  {
+    initials: 'MP',
+    name:    'Michael Peterson',
+    role:    'DevOps Architect',
+    company: 'CloudScale',
+    bio:     'Expert in cloud infrastructure and DevOps practices with 12+ years of experience. Helped 50+ companies migrate to cloud-native architectures and implement CI/CD pipelines.',
+    tags:    ['DevOps', 'Kubernetes', 'AWS'],
+    session: { time: 'Day 1 · 10:45', name: 'Modern DevOps Practices', track: 'Developer Zone' },
+    social:  ['github', 'linkedin'],
+  },
+  {
+    initials: 'EW',
+    name:    'Emily Wu',
+    role:    'VP of Engineering',
+    company: 'FutureTech',
+    bio:     'Leads a team of 200+ engineers at FutureTech. Passionate about building inclusive tech teams and scalable engineering cultures. Speaker at 20+ international conferences.',
+    tags:    ['Leadership', 'Ethics', 'Cloud'],
+    session: { time: 'Day 1 · 1:45', name: 'The Ethics of AI: A Panel Discussion', track: 'Main Stage' },
+    social:  ['twitter', 'linkedin'],
+  },
+  {
+    initials: 'LT',
+    name:    'Lisa Taylor',
+    role:    'Cloud Solutions Architect',
+    company: 'Azure Labs',
+    bio:     'Microsoft MVP and certified Azure architect. Specializes in designing multi-cloud architectures for enterprise clients across finance, healthcare, and retail sectors.',
+    tags:    ['Azure', 'Architecture', 'Security'],
+    session: { time: 'Day 1 · 3:30', name: 'Cloud Architecture Patterns', track: 'Developer Zone' },
+    social:  ['twitter', 'linkedin'],
+  },
+  {
+    initials: 'DK',
+    name:    'Dr. David Kumar',
+    role:    'Quantum Computing Researcher',
+    company: 'QuantumLabs',
+    bio:     'Pioneer in quantum computing with 10 patents. His work on quantum error correction has been published in Nature and Science. Making quantum accessible to software developers worldwide.',
+    tags:    ['Quantum', 'Physics', 'Research'],
+    session: { time: 'Day 1 · 3:30', name: 'Intro to Quantum Computing', track: 'Innovation Lab' },
+    social:  ['twitter', 'github'],
+  },
+]
 
+/* ── Filter tabs ─────────────────────────────────────────── */
+const FILTERS = ['All Speakers', 'Keynote', 'AI & ML', 'DevOps', 'Cloud', 'Security']
+
+/* ── Social icon SVGs ────────────────────────────────────── */
+function SocialIcon({ type }: { type: Social }) {
+  if (type === 'twitter') return (
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.852L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  )
+  if (type === 'github') return (
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+    </svg>
+  )
+  return (
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  )
+}
+
+/* ── Page ─────────────────────────────────────────────────── */
 export default function SpeakersPage() {
-  const [eventId, setEventId] = useState(events[0]?.id ?? '')
-  const speakers = allSpeakers.filter(s => s.eventId === eventId)
+  const [activeFilter, setActiveFilter] = useState('All Speakers')
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', background: 'var(--off)' }}>
-      <PageHeader title="Speakers" subtitle="Manage confirmed and invited speakers" />
+    <div className={styles.page}>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 32px', borderBottom: '1px solid var(--border)', background: 'var(--white)', flexShrink: 0 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em', color: 'var(--ink-3)' }}>Event</span>
-        <select value={eventId} onChange={e => setEventId(e.target.value)} style={{ fontFamily: 'var(--font)', fontSize: 13, fontWeight: 600, padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--border)', background: 'var(--white)', color: 'var(--ink)', cursor: 'pointer', outline: 'none' }}>
-          {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
-        </select>
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--ink-3)' }}>{speakers.length} speaker{speakers.length !== 1 ? 's' : ''}</span>
-      </div>
+      {/* ── Page Header ── */}
+      <header className={styles.pageHeader}>
+        <h1 className={styles.headerTitle}>Our Speakers</h1>
+        <p className={styles.headerSubtitle}>Meet the brilliant minds shaping the future of technology</p>
+        <div className={styles.searchBar}>
+          <span className={styles.searchIcon}>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </span>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search speakers, topics, companies..."
+          />
+        </div>
+      </header>
 
-      <div style={{ padding: '24px 32px 40px' }}>
-        <Card flush>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={TH}>Speaker</th>
-                <th style={TH}>Email</th>
-                <th style={TH}>Bio</th>
-                <th style={TH}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {speakers.length === 0 ? (
-                <tr><td colSpan={4} style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>No speakers for this event</td></tr>
-              ) : speakers.map(sp => (
-                <tr key={sp.id}>
-                  <td style={TD}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <Avatar initials={sp.firstName[0] + sp.lastName[0]} color={avatarColor(sp.firstName)} size="sm" />
-                      <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)' }}>{sp.firstName} {sp.lastName}</div>
+      <div className={styles.content}>
+
+        {/* ── Featured Speaker ── */}
+        <div className={styles.featuredSpeaker}>
+          <div className={styles.featuredAvatar}>{FEATURED.initials}</div>
+          <div>
+            <div className={styles.featuredBadge}>{FEATURED.badge}</div>
+            <h2 className={styles.featuredName}>{FEATURED.name}</h2>
+            <p className={styles.featuredTitle}>{FEATURED.title}</p>
+            <p className={styles.featuredBio}>{FEATURED.bio}</p>
+            <div className={styles.featuredSession}>
+              <span className={styles.featuredSessionTime}>{FEATURED.session.time}</span>
+              <span className={styles.featuredSessionName}>{FEATURED.session.name}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Filter Tabs ── */}
+        <div className={styles.filters}>
+          {FILTERS.map(f => (
+            <button
+              key={f}
+              className={`${styles.filterBtn}${activeFilter === f ? ` ${styles.filterBtnActive}` : ''}`}
+              onClick={() => setActiveFilter(f)}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Section Header ── */}
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>All Speakers</h2>
+          <span className={styles.speakerCount}>45 speakers total</span>
+        </div>
+
+        {/* ── Speaker Grid ── */}
+        <div className={styles.speakerGrid}>
+          {SPEAKERS.map((sp, i) => (
+            <div key={i} className={styles.speakerCard}>
+
+              {/* Header */}
+              <div className={styles.speakerHeader}>
+                <div className={styles.speakerAvatar}>{sp.initials}</div>
+                <h3 className={styles.speakerName}>{sp.name}</h3>
+                <p className={styles.speakerRole}>{sp.role}</p>
+                <span className={styles.speakerCompany}>{sp.company}</span>
+              </div>
+
+              {/* Body */}
+              <div className={styles.speakerBody}>
+                <p className={styles.speakerBio}>{sp.bio}</p>
+
+                {/* Tags */}
+                <div className={styles.speakerTags}>
+                  {sp.tags.map(tag => (
+                    <span key={tag} className={styles.speakerTag}>{tag}</span>
+                  ))}
+                </div>
+
+                {/* Session */}
+                <div className={styles.speakerSessions}>
+                  <div className={styles.sessionsLabel}>Sessions</div>
+                  <div className={styles.sessionItem}>
+                    <div className={styles.sessionTime}>{sp.session.time}</div>
+                    <div className={styles.sessionInfo}>
+                      <div className={styles.sessionName}>{sp.session.name}</div>
+                      <div className={styles.sessionTrack}>{sp.session.track}</div>
                     </div>
-                  </td>
-                  <td style={TD}><span style={{ fontSize: 13, color: 'var(--ink-2)' }}>{sp.email}</span></td>
-                  <td style={{ ...TD, maxWidth: 300 }}>
-                    <span style={{ fontSize: 11, color: 'var(--ink-3)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>{sp.bio}</span>
-                  </td>
-                  <td style={TD}><Badge color={STATUS_COLOR[sp.status] ?? 'neutral'}>{sp.status}</Badge></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+                  </div>
+                </div>
+
+                {/* Social */}
+                <div className={styles.speakerSocial}>
+                  {sp.social.map(s => (
+                    <button key={s} className={styles.socialLink} aria-label={s}>
+                      <SocialIcon type={s} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   )
