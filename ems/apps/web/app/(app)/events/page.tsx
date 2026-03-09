@@ -29,12 +29,18 @@ function getEventMeta(ev: typeof events[0], index: number) {
   return fallbacks[index % 4]
 }
 
-/* ── Status label + class — maps mock status to HTML's 2 labels ── */
-function statusLabel(status: string): string {
+/* ── Status label + class — maps mock status to HTML's 3 labels ── */
+function isSoldOut(eventId: string): boolean {
+  const tix = allTicksByEvent[eventId] ?? []
+  return tix.length > 0 && tix.every(t => t.quantitySold >= t.quantityTotal)
+}
+function statusLabel(status: string, soldOut: boolean): string {
+  if (soldOut) return 'Sold Out'
   if (status === 'live') return '● Live'
   return 'Upcoming'
 }
-function statusClass(status: string): string {
+function statusClass(status: string, soldOut: boolean): string {
+  if (soldOut) return styles.statusSoldOut
   if (status === 'live') return styles.statusLive
   return styles.statusUpcoming
 }
@@ -216,13 +222,14 @@ export default function EventsPage() {
             const cap      = tix.reduce((s, t) => s + t.quantityTotal, 0)
             const price    = getPrice(ev.id)
             const free     = isFree(ev.id)
+            const soldOut  = isSoldOut(ev.id)
             return (
               <Link key={ev.id} href={`/events/${ev.id}`} className={styles.eventCard}>
                 {/* Event image — gradient bg + emoji + status badge */}
                 <div className={`${styles.eventImage} ${meta.imageClass}`}>
                   <span>{meta.emoji}</span>
-                  <span className={`${styles.eventStatus} ${statusClass(ev.status)}`}>
-                    {statusLabel(ev.status)}
+                  <span className={`${styles.eventStatus} ${statusClass(ev.status, soldOut)}`}>
+                    {statusLabel(ev.status, soldOut)}
                   </span>
                 </div>
 

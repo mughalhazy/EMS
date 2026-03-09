@@ -13,7 +13,7 @@ import type { TenantKpis, EventKpis, RevenueSummary, AttendanceTrend, FunnelMetr
 // ── IDs ──────────────────────────────────────────────────────
 const T  = 'tenant-001'
 const O1 = 'org-001', O2 = 'org-002', O3 = 'org-003', O4 = 'org-004', O5 = 'org-005'
-const E1 = 'event-001', E2 = 'event-002', E3 = 'event-003'
+const E1 = 'event-001', E2 = 'event-002', E3 = 'event-003', E4 = 'event-004', E5 = 'event-005', E6 = 'event-006'
 
 // ── Tenant ───────────────────────────────────────────────────
 export const tenant: Tenant = {
@@ -83,6 +83,39 @@ export const events: Event[] = [
     status: 'draft',
     createdAt: '2026-01-15T09:00:00Z', updatedAt: '2026-02-10T09:00:00Z',
   },
+  {
+    id: E4, tenantId: T, organizationId: O1,
+    name: 'AI & Machine Learning Summit',
+    code: 'AIML26',
+    description: 'Deep-dive conference on production ML, LLM deployment, and AI-driven product development for engineering teams.',
+    timezone: 'America/Los_Angeles',
+    startAt: '2026-04-08T09:00:00Z',
+    endAt:   '2026-04-08T18:00:00Z',
+    status: 'published',
+    createdAt: '2026-01-01T09:00:00Z', updatedAt: '2026-02-01T09:00:00Z',
+  },
+  {
+    id: E5, tenantId: T, organizationId: O1,
+    name: 'Creative Directors Masterclass',
+    code: 'CDM26',
+    description: 'Exclusive masterclass for senior creative directors: brand strategy, visual communication, and creative leadership.',
+    timezone: 'America/New_York',
+    startAt: '2026-04-12T10:00:00Z',
+    endAt:   '2026-04-12T17:00:00Z',
+    status: 'published',
+    createdAt: '2026-01-10T09:00:00Z', updatedAt: '2026-02-15T09:00:00Z',
+  },
+  {
+    id: E6, tenantId: T, organizationId: O1,
+    name: 'Data Analytics Workshop',
+    code: 'DAW26',
+    description: 'Hands-on workshop covering data pipelines, BI tooling, and analytics engineering best practices.',
+    timezone: 'America/Chicago',
+    startAt: '2026-04-15T09:00:00Z',
+    endAt:   '2026-04-15T17:00:00Z',
+    status: 'published',
+    createdAt: '2026-01-20T09:00:00Z', updatedAt: '2026-02-20T09:00:00Z',
+  },
 ]
 
 // ── Sessions ──────────────────────────────────────────────────
@@ -136,6 +169,15 @@ export const tickets: { [eventId: string]: import('@/types/domain').Ticket[] } =
   [E3]: [
     { id: 'tk-006', tenantId: T, eventId: E3, name: 'Founder Ticket',  description: 'Full day access including investor speed rounds.', priceAmount: 39900, priceCurrency: 'USD', quantityTotal: 300, quantitySold: 0, salesStartAt: '2026-03-15T00:00:00Z', salesEndAt: '2026-06-09T23:59:59Z', status: 'draft', createdAt: '2026-02-01T09:00:00Z', updatedAt: '2026-02-10T09:00:00Z' },
   ],
+  [E4]: [
+    { id: 'tk-007', tenantId: T, eventId: E4, name: 'General Admission', description: 'Full-day access to all talks and workshops.', priceAmount: 19900, priceCurrency: 'USD', quantityTotal: 500, quantitySold: 420, salesStartAt: '2026-01-15T00:00:00Z', salesEndAt: '2026-04-07T23:59:59Z', status: 'on_sale', createdAt: '2026-01-05T09:00:00Z', updatedAt: '2026-03-01T09:00:00Z' },
+  ],
+  [E5]: [
+    { id: 'tk-008', tenantId: T, eventId: E5, name: 'Masterclass Seat', description: 'Exclusive in-person seat — strictly limited to 40.', priceAmount: 29900, priceCurrency: 'USD', quantityTotal: 40, quantitySold: 40, salesStartAt: '2026-01-10T00:00:00Z', salesEndAt: '2026-04-11T23:59:59Z', status: 'sold_out', createdAt: '2026-01-12T09:00:00Z', updatedAt: '2026-02-28T09:00:00Z' },
+  ],
+  [E6]: [
+    { id: 'tk-009', tenantId: T, eventId: E6, name: 'Workshop Seat', description: 'Hands-on workshop seat with lab materials included.', priceAmount: 14900, priceCurrency: 'USD', quantityTotal: 80, quantitySold: 64, salesStartAt: '2026-02-01T00:00:00Z', salesEndAt: '2026-04-14T23:59:59Z', status: 'on_sale', createdAt: '2026-01-22T09:00:00Z', updatedAt: '2026-03-01T09:00:00Z' },
+  ],
 }
 
 // ── Attendees ─────────────────────────────────────────────────
@@ -186,6 +228,21 @@ export const registrations: { [eventId: string]: Registration[] } = {
     { id: 'reg-013', tenantId: T, eventId: E2, attendeeId: 'at-014', ticketId: 'tk-004', status: 'cancelled', registeredAt: '2026-02-05T14:00:00Z', createdAt: '2026-02-05T14:00:00Z', updatedAt: '2026-02-20T09:00:00Z' },
   ],
   [E3]: [],
+  [E4]: Array.from({ length: 420 }, (_, i) => ({
+    id: `reg-e4-${String(i + 1).padStart(3, '0')}`, tenantId: T, eventId: E4,
+    attendeeId: `at-e4-${i}`, ticketId: 'tk-007', status: 'confirmed' as const,
+    registeredAt: '2026-02-01T09:00:00Z', createdAt: '2026-02-01T09:00:00Z', updatedAt: '2026-02-01T09:00:00Z',
+  })),
+  [E5]: Array.from({ length: 40 }, (_, i) => ({
+    id: `reg-e5-${String(i + 1).padStart(3, '0')}`, tenantId: T, eventId: E5,
+    attendeeId: `at-e5-${i}`, ticketId: 'tk-008', status: 'confirmed' as const,
+    registeredAt: '2026-02-15T09:00:00Z', createdAt: '2026-02-15T09:00:00Z', updatedAt: '2026-02-15T09:00:00Z',
+  })),
+  [E6]: Array.from({ length: 64 }, (_, i) => ({
+    id: `reg-e6-${String(i + 1).padStart(3, '0')}`, tenantId: T, eventId: E6,
+    attendeeId: `at-e6-${i}`, ticketId: 'tk-009', status: 'confirmed' as const,
+    registeredAt: '2026-03-01T09:00:00Z', createdAt: '2026-03-01T09:00:00Z', updatedAt: '2026-03-01T09:00:00Z',
+  })),
 }
 
 // ── Sponsors ──────────────────────────────────────────────────
