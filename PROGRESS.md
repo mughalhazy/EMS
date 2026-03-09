@@ -761,3 +761,15 @@ Full one-pass normalization of `events-page.html` → `events/page.tsx` + `event
 **All dashboard lessons applied upfront:** opacity-only animation, flat badge classes, static text rule, raw value documentation.
 
 **Commit:** `c75a2b1`
+
+---
+
+## [36] Attendees Page — Normalized to attendees-page.html Spec
+
+Full one-pass normalization of `attendees-page.html` → `attendees/page.tsx` + `attendees/attendees.module.css`.
+
+**Key changes:**
+- `attendees.module.css` — complete rewrite: page header (white bg, 1600px max-width, h1 36px, teal stat values), toolbar (search box + filter group + teal add button), 4-column stats grid (flat color variants: forest/gold/indigo/teal), table container (radius-xl), 40px square indigo→teal gradient avatars, company chips, ticket badges (vip/standard/early flat classes), status dot indicators (flat classes: statusCheckedIn/Registered/Cancelled + dotCheckedIn/etc.), action buttons (32px square), pagination (prev/next + 1-4…23); opacity-only fadeIn (D-010); flat classes throughout (P-007)
+- `attendees/page.tsx` — complete rewrite: static ATTENDEES (8 rows matching HTML exactly), STATS (4 cards), FILTERS (All/Checked In/Registered/VIP); filter state + filtered list; all class helpers (ticketClass, statusClass, statusDotClass, statusLabel); inline SVG icons (EyeIcon, EditIcon, PlusIcon, SearchIcon, TrendUpIcon, ChevronLeft/Right); zero inline styles; zero mock-data wiring (P-012)
+
+**Commit:** `f676e16`
