@@ -1,74 +1,522 @@
+/* ── Ticketing Page — faithful port of ticketing-page.html ── */
+
 .page {
+  background: var(--off);
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--g-dk) 0%, var(--g-md) 100%);
+  color: var(--white);
+  padding: 64px var(--space-10);
+  text-align: center;
+}
+
+.heroContainer {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 48px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-4);
+}
+
+.heroSubtitle {
+  font-size: var(--text-lg);
+  opacity: 0.9;
+  margin-bottom: var(--space-8);
+}
+
+.heroMeta {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-10);
+  font-size: 15px; /* raw — R-001 */
+}
+
+.heroMetaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  opacity: 0.95;
+}
+
+/* ── CONTENT ── */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px var(--space-10);
+}
+
+/* ── SECTION HEADER ── */
+.sectionHeader {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+.sectionLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--g-md);
+  margin-bottom: var(--space-3);
+}
+
+.sectionTitle {
+  font-size: 36px; /* raw — T-019 */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-3);
+}
+
+.sectionDescription {
+  font-size: 16px; /* raw — off type scale */
+  color: var(--ink-3);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── TICKET GRID ── */
+.ticketGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  margin-bottom: 64px;
+}
+
+.ticketCard {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  transition: all 0.3s;
+  position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  animation: fadeIn 0.4s ease-out; /* opacity-only D-010 */
+}
+
+.ticketCard:nth-child(1) { animation-delay: 0s; }
+.ticketCard:nth-child(2) { animation-delay: 0.1s; }
+.ticketCard:nth-child(3) { animation-delay: 0.2s; }
+
+.ticketCard:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--border-strong);
+}
+
+/* Popular variant — flat class (P-007) */
+.ticketCardPopular {
+  border-color: var(--g-md);
+  box-shadow: 0 0 0 1px var(--g-md); /* raw — custom ring */
+}
+
+.ticketCardPopular::before {
+  content: 'MOST POPULAR';
+  position: absolute;
+  top: -12px; /* raw — layout dimension */
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--g-md);
+  color: var(--white);
+  padding: 4px var(--space-4);
+  border-radius: 20px; /* raw — pill shape */
+  font-size: 10px; /* raw — R-005 */
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow-md);
+}
+
+.ticketHeader {
+  text-align: center;
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+}
+
+.ticketIcon {
+  width: 64px; /* raw — layout dimension */
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px; /* raw — emoji display size */
+  margin: 0 auto var(--space-4);
+}
+
+.ticketIconPopular {
+  background: var(--g-lt);
+  border: 2px solid var(--g-border);
+}
+
+.ticketName {
+  font-size: 22px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-2);
+}
+
+.ticketDescription {
+  font-size: var(--text-md);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.ticketPrice {
+  text-align: center;
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+}
+
+.priceAmount {
+  font-size: 48px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  color: var(--g-md);
+  line-height: 1;
+  margin-bottom: 4px; /* raw — off grid */
+}
+
+.pricePeriod {
+  font-size: var(--text-md);
+  color: var(--ink-3);
+}
+
+.priceSavings {
+  display: inline-block;
+  margin-top: var(--space-2);
+  padding: 4px var(--space-3);
+  border-radius: 6px; /* raw — R-017 */
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  background: var(--f-lt);
+  color: var(--f-dk);
+  border: 1px solid var(--f-border);
+}
+
+.ticketFeatures {
+  flex: 1;
+  margin-bottom: var(--space-6);
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-md);
+}
+
+.featureIcon {
+  color: var(--f-md);
+  flex-shrink: 0;
+  margin-top: 2px; /* raw — off grid */
+}
+
+.featureText {
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.featureItemUnavailable {
+  opacity: 0.4;
+}
+
+.featureIconUnavailable {
+  color: var(--ink-4);
+}
+
+/* Ticket CTA button variants — flat classes (P-007) */
+.ticketCta {
+  width: 100%;
+  padding: 14px var(--space-6); /* 14px raw — off grid */
+  border-radius: var(--radius);
+  font-size: 15px; /* raw — R-001 */
+  font-weight: var(--weight-bold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  text-align: center;
+}
+
+.btnSecondary {
+  background: var(--white);
+  color: var(--ink);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+}
+
+.btnSecondary:hover {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+.btnPopular {
+  background: var(--g-md);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(245,158,11,.2); /* raw — custom shadow */
+}
+
+.btnPopular:hover {
+  background: var(--g-dk);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245,158,11,.25);
+}
+
+.btnPrimary {
+  background: var(--t-md);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(13,148,136,.2); /* raw — custom shadow */
+}
+
+.btnPrimary:hover {
+  background: var(--t-dk);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13,148,136,.25);
+}
+
+/* ── ADD-ONS ── */
+.addonsSection {
+  margin-top: 80px; /* raw — layout dimension */
+}
+
+.addonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.addonCard {
+  background: var(--white);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  gap: var(--space-5);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.addonCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.addonCardSelected {
+  border-color: var(--t-md);
+  background: var(--t-lt);
+}
+
+.addonIcon {
+  width: 56px; /* raw — layout dimension */
+  height: 56px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px; /* raw — emoji display size */
+  flex-shrink: 0;
+}
+
+.addonContent {
+  flex: 1;
+}
+
+.addonName {
+  font-size: 16px; /* raw — off type scale */
+  font-weight: var(--weight-bold);
+  margin-bottom: 4px; /* raw — off grid */
+}
+
+.addonDescription {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  margin-bottom: var(--space-2);
+  line-height: 1.5;
+}
+
+.addonPrice {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-extrabold);
+  color: var(--g-md);
+}
+
+/* ── COMPARISON TABLE ── */
+.comparisonSection {
+  margin-top: 80px; /* raw — layout dimension */
+}
+
+.comparisonTable {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
-.content {
-  flex: 1;
-  overflow-y: auto;
+.tableHeader {
+  background: var(--surface);
   padding: var(--space-6);
-}
-
-/* ── Toolbar ─────────────────────────────────────────────────── */
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-6);
   border-bottom: 1px solid var(--border);
 }
 
-.selectorLabel {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-3);
-  white-space: nowrap;
+.tableHeaderTitle {
+  font-size: 22px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
 }
 
-.select {
-  font-family: var(--font);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  padding: 7px 32px 7px var(--space-3);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--border);
-  background: var(--white)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8880' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    no-repeat right 12px center;
-  background-size: 10px 6px;
-  color: var(--ink);
-  appearance: none;
-  cursor: pointer;
-  outline: none;
-  flex: 1;
-  max-width: 360px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-.select:focus   { border-color: var(--i-md); box-shadow: 0 0 0 3px var(--i-border); }
-.select:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* ── Cell styles ─────────────────────────────────────────────── */
-.ticketName {
-  font-weight: var(--weight-bold);
-  color: var(--ink);
-  font-size: var(--text-sm);
+.comparisonGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
 }
 
-.zero { color: var(--b-md); font-weight: var(--weight-bold); }
+.comparisonRow {
+  display: contents;
+}
 
-/* ── Empty state ─────────────────────────────────────────────── */
-.empty {
+.comparisonCell {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: var(--space-16) var(--space-6);
-  gap: 6px;
-  text-align: center;
 }
-.emptyTitle { font-size: var(--text-md); font-weight: var(--weight-bold); color: var(--ink); }
-.emptyDesc  { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--ink-3); }
+
+.comparisonCellHeader {
+  font-weight: var(--weight-bold);
+  background: var(--surface);
+}
+
+.comparisonCellFeature {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
+}
+
+.comparisonCellValue {
+  justify-content: center;
+  color: var(--ink-3);
+  font-size: var(--text-md);
+}
+
+.checkIcon {
+  color: var(--f-md);
+  font-size: var(--text-lg);
+}
+
+.xIcon {
+  color: var(--ink-4);
+  font-size: var(--text-lg);
+}
+
+/* ── FAQ ── */
+.faqSection {
+  margin-top: 80px; /* raw — layout dimension */
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faqItem {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.faqItem:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.faqQuestion {
+  font-size: 16px; /* raw — off type scale */
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faqAnswer {
+  font-size: var(--text-md);
+  color: var(--ink-3);
+  line-height: 1.6;
+  margin-top: var(--space-3);
+}
+
+/* ── FOOTER CTA ── */
+.footerCta {
+  background: linear-gradient(135deg, var(--i-dk) 0%, var(--i-md) 100%);
+  color: var(--white);
+  padding: 64px var(--space-10);
+  text-align: center;
+  margin-top: 80px; /* raw — layout dimension */
+  border-radius: var(--radius-xl);
+}
+
+.footerCtaTitle {
+  font-size: 36px; /* raw — T-019 */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-4);
+}
+
+.footerCtaSubtitle {
+  font-size: 16px; /* raw — off type scale */
+  opacity: 0.9;
+  margin-bottom: var(--space-8);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+.btnWhite {
+  background: var(--white);
+  color: var(--i-dk);
+  padding: 14px var(--space-8); /* 14px raw — off grid */
+  border-radius: var(--radius);
+  font-size: 15px; /* raw — R-001 */
+  font-weight: var(--weight-bold);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.btnWhite:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* raw — custom shadow */
+}
+
+/* ── ANIMATIONS — opacity-only (D-010) ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .ticketGrid       { grid-template-columns: 1fr; }
+  .comparisonGrid   { grid-template-columns: 1fr; }
+  .comparisonCellHeader { display: none; }
+  .addonGrid        { grid-template-columns: 1fr; }
+}
