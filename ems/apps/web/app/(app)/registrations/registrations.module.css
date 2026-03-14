@@ -1,98 +1,357 @@
+/* ── Registration Page — faithful port of registration-page.html ── */
+
+/* Two-panel split: fills height below TopNav */
 .page {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 480px; /* raw — 480px fixed form panel */
   height: 100%;
   overflow: hidden;
 }
 
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-6);
-}
-
-/* ── Toolbar ─────────────────────────────────────────────────── */
-.toolbar {
+/* ── BRAND SIDE ── */
+.brandSide {
+  background: linear-gradient(135deg, var(--t-dk) 0%, var(--t-md) 100%);
+  color: var(--white);
+  padding: 64px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
-  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.brandSide::before {
+  content: '';
+  position: absolute;
+  top: -100px; /* raw — layout dimension */
+  right: -100px;
+  width: 400px; /* raw — layout dimension */
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); /* raw — glass glow */
+  pointer-events: none;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-6);
-  border-bottom: 1px solid var(--border);
+  z-index: 1;
 }
 
-.selectorRow {
+.logoMark {
+  width: 40px; /* raw — layout dimension */
+  height: 40px;
+  background: rgba(255,255,255,0.2); /* raw — glass effect */
+  border-radius: 10px; /* raw — off radius tokens */
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  font-weight: var(--weight-extrabold);
+  font-size: 20px; /* raw — off type scale */
 }
 
-.selectorLabel {
-  font-size: var(--text-xs);
+.logoText {
+  font-size: 20px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+}
+
+.brandContent {
+  z-index: 1;
+}
+
+.brandTitle {
+  font-size: 42px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-4);
+  line-height: 1.2;
+}
+
+.brandSubtitle {
+  font-size: var(--text-lg);
+  opacity: 0.9;
+  line-height: 1.6;
+  margin-bottom: var(--space-10);
+}
+
+.brandFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.featureIcon {
+  width: 40px; /* raw — layout dimension */
+  height: 40px;
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.15); /* raw — glass effect */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: var(--text-lg);
+}
+
+.featureTextTitle {
+  font-size: 16px; /* raw — off type scale */
   font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-3);
-  white-space: nowrap;
+  margin-bottom: 4px; /* raw — off grid */
 }
 
-.select {
-  font-family: var(--font);
+.featureTextDesc {
+  font-size: var(--text-md);
+  opacity: 0.85;
+}
+
+.brandFooter {
+  z-index: 1;
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  padding: 7px 32px 7px var(--space-3);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--border);
-  background: var(--white)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8880' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    no-repeat right 12px center;
-  background-size: 10px 6px;
-  color: var(--ink);
-  appearance: none;
-  cursor: pointer;
-  outline: none;
-  max-width: 320px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  opacity: 0.7;
 }
-.select:focus   { border-color: var(--i-md); box-shadow: 0 0 0 3px var(--i-border); }
-.select:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.filters {
+/* ── FORM SIDE ── */
+.formSide {
+  background: var(--white);
+  padding: 64px 56px; /* 56px raw — off spacing scale */
+  overflow-y: auto;
+}
+
+/* ── PROGRESS STEPS ── */
+.progressSteps {
   display: flex;
-  gap: var(--space-1);
+  justify-content: space-between;
+  margin-bottom: var(--space-12);
+  position: relative;
 }
 
-.filterBtn {
-  font-family: var(--font);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  padding: 5px var(--space-3);
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--ink-3);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  line-height: 1;
-}
-.filterBtn:hover { background: var(--surface); color: var(--ink-2); }
-.active          { background: var(--ink); color: var(--white); }
-.active:hover    { background: var(--ink-2); }
-
-/* ── Cell styles ─────────────────────────────────────────────── */
-.mono {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--ink-3);
+.progressSteps::before {
+  content: '';
+  position: absolute;
+  top: 16px; /* raw — half of step-number height */
+  left: 16px;
+  right: 16px;
+  height: 2px; /* raw — hairline rule */
+  background: var(--border);
+  z-index: 0;
 }
 
-.name       { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--ink); }
-.ticketName { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--ink-2); }
-.na         { color: var(--ink-4); }
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+  z-index: 1;
+}
 
-.rowActions {
+.stepNumber {
+  width: 32px; /* raw — layout dimension */
+  height: 32px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--ink-3);
+  transition: all 0.2s;
+}
+
+.stepLabel {
+  font-size: 12px; /* raw — R-044 */
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+}
+
+/* Flat state classes (P-007) */
+.stepActive .stepNumber {
+  background: var(--t-md);
+  border-color: var(--t-md);
+  color: var(--white);
+}
+
+.stepActive .stepLabel {
+  color: var(--ink);
+}
+
+.stepCompleted .stepNumber {
+  background: var(--f-md);
+  border-color: var(--f-md);
+  color: var(--white);
+}
+
+/* ── FORM HEADER ── */
+.formHeader {
+  margin-bottom: var(--space-8);
+}
+
+.formTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-2);
+}
+
+.formSubtitle {
+  font-size: 15px; /* raw — R-001 */
+  color: var(--ink-3);
+}
+
+/* ── FORM FIELDS ── */
+.formGroup {
+  margin-bottom: var(--space-6);
+}
+
+.formLabel {
+  display: block;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-2);
+  margin-bottom: var(--space-2);
+}
+
+.formLabelRequired {
+  color: var(--b-md);
+  margin-left: 4px; /* raw — off grid */
+}
+
+.formInput {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  border-radius: var(--radius);
+  font-size: var(--text-md);
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--white);
+  transition: all 0.15s;
+  outline: none;
+}
+
+.formInput:focus {
+  border-color: var(--t-md);
+  box-shadow: 0 0 0 3px var(--t-border); /* raw — focus ring */
+}
+
+.formInput::placeholder {
+  color: var(--ink-4);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.formHelp {
+  font-size: 12px; /* raw — R-044 */
+  color: var(--ink-3);
+  margin-top: 6px; /* raw — off grid */
+}
+
+/* ── CHECKBOXES ── */
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checkboxOption {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.checkboxOption:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+.checkboxInput {
+  width: 18px; /* raw — layout dimension */
+  height: 18px;
+  margin-right: var(--space-3);
+  accent-color: var(--t-md);
+  flex-shrink: 0;
+}
+
+.optionContent {
+  flex: 1;
+}
+
+.optionTitle {
+  font-size: 15px; /* raw — R-001 */
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+/* ── FORM ACTIONS ── */
+.formActions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  flex: 1;
+  padding: 14px var(--space-6); /* 14px raw — off grid */
+  border-radius: var(--radius);
+  font-size: 15px; /* raw — R-001 */
+  font-weight: var(--weight-bold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.btnPrimary {
+  background: var(--t-md);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(13,148,136,.2); /* raw — custom shadow */
+}
+
+.btnPrimary:hover {
+  background: var(--t-dk);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13,148,136,.25);
+}
+
+.btnSecondary {
+  background: var(--white);
+  color: var(--ink-2);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+}
+
+.btnSecondary:hover {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+  .brandSide {
+    display: none;
+  }
 }
