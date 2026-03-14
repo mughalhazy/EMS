@@ -347,3 +347,36 @@
 | D-049 | ticketing | Missing FAQ accordion | Added `.faqSection` with openFaq state, answer shown conditionally | fixed |
 | D-050 | ticketing | Missing footer CTA | Added `.footerCta` indigo gradient with purchase button | fixed |
 | D-051 | ticketing | Animation had transform in keyframe (fadeInUp) | Changed to opacity-only fadeIn (D-010) | fixed |
+
+---
+
+### Registrations Page (registration-page.html)
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-062 | registrations | `480px` form-side fixed width | raw — layout dimension | logged |
+| R-063 | registrations | `42px` brand-title font-size | raw — off type scale | logged |
+| R-064 | registrations | `20px` logo-text + logo-mark font-size | raw — off type scale | logged |
+| R-065 | registrations | `40px` logo-mark + feature-icon size | raw — layout dimension | logged |
+| R-066 | registrations | `16px` feature-text h3 font-size | raw — off type scale | logged |
+| R-067 | registrations | `56px` form-side padding-inline | raw — off spacing scale | logged |
+| R-068 | registrations | `32px` step-number size | raw — layout dimension | logged |
+| R-069 | registrations | `18px` feature-icon font-size | `var(--text-lg)` | resolved |
+| R-070 | registrations | `10px` logo-mark border-radius | raw — off radius tokens | logged |
+| R-071 | registrations | `rgba(255,255,255,0.2)` logo-mark bg | raw — glass effect | logged |
+| R-072 | registrations | `rgba(255,255,255,0.15)` feature-icon bg | raw — glass effect | logged |
+| R-073 | registrations | `radial-gradient` brand-side ::before glow | raw — decorative effect | logged |
+| R-074 | registrations | `-100px` ::before top/right offset | raw — layout dimension | logged |
+| R-075 | registrations | `400px` ::before size | raw — layout dimension | logged |
+| R-076 | registrations | `0 0 0 3px var(--t-border)` input focus ring | raw — custom focus shadow | logged |
+| R-077 | registrations | `18px` checkbox input size | raw — layout dimension | logged |
+| R-078 | registrations | `6px` form-help margin-top | raw — off grid | logged |
+| M-038 | registrations | `.step.active` | flat class `.stepActive` (P-007) | resolved |
+| M-039 | registrations | `.step.completed` | flat class `.stepCompleted` (P-007) | resolved |
+| M-040 | registrations | `.btn-primary / .btn-secondary` | flat classes `.btnPrimary / .btnSecondary` (P-007) | resolved |
+| D-052 | registrations | Page was inline styles + data table pulling from mock registrations | full rewrite: CSS module + split layout form | fixed |
+| D-053 | registrations | Missing split-screen layout (brand left + form right) | Added `.page` grid-template-columns: 1fr 480px | fixed |
+| D-054 | registrations | Missing teal gradient brand side with radial glow | Added `.brandSide` + `::before` pseudo-element | fixed |
+| D-055 | registrations | Missing 4-step progress tracker | Added `.progressSteps` with `::before` connector + flat state classes | fixed |
+| D-056 | registrations | Missing registration form (personal info fields) | Added all 7 fields + dietary checkboxes + hear-about select | fixed |
+| D-057 | registrations | Missing Back + Continue form actions | Added `.formActions` with `.btnSecondary` / `.btnPrimary` | fixed |

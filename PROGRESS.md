@@ -785,3 +785,15 @@ Full one-pass normalization of `ticketing-page.html` → `ticketing/page.tsx` + 
 - `ticketing/page.tsx` — complete rewrite: static TICKETS (3 tiers), ADDONS (4 items), COMPARISON (8 rows), FAQS (4 items); FAQ open/close state; addon toggle selection state; compCellClass() helper for ✓/✕; inline SVG icons; zero inline styles; zero mock-data wiring (P-012)
 
 **Commit:** `bc4dac9`
+
+---
+
+## [38] Registrations Page — Normalized to registration-page.html Spec
+
+Full one-pass normalization of `registration-page.html` → `registrations/page.tsx` + `registrations/registrations.module.css`.
+
+**Key changes:**
+- `registrations.module.css` — complete rewrite: two-panel split grid (1fr + 480px); brand side (teal gradient, radial glow ::before, logo, brandTitle 42px, 3 feature items with glass icon squares, brand footer); form side (64px 56px padding, overflow-y: auto); 4-step progress tracker with ::before connector line + flat state classes stepActive/stepCompleted (P-007); form header (text-xl title); all form fields (formInput with teal focus ring + 0 0 0 3px border); formRow 2-col grid; checkboxGroup with checkboxOption hover/selected; formActions Back+Continue buttons (btnPrimary teal / btnSecondary white); responsive: brand side hidden < 1024px
+- `registrations/page.tsx` — complete rewrite: STEPS (4 items with state), FEATURES (3 items), DIETARY (4 checkboxes), HEAR_OPTIONS (6); controlled form state for all inputs; dietary Set<string> toggle; stepClass() helper for flat state classes; BackIcon + ForwardIcon SVGs; zero inline styles; zero mock-data wiring (P-012)
+
+**Commit:** `b0b11f5`
