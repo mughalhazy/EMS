@@ -51,11 +51,44 @@ These standards apply to all externally and internally consumed HTTP APIs in EMS
 - Booleans should be positively named (`isActive`, `hasAccess`).
 - Include `createdAt`, `updatedAt` on persistent resources when applicable.
 
-## Versioning strategy
+## Response envelope
+
+All JSON responses must use a predictable top-level envelope so clients can implement generic handling.
+
+### Success envelope
+
+```json
+{
+  "data": {
+    "id": "evt_123",
+    "name": "Annual Summit"
+  },
+  "meta": {
+    "requestId": "req_01HV8Q...",
+    "timestamp": "2026-03-05T13:45:00Z"
+  }
+}
+```
+
+Rules:
+
+- `data` is required for successful responses (`2xx`) except `204 No Content`.
+- `meta` is optional but recommended; include `requestId` at minimum for traceability.
+- List responses use `data` (array) plus `page` metadata when paginated.
+- Avoid ad-hoc top-level fields; place operational metadata in `meta`.
+
+### Error envelope
+
+Use a single top-level `error` object for all non-2xx responses.
+
+## Versioning rules
 
 - Use URI major versioning: `/api/v1/...`, `/api/v2/...`.
-- Increment **major** version for breaking changes.
-- Additive, backward-compatible changes remain within the same major version.
+- Increment **major** version only for breaking changes.
+- Additive, backward-compatible changes remain in the same major version.
+- A single endpoint must not mix versioning styles (for example, URI + header simultaneously).
+- Fields may be added within a major version, but field removals/renames require the next major version.
+- Behavior changes that alter contract semantics (validation, auth scope, business meaning) are breaking.
 - Deprecation policy:
   - Mark deprecated fields/endpoints in docs with migration notes.
   - Return `Deprecation` and/or `Sunset` headers when retirement is scheduled.
@@ -119,11 +152,33 @@ Rules:
 - Sort order must be deterministic and documented.
 - `nextCursor` is opaque; clients must not parse it.
 
+Response envelope for cursor lists:
+
+```json
+{
+  "data": [ ... ],
+  "page": {
+    "nextCursor": "eyJpZCI6IjQ1NiJ9",
+    "hasMore": true,
+    "limit": 50
+  },
+  "meta": {
+    "requestId": "req_01HV8Q..."
+  }
+}
+```
+
 ### Offset pagination (exception only)
 
 Allowed only for administrative/reporting endpoints requiring page-number UX:
 
 - `GET /audit-logs?offset=0&limit=50`
+
+If offset mode is used, return:
+
+- `page.offset`
+- `page.limit`
+- `page.total` (when it can be computed efficiently)
 
 ## Authentication
 
@@ -162,6 +217,25 @@ Recommended headers:
 - Server stores key + request fingerprint + response for a bounded window (recommended: 24 hours).
 - Replayed requests with same key and same payload return original response.
 - Same key with different payload returns `409 Conflict`.
+
+### Idempotency headers
+
+Request headers:
+
+- `Idempotency-Key: <opaque-client-key>` (required where documented).
+- `X-Request-Id: <client-request-id>` (optional, recommended).
+
+Response headers:
+
+- `Idempotency-Key: <echoed-key>` when request included it.
+- `Idempotency-Status: created|replayed|conflict`.
+- `Idempotency-Replayed: true|false`.
+
+Header behavior rules:
+
+- Keys must be treated as opaque, case-sensitive strings.
+- Servers must scope key uniqueness by tenant + route (and optionally authenticated principal).
+- Conflicts (same key, different fingerprint) must return `409` with standard error envelope.
 
 ## Governance and review
 
