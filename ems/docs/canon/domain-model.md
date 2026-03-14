@@ -1,514 +1,164 @@
 # EMS Domain Model
 
-This document defines the core Event Management System (EMS) domain entities, their relationships, and key data constraints. The model is multi-tenant by design and supports conferences, trade shows, and similar events.
+This document defines the **core EMS entities** and the **service that owns each entity's source of truth**.
 
 ## Modeling Principles
 
-- **Tenant-first isolation:** Every business record is scoped to a `tenant`.
-- **Organization hierarchy:** A tenant can manage multiple organizations (event owners, agencies, sponsors, exhibitors).
-- **Role-based access:** Users can hold multiple roles, potentially with event-level scope.
-- **Event-centric operations:** Commercial, logistics, and engagement workflows pivot around events.
-- **Auditability and integrity:** Immutable identifiers, status fields, timestamps, and referential constraints are expected on all entities.
+- Every entity is tenant-scoped unless explicitly global.
+- Service ownership is authoritative for writes, lifecycle rules, and invariants.
+- Cross-service references should use immutable IDs and async integration events.
 
 ---
 
-## Entities
+## Service Ownership Map
 
-### 1) tenant
-Represents an isolated customer space in EMS.
-
-**Key attributes**
-- `id` (PK)
-- `name` (unique)
-- `slug` (unique, immutable)
-- `status` (`active|suspended|archived`)
-- `created_at`, `updated_at`
-
-**Constraints**
-- `slug` must be globally unique.
-- Hard delete is discouraged once production data exists.
-
----
-
-### 2) organization
-A business unit within a tenant (e.g., event host, sponsor company, exhibitor company, agency).
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `name`
-- `type` (`host|sponsor|exhibitor|agency|vendor|other`)
-- `external_ref` (optional integration key)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Unique per tenant: (`tenant_id`, `name`).
-- Must always belong to exactly one tenant.
+| Entity | Purpose | Owning service |
+|---|---|---|
+| `Tenant` | Top-level customer/account boundary | `Identity & Access Service` |
+| `User` | Authenticated platform identity | `Identity & Access Service` |
+| `Role` | Authorization role definition and scope | `Identity & Access Service` |
+| `Event` | Event container and lifecycle | `Event Service` |
+| `Venue` | Event location (physical/virtual/hybrid) | `Event Service` |
+| `Session` | Agenda item scheduled within an event | `Program Service` |
+| `Speaker` | Speaker profile and participation | `Program Service` |
+| `Exhibitor` | Exhibitor participation in event | `Partner Service` |
+| `Attendee` | Person record attending an event | `Attendee Service` |
+| `Registration` | Enrollment of attendee into an event/ticket | `Registration Service` |
+| `TicketProduct` | Sellable admission product for an event | `Ticketing Catalog Service` |
+| `PriceRule` | Dynamic/static pricing policy for ticket products | `Ticketing Catalog Service` |
+| `InventoryReservation` | Temporary hold of ticket inventory | `Inventory Service` |
+| `Order` | Commercial checkout aggregate | `Commerce Service` |
+| `OrderItem` | Individual line item within an order | `Commerce Service` |
+| `Payment` | Payment authorization/capture record | `Billing Service` |
+| `Refund` | Refund instruction and settlement status | `Billing Service` |
+| `Ticket` | Issued admission entitlement artifact | `Fulfillment Service` |
+| `Badge` | Printed/digital attendee badge artifact | `Fulfillment Service` |
 
 ---
 
-### 3) user
-A system identity used for platform access (staff, organizer, speaker admin, etc.).
+## Core Entity Definitions
 
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `organization_id` (FK -> organization, nullable)
-- `email`
-- `first_name`, `last_name`
-- `status` (`invited|active|disabled`)
-- `last_login_at`
-- `created_at`, `updated_at`
+### Identity & Access
 
-**Constraints**
-- Unique email per tenant: (`tenant_id`, `email`).
-- `organization_id`, if present, must reference an organization in the same tenant.
+#### `Tenant`
+- **Description:** Isolated EMS customer boundary for data and policy.
+- **Key fields:** `id`, `name`, `slug`, `status`, `created_at`, `updated_at`.
+- **Invariants:** `slug` is globally unique and immutable.
 
----
+#### `User`
+- **Description:** Human or service principal that can authenticate.
+- **Key fields:** `id`, `tenant_id`, `email`, `status`, `last_login_at`.
+- **Invariants:** `email` unique per tenant.
 
-### 4) role
-Defines permissions that can be assigned to users.
+#### `Role`
+- **Description:** Named permission bundle, optionally scoped.
+- **Key fields:** `id`, `tenant_id`, `name`, `scope` (`tenant|event|resource`).
+- **Invariants:** role `name` unique per tenant.
 
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `name` (e.g., `tenant_admin`, `event_manager`, `checkin_staff`)
-- `scope` (`tenant|organization|event`)
-- `description`
-- `created_at`, `updated_at`
+### Event & Program
 
-**Constraints**
-- Unique role name per tenant: (`tenant_id`, `name`).
-- Roles are assigned through a join model (recommended: `user_role_assignment`) supporting optional scope references.
+#### `Event`
+- **Description:** Top-level event object (conference, expo, summit).
+- **Key fields:** `id`, `tenant_id`, `code`, `name`, `timezone`, `start_at`, `end_at`, `status`.
+- **Invariants:** (`tenant_id`, `code`) unique; `start_at < end_at`.
 
----
+#### `Venue`
+- **Description:** Place where event experiences occur.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `name`, `type`, `capacity`.
+- **Invariants:** venue belongs to one event.
 
-### 5) event
-Top-level event (conference, expo, summit).
+#### `Session`
+- **Description:** Agenda block (talk/workshop/panel/etc.).
+- **Key fields:** `id`, `tenant_id`, `event_id`, `venue_id` (optional), `title`, `start_at`, `end_at`, `status`.
+- **Invariants:** `start_at < end_at`; no overlapping active sessions in same location/time.
 
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `organization_id` (FK -> organization, owner/host)
-- `name`
-- `code` (short unique identifier)
-- `description`
-- `timezone`
-- `start_at`, `end_at`
-- `status` (`draft|published|live|archived`)
-- `created_at`, `updated_at`
+#### `Speaker`
+- **Description:** Speaker profile linked to one or more sessions.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `first_name`, `last_name`, `email`, `status`.
+- **Invariants:** many-to-many with `Session` through join model (`SessionSpeaker`).
 
-**Constraints**
-- Unique event code per tenant: (`tenant_id`, `code`).
-- `start_at < end_at`.
-- Owner organization must belong to same tenant.
+#### `Exhibitor`
+- **Description:** Exhibitor organization participating in event.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `organization_name`, `booth_code`, `status`.
+- **Invariants:** booth code unique per event.
 
----
+### Participation & Registration
 
-### 6) venue
-Physical or virtual location hosting an event.
+#### `Attendee`
+- **Description:** Person record attending an event; may map to `User`.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `user_id` (optional), `email`, `status`.
+- **Invariants:** `email` unique per event.
 
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `name`
-- `type` (`physical|virtual|hybrid`)
-- `address_line1`, `city`, `country` (nullable for virtual)
-- `virtual_url` (nullable for physical)
-- `capacity` (optional)
-- `created_at`, `updated_at`
+#### `Registration`
+- **Description:** Attendee enrollment state for attendance and entitlements.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `attendee_id`, `ticket_product_id`, `status`, `registered_at`.
+- **Invariants:** one active registration per attendee per event per ticket product.
 
-**Constraints**
-- Must belong to one event.
-- For `physical`, address required; for `virtual`, `virtual_url` required.
+### Ticketing Catalog & Inventory
 
----
+#### `TicketProduct`
+- **Description:** Sellable ticket type (e.g., Early Bird, VIP).
+- **Key fields:** `id`, `tenant_id`, `event_id`, `name`, `sales_start_at`, `sales_end_at`, `status`.
+- **Invariants:** product name unique per event.
 
-### 7) room
-Sub-location within a venue where sessions occur.
+#### `PriceRule`
+- **Description:** Price determination rule for a `TicketProduct`.
+- **Key fields:** `id`, `tenant_id`, `ticket_product_id`, `rule_type`, `amount_or_percent`, `priority`, `active_from`, `active_to`.
+- **Invariants:** deterministic winner by priority and validity window.
 
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `venue_id` (FK -> venue)
-- `name`
-- `floor` (optional)
-- `capacity`
-- `created_at`, `updated_at`
+#### `InventoryReservation`
+- **Description:** Time-bound hold on available ticket quantity.
+- **Key fields:** `id`, `tenant_id`, `ticket_product_id`, `order_id`, `quantity`, `reserved_until`, `status`.
+- **Invariants:** reservations expire automatically; confirmed order converts reservation to committed allocation.
 
-**Constraints**
-- Unique room name per venue: (`venue_id`, `name`).
-- `capacity >= 0`.
+### Commerce, Billing, and Fulfillment
 
----
+#### `Order`
+- **Description:** Checkout aggregate for purchase intent and totals.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `order_number`, `currency`, `subtotal`, `tax`, `discount`, `total`, `status`.
+- **Invariants:** (`tenant_id`, `order_number`) unique; `total = subtotal + tax - discount`.
 
-### 8) session
-Agenda item within an event (talk, panel, workshop).
+#### `OrderItem`
+- **Description:** Line item under an order.
+- **Key fields:** `id`, `tenant_id`, `order_id`, `product_type`, `product_ref_id`, `unit_price`, `quantity`, `line_total`.
+- **Invariants:** `line_total = unit_price * quantity` (before line-level adjustments if configured).
 
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `room_id` (FK -> room, nullable for virtual/unassigned)
-- `title`
-- `abstract`
-- `session_type` (`keynote|talk|panel|workshop|networking|other`)
-- `start_at`, `end_at`
-- `capacity` (optional)
-- `status` (`draft|scheduled|completed|cancelled`)
-- `created_at`, `updated_at`
+#### `Payment`
+- **Description:** Payment attempt/transaction for an order.
+- **Key fields:** `id`, `tenant_id`, `order_id`, `provider`, `provider_ref`, `amount`, `currency`, `status`, `captured_at`.
+- **Invariants:** provider reference unique per provider; only captured amounts count toward paid balance.
 
-**Constraints**
-- `start_at < end_at`.
-- If `room_id` is set, room must belong to the same event via room -> venue -> event chain.
-- No overlapping scheduled sessions in same room time window (enforced at app/DB exclusion constraint where supported).
+#### `Refund`
+- **Description:** Return of funds for a prior payment.
+- **Key fields:** `id`, `tenant_id`, `payment_id`, `order_id`, `amount`, `reason`, `status`, `refunded_at`.
+- **Invariants:** cumulative successful refunds cannot exceed captured payment amount.
+
+#### `Ticket`
+- **Description:** Issued admission entitlement bound to a registration.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `registration_id`, `order_item_id`, `ticket_code`, `status`, `issued_at`.
+- **Invariants:** `ticket_code` unique; revocation required on full cancellation/refund per policy.
+
+#### `Badge`
+- **Description:** Attendee-facing badge artifact for check-in/onsite identity.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `attendee_id`, `ticket_id` (optional), `badge_code`, `print_status`, `issued_at`.
+- **Invariants:** one active badge per attendee per event unless explicit reprint policy.
 
 ---
 
-### 9) speaker
-Profile of a person speaking at sessions.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `organization_id` (FK -> organization, nullable)
-- `first_name`, `last_name`
-- `email` (optional)
-- `bio`
-- `status` (`invited|confirmed|declined|withdrawn`)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Speaker is event-scoped.
-- Many-to-many with `session` via recommended join entity `session_speaker`.
-
----
-
-### 10) ticket
-Sellable or allocatable admission type for an event.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `name`
-- `description`
-- `price_amount`, `price_currency`
-- `quantity_total`
-- `quantity_sold`
-- `sales_start_at`, `sales_end_at`
-- `status` (`draft|on_sale|sold_out|closed`)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Unique ticket name per event: (`event_id`, `name`).
-- `price_amount >= 0`.
-- `0 <= quantity_sold <= quantity_total`.
-- Sales window must satisfy `sales_start_at < sales_end_at` when both present.
-
----
-
-### 11) registration
-Represents an attendee’s registration intent/record for an event, linked to ticketing and checkout.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `attendee_id` (FK -> attendee)
-- `ticket_id` (FK -> ticket)
-- `order_id` (FK -> order, nullable until checkout)
-- `status` (`pending|approved|confirmed|cancelled`)
-- `registered_at`
-- `checkin_at` (optional)
-- `created_at`, `updated_at`
-
-**Constraints**
-- One attendee cannot hold duplicate active registrations for same ticket/event (unique partial index by status).
-- `ticket_id` must reference ticket in same event.
-
----
-
-### 12) attendee
-Person attending an event (can exist with or without platform user account).
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `user_id` (FK -> user, nullable)
-- `organization_id` (FK -> organization, nullable)
-- `first_name`, `last_name`
-- `email`
-- `phone` (optional)
-- `badge_name` (optional)
-- `status` (`prospect|registered|checked_in|cancelled`)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Unique attendee email per event: (`event_id`, `email`).
-- If `user_id` is set, user must belong to same tenant.
-
----
-
-### 13) sponsor
-Sponsorship agreement record for an organization at an event.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `organization_id` (FK -> organization)
-- `tier` (`gold|silver|bronze`)
-- `amount`
-- `benefits_json` (structured benefit package)
-- `status` (`prospect|active|fulfilled|cancelled`)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Organization can appear once per tier per event (or once per event per business rule).
-- `amount >= 0`.
-
----
-
-### 14) exhibitor
-Exhibitor participation record for an organization at an event.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `organization_id` (FK -> organization)
-- `booth_code`
-- `booth_size`
-- `status` (`invited|confirmed|checked_in|cancelled`)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Unique booth per event: (`event_id`, `booth_code`).
-- Organization can have at most one active exhibitor record per event.
-
----
-
-### 15) lead
-Captured commercial lead (typically at exhibitor booths or sponsor activations).
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `exhibitor_id` (FK -> exhibitor, nullable)
-- `sponsor_id` (FK -> sponsor, nullable)
-- `attendee_id` (FK -> attendee, nullable)
-- `captured_by_user_id` (FK -> user)
-- `full_name`
-- `email`
-- `phone` (optional)
-- `score` (optional)
-- `status` (`new|qualified|disqualified|follow_up|converted`)
-- `notes`
-- `created_at`, `updated_at`
-
-**Constraints**
-- At least one of `exhibitor_id` or `sponsor_id` must be present.
-- Lead email uniqueness should be event- and owner-scoped to avoid duplicate clutter.
-
----
-
-### 16) order
-Commercial order representing a checkout transaction (can include one or multiple ticket lines).
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `buyer_attendee_id` (FK -> attendee, nullable)
-- `order_number`
-- `subtotal_amount`, `tax_amount`, `discount_amount`, `total_amount`
-- `currency`
-- `status` (`draft|pending_payment|paid|partially_refunded|refunded|cancelled`)
-- `placed_at`
-- `created_at`, `updated_at`
-
-**Constraints**
-- Unique order number per tenant: (`tenant_id`, `order_number`).
-- `total_amount = subtotal + tax - discount`.
-- Non-negative monetary fields, except refund adjustments tracked separately.
-
----
-
-### 17) payment
-Payment transaction associated with an order.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `order_id` (FK -> order)
-- `provider` (`stripe|adyen|paypal|bank_transfer|offline|other`)
-- `provider_payment_ref`
-- `amount`
-- `currency`
-- `status` (`initiated|authorized|captured|failed|refunded|voided`)
-- `paid_at` (optional)
-- `failure_reason` (optional)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Provider payment reference unique per provider: (`provider`, `provider_payment_ref`).
-- Sum of captured payments should equal or exceed order total for `order.status = paid`.
-
----
-
-### 18) notification
-Message sent by system (email/SMS/push/in-app) related to operational or transactional events.
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event, nullable)
-- `recipient_user_id` (FK -> user, nullable)
-- `recipient_attendee_id` (FK -> attendee, nullable)
-- `channel` (`email|sms|push|in_app|webhook`)
-- `template_key`
-- `subject` (nullable depending on channel)
-- `payload_json`
-- `status` (`queued|sent|delivered|failed|bounced|suppressed`)
-- `sent_at`, `delivered_at` (optional)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Must target at least one recipient (`recipient_user_id` or `recipient_attendee_id` or explicit external address in payload).
-- Notification dispatch should be idempotent using deduplication key (recommended).
-
----
-
-### 19) ticket_fulfillment
-Represents issuance and lifecycle of a digital ticket artifact after payment success (e.g., QR pass attached to an attendee/registration).
-
-**Key attributes**
-- `id` (PK)
-- `tenant_id` (FK -> tenant)
-- `event_id` (FK -> event)
-- `order_id` (FK -> order)
-- `payment_id` (FK -> payment)
-- `registration_id` (FK -> registration)
-- `attendee_id` (FK -> attendee)
-- `ticket_id` (FK -> ticket)
-- `fulfillment_status` (`pending|generated|attached|revoked|failed`)
-- `artifact_type` (`qr_png|qr_svg|wallet_pass|pdf`)
-- `artifact_url` (secure storage path, nullable until generated)
-- `artifact_checksum` (optional integrity hash)
-- `issued_at` (optional)
-- `attached_at` (optional)
-- `revoked_at` (optional)
-- `failure_reason` (optional)
-- `idempotency_key` (generation dedupe key)
-- `created_at`, `updated_at`
-
-**Constraints**
-- Exactly one active generated fulfillment per registration (`registration_id`, `fulfillment_status in generated|attached`).
-- Fulfillment generation is allowed only when linked `payment.status = captured` and `order.status in paid|partially_refunded`.
-- `attendee_id`, `registration_id`, `ticket_id`, and `event_id` must all resolve to the same event and tenant.
-- Replays with same `idempotency_key` must return existing fulfillment artifact instead of generating a new QR.
-- On refund/void/cancel transitions, fulfillment must move to `revoked` and previously issued QR must be invalidated.
-
----
-
-## Relationship Summary
-
-### Core hierarchy
-- `tenant` 1---* `organization`
-- `tenant` 1---* `user`
-- `tenant` 1---* `role`
-- `tenant` 1---* `event`
-
-### Event logistics
-- `event` 1---* `venue`
-- `venue` 1---* `room`
-- `event` 1---* `session`
-- `session` *---* `speaker` (via `session_speaker`)
-
-### Participation & commerce
-- `event` 1---* `ticket`
-- `event` 1---* `attendee`
-- `attendee` 1---* `registration`
-- `ticket` 1---* `registration`
-- `order` 1---* `payment`
-- `order` 1---* `registration` (one order can cover multiple registrations)
-- `registration` 1---* `ticket_fulfillment`
-- `attendee` 1---* `ticket_fulfillment`
-
-### Partners & lead capture
-- `event` 1---* `sponsor`
-- `event` 1---* `exhibitor`
-- `sponsor` 1---* `lead` (optional path)
-- `exhibitor` 1---* `lead` (optional path)
-- `attendee` 1---* `lead` (optional association)
-
-### Messaging
-- `event` 1---* `notification` (optional event scope)
-- `user` 1---* `notification` (recipient path)
-- `attendee` 1---* `notification` (recipient path)
-
----
-
-## Cross-Cutting Constraints
-
-1. **Tenant consistency rule**  
-   All foreign-key relationships must preserve tenant boundaries. For every FK chain, parent and child `tenant_id` values must match.
-
-2. **Status lifecycle enforcement**  
-   State transitions should be validated by a domain service/state machine (e.g., prevent `paid -> draft`, prevent `completed -> draft`).
-
-3. **Time integrity**  
-   Datetimes should be stored in UTC with event timezone metadata for display. Business rules (sales windows, session windows, event windows) should validate chronological order.
-
-4. **Soft delete + audit**  
-   Prefer soft deletes (`deleted_at`) and immutable audit logs for financial and compliance-sensitive entities (`order`, `payment`, `registration`, `notification`).
-
-5. **PII handling**  
-   Entities containing personal data (`user`, `attendee`, `speaker`, `lead`) require retention, masking, and export/delete workflows compliant with applicable privacy regulations.
-
-6. **Idempotency for integration boundaries**  
-   Payment callbacks and notification dispatches should use idempotency keys to avoid duplicate side effects.
-
-## Recommended Supporting Join/Lookup Models (Non-mandatory)
-
-To operationalize the model cleanly, these additional models are recommended:
-
-- `user_role_assignment` (user <-> role with optional `event_id`/`organization_id` scope)
-- `session_speaker` (session <-> speaker)
-- `order_line` (order <-> ticket with quantity/unit price)
-- `registration_checkin` (historical check-in/out records)
-- `notification_delivery_attempt` (provider-level retry log)
-- `ticket_fulfillment_attempt` (generation/attachment retry log)
-
-These are not part of the mandatory entity list but are typically required for production-grade behavior.
-
-## QC-01 domain correctness addendum
-
-### Required entity checklist
-The following required entities are present in this model and are mandatory for any EMS deployment:
-- `tenant`
-- `organization`
-- `user`
-- `role`
-- `event`
-- `venue`
-- `session`
-- `ticket`
-- `registration`
-- `attendee`
-- `sponsor`
-- `exhibitor`
-- `order`
-- `payment`
-- `notification`
-
-### Critical invariants
-1. `tenant_id` is required on every tenant-owned entity and in all uniqueness constraints where business keys exist.
-2. `order` is the financial container; one order can have multiple payments, but payment totals cannot exceed authorized order total unless an explicit adjustment policy exists.
-3. `registration` must reference exactly one attendee and one event; ticket allocation must remain consistent with ticket inventory rules.
-4. `notification` records are immutable delivery facts (status may transition, content version is append-only).
+## Relationship Backbone
+
+- `Tenant` 1---* `User`, `Role`, `Event`, and all tenant-owned entities.
+- `Event` 1---* `Venue`, `Session`, `Speaker`, `Exhibitor`, `Attendee`, `Registration`, `TicketProduct`, `Order`, `Ticket`, `Badge`.
+- `Attendee` 1---* `Registration`.
+- `TicketProduct` 1---* `PriceRule` and 1---* `InventoryReservation`.
+- `Order` 1---* `OrderItem` and 1---* `Payment`.
+- `Payment` 1---* `Refund`.
+- `Registration` 1---0..1 `Ticket`; `Ticket` 1---0..1 `Badge`.
+
+## Cross-Service Guardrails
+
+1. **Tenant consistency:** all FK chains must preserve `tenant_id`.
+2. **Write authority:** only the owning service can mutate its entity.
+3. **Lifecycle integrity:** status transitions are validated by owning service state machines.
+4. **Idempotency:** payment, refund, and fulfillment commands must be idempotent.
+5. **Auditability:** commerce and fulfillment entities require immutable event logs.
