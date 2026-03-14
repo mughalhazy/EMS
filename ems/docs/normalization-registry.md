@@ -545,3 +545,34 @@
 | D-079 | top-nav | Was flat single NAV_LINKS array, no grouping | Rewrote to 4 GROUP_* arrays + NavGroup helper component | fixed |
 | D-080 | top-nav | Missing pill containers (nav-group) + separators (nav-divider) | Added `.navGroup` + `.navGroupPrimary` + `.navDivider` | fixed |
 | D-081 | top-nav | Missing icon action buttons (notifications + settings) | Added `.navActions` + `.navIconBtn` + `.navBadge` | fixed |
+
+---
+
+## Sidebar — dashboard-side-nav .html → components/nav/ [45]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-144 | side-nav | `20px 16px` sidebar padding | raw — layout dimension | logged |
+| R-145 | side-nav | `36px` logo mark size | raw — layout dimension | logged |
+| R-146 | side-nav | `10px` logo mark border-radius | raw — between radius (8px) and radius-lg (14px) | logged |
+| R-147 | side-nav | `18px` logo mark font-size | raw — off type scale | logged |
+| R-148 | side-nav | `32px` logo margin-bottom | raw — off grid | logged |
+| R-149 | side-nav | `0 8px` logo padding | raw — off spacing scale | logged |
+| R-150 | side-nav | `17px` logo text font-size | raw — off type scale | logged |
+| R-151 | side-nav | `24px` nav-section margin-bottom | raw — off grid | logged |
+| R-152 | side-nav | `0.06em` nav-label letter-spacing | raw — off tracking scale | logged |
+| R-153 | side-nav | `0 12px` nav-label padding | raw — off spacing scale | logged |
+| R-154 | side-nav | `14px` nav-item font-size | raw — between text-sm (13px) and text-md (14px) | logged |
+| R-155 | side-nav | `10px 12px` nav-item padding | raw — off spacing scale | logged |
+| R-156 | side-nav | `2px 7px` nav-item-badge padding | raw — off spacing scale | logged |
+| R-157 | side-nav | `10px` nav-item-badge border-radius | raw — pill value | logged |
+| R-158 | side-nav | `16px 12px` sidebar-footer padding | raw — off spacing scale | logged |
+| R-159 | side-nav | `8px` user-avatar border-radius | raw — matches radius token | logged |
+| R-160 | side-nav | `13px` user-avatar font-size | raw — matches text-sm token | logged |
+| M-063 | side-nav | `.nav-item.active` | flat class `.navItemActive` (P-007) | resolved |
+| D-082 | side-nav | Was emoji icons + collapse toggle (not in spec) | Rewrote with inline SVG icons, removed collapse (spec has none) | fixed |
+| D-083 | side-nav | Was indigo active state (i-lt bg + i-dk color) | Spec: ink bg + white color — corrected | fixed |
+| D-084 | side-nav | Was green logoMark gradient (f-dk → f-md) | Spec: teal gradient (t-dk → t-md) — corrected | fixed |
+| D-085 | side-nav | analytics, notifications, settings using AppTopLayout | Moved to AppLayout (sidebar) via SIDEBAR_PATHS in layout.tsx | fixed |

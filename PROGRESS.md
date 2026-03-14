@@ -861,3 +861,18 @@ Cascades automatically to all 8 non-dashboard pages via `AppTopLayout`.
 
 **Pages updated (via AppTopLayout cascade):** events, agenda, speakers, attendees, registrations, ticketing, sponsors, exhibitors
 
+---
+
+## [45] Sidebar — Grouped Nav per dashboard-side-nav .html Spec
+
+Rewrote `components/nav/Sidebar.tsx` + `Sidebar.module.css` to match `dashboard-side-nav .html` exactly.
+Updated `app/(app)/layout.tsx` to route analytics, notifications, settings to `AppLayout` (sidebar).
+
+**Key changes:**
+- `Sidebar.module.css` — complete rewrite: `.sidebar` (240px, white, border-right, `20px 16px` pad); `.logo` (36px logoMark radius 10px t-dk→t-md, margin-bottom 32px, 0 8px pad, 17px logoText 800 weight); `.navSection` (margin-bottom 24px); `.navLabel` (11px, 700, uppercase, tracking 0.06em, `0 12px` pad); `.navItem` (flex, gap 12px, `10px 12px` pad, radius 8px, 14px, weight-semibold, ink-3); `.navItemActive` flat class (ink bg + white, P-007); `.navItemIcon` (18×18); `.navItemBadge` (t-lt bg + t-dk, `2px 7px` pad, radius 10px, 11px, 700); `.sidebarFooter` (margin-top auto, surface bg, radius-lg, border, `16px 12px` pad); `.userAvatar` (32px, radius 8px, i-md→t-md gradient); responsive: `display: none` below 1200px
+- `Sidebar.tsx` — complete rewrite: 5 `NAV_SECTIONS` with inline SVG icons per spec; badges on Events ("8") + Notifications ("3"); flat `.navItemActive` active detection via `usePathname()`; user "Alex Johnson / Event Manager / AJ"; no collapse toggle (not in spec)
+- `app/(app)/layout.tsx` — `SIDEBAR_PATHS` array `['/dashboard', '/analytics', '/notifications', '/settings']`; `usesSidebar()` helper routes these 4 to `AppLayout`, all others to `AppTopLayout`
+
+**Pages on sidebar layout:** dashboard, analytics, notifications, settings
+**Pages on top-nav layout:** events, agenda, speakers, attendees, registrations, ticketing, sponsors, exhibitors
+
