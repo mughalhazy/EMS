@@ -16,5 +16,5 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  height: calc(100vh - 69px); /* raw — 69px = topbar height (16px*2 padding + 36px logo + 1px border) */
+  height: calc(100vh - 81px); /* raw — 81px = topbar height (20px*2 padding + 40px logo + 1px border) */
 }
