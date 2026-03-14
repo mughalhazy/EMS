@@ -797,3 +797,44 @@ Full one-pass normalization of `registration-page.html` → `registrations/page.
 - `registrations/page.tsx` — complete rewrite: STEPS (4 items with state), FEATURES (3 items), DIETARY (4 checkboxes), HEAR_OPTIONS (6); controlled form state for all inputs; dietary Set<string> toggle; stepClass() helper for flat state classes; BackIcon + ForwardIcon SVGs; zero inline styles; zero mock-data wiring (P-012)
 
 **Commit:** `b0b11f5`
+
+---
+
+## [39] Analytics Page — Normalized to analytics-page.html Spec
+
+Full one-pass normalization of `analytics-page.html` → `analytics/page.tsx` + `analytics/analytics.module.css`.
+
+**Key changes:**
+- `analytics.module.css` — complete rewrite: white page header (42px h1, date-range pill buttons with active state), content 1600px max-width; 4-col KPI grid (flat card variants: kpiCardRevenue/Attendees/Engagement/Satisfaction each with colored radial ::before glow + colored icon + colored value); 2fr+1fr content grid (bar chart card + insights panel); bar chart (200px height, gold bars, month labels); insights panel (3 flat sentiment variants: insightPositive/Default/Warning with border-left accents); 3-col performance grid (metric 32px, progress bar 8px, metricBadgeHigh/Medium flat classes); session comparison table (radius-xl, th surface bg); opacity-only fadeIn (D-010); flat classes (P-007)
+- `analytics/page.tsx` — complete rewrite: DATE_RANGES (3 buttons), KPIS (4 cards), BAR_DATA (8 months), INSIGHTS (4 items), PERFORMANCE (3 cards), SESSIONS (5 rows); activeDateRange state; bar height computed as % of maxRevenue; zero inline styles except `style={{ height }}` on bars (data-driven); zero mock-data wiring (P-012)
+
+---
+
+## [40] Sponsors Page — Normalized to sponsors-page.html Spec
+
+Full one-pass normalization of `sponsors-page.html` → `sponsors/page.tsx` + `sponsors/sponsors.module.css`.
+
+**Key changes:**
+- `sponsors.module.css` — complete rewrite: dark hero (#1A1A1A → #2D2D2D → g-dk gradient, dual radial ::before/::after glows, 72px h1 with gradient text clip, 56px heroStatValue, glass hero stat cards); 3-tier sections (platinum 1-col / gold 2-col / silver 3-col grids); tier badges (flat: tierBadgePlatinum/Gold/Silver); platinum card (gradient border via ::before pseudo, dark header, 180px logo placeholder); gold card (2px g-md border, gold-lt header); silver card (1px border, surface header); sponsor name rows (28px platinum / 20px gold / 16px silver + inline tier badge); benefit tags (flat: benefitTagPlatinum/Gold/Silver); card footer (booth + social links); indigo CTA section with gradient text; opacity-only fadeIn (D-010)
+- `sponsors/page.tsx` — complete rewrite: SPONSORS_PLATINUM (2), SPONSORS_GOLD (2), SPONSORS_SILVER (3); shared SponsorFooter sub-component; 3-tier render loop each with correct card/header/logo/name/badge variants; zero inline styles; zero mock-data wiring (P-012)
+
+---
+
+## [41] Exhibitors Page — Normalized to exhibitors-page.html Spec
+
+Full one-pass normalization of `exhibitors-page.html` → `exhibitors/page.tsx` + `exhibitors/exhibitors.module.css`.
+
+**Key changes:**
+- `exhibitors.module.css` — complete rewrite: white page header (42px h1, right-aligned stats in i-md), toolbar (search box with icon + filter chips with active state); indigo gradient featured exhibitor (2-col grid, glass meta items, glass product items); section header; auto-fill exhibitor grid (minmax 360px); exhibitor card (header surface bg + logo 64px square + identity, body description + tags, footer booth + contact buttons); tag flat variants (exhibitorTagHardware/Software/Services/Cloud); opacity-only fadeIn (D-010); flat classes (P-007)
+- `exhibitors/page.tsx` — complete rewrite: EXHIBITORS (6 cards from HTML), FILTERS (5 chips); activeFilter + search state; tagClass() helper; inline SVG icons (Search/Location/Email/Web); zero inline styles; zero mock-data wiring (P-012)
+
+---
+
+## [42] Notifications Page — Normalized to notifications-page.html Spec
+
+Full one-pass normalization of `notifications-page.html` → `notifications/page.tsx` + `notifications/notifications.module.css`.
+
+**Key changes:**
+- `notifications.module.css` — complete rewrite: white page header (36px h1, Settings + Mark All Read action buttons); content 1fr+360px grid; filter tabs (pill switcher with ink active); notifications feed (radius-xl, items with unread state: i-lt bg + 4px i-md left bar); notification icon flat variants (6: success/info/warning/error/revenue/activity each with lt bg + border); notification badge flat variants (urgent/high/medium); sidebar (quickStats / priorityAlerts / recentActivity); activity timeline (absolute ::before line, colored dot variants: default i-md / success f-md / revenue g-md); alert items (b-lt + b-md border-left; warning variant a-lt + a-md); opacity-only fadeIn (D-010); flat classes (P-007)
+- `notifications/page.tsx` — complete rewrite: NOTIFICATIONS (10 items from HTML), TABS (4); activeTab state; iconVariantClass() + badgeClass() + badgeLabel() helpers; SettingsIcon + MarkReadIcon SVGs; sidebar with inline stat/activity data; zero inline styles; zero mock-data wiring (P-012)
+

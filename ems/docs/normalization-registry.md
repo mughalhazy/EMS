@@ -380,3 +380,101 @@
 | D-055 | registrations | Missing 4-step progress tracker | Added `.progressSteps` with `::before` connector + flat state classes | fixed |
 | D-056 | registrations | Missing registration form (personal info fields) | Added all 7 fields + dietary checkboxes + hear-about select | fixed |
 | D-057 | registrations | Missing Back + Continue form actions | Added `.formActions` with `.btnSecondary` / `.btnPrimary` | fixed |
+
+---
+
+## Analytics Page — analytics-page.html → analytics/ [39]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-079 | analytics | `42px` h1 font-size | raw — off type scale | logged |
+| R-080 | analytics | `32px` KPI value font-size | raw — layout dimension | logged |
+| R-081 | analytics | `48px` KPI icon size | raw — layout dimension | logged |
+| R-082 | analytics | `200px` bar chart height | raw — layout dimension | logged |
+| R-083 | analytics | `8px` progress bar height | raw — layout dimension | logged |
+| R-084 | analytics | `radial-gradient` KPI card ::before glows | raw — decorative color effect | logged |
+| M-041 | analytics | `.kpi-card.revenue / attendees / engagement / satisfaction` | flat classes `.kpiCardRevenue/Attendees/Engagement/Satisfaction` (P-007) | resolved |
+| M-042 | analytics | `.insight-item.positive / default / warning` | flat classes `.insightPositive/Default/Warning` (P-007) | resolved |
+| M-043 | analytics | `.metric-badge.high / medium` | flat classes `.metricBadgeHigh/Medium` (P-007) | resolved |
+| M-044 | analytics | `.progress-fill.high / medium` | flat classes `.progressFillHigh/Medium` (P-007) | resolved |
+| D-058 | analytics | Page was scaffold pulling mock KPI data via renderer | full rewrite: CSS module + static KPIS/BAR_DATA/INSIGHTS/PERFORMANCE/SESSIONS | fixed |
+| D-059 | analytics | Missing date-range button switcher | Added `.dateRange` + `.dateBtnActive` flat state (P-007) | fixed |
+| D-060 | analytics | Animation was `fadeInUp` (transform) | D-010 fix: opacity-only `.fadeIn` | fixed |
+| D-061 | analytics | Missing colored glow blobs on KPI cards | Added `::before` radial gradient per flat variant | fixed |
+
+---
+
+## Sponsors Page — sponsors-page.html → sponsors/ [40]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-085 | sponsors | `#1A1A1A` hero dark bg | raw — custom dark color | logged |
+| R-086 | sponsors | `#2D2D2D` hero mid bg | raw — custom dark color | logged |
+| R-087 | sponsors | `72px` hero h1 font-size | raw — layout dimension | logged |
+| R-088 | sponsors | `56px` heroStatValue font-size | raw — layout dimension | logged |
+| R-089 | sponsors | `22px` heroSubtitle font-size | raw — off type scale | logged |
+| R-090 | sponsors | `42px` tierTitle font-size | raw — off type scale | logged |
+| R-091 | sponsors | `17px` tierDescription font-size | raw — off type scale | logged |
+| R-092 | sponsors | `180px` platinum logo placeholder height | raw — layout dimension | logged |
+| R-093 | sponsors | `120px` gold logo placeholder height | raw — layout dimension | logged |
+| R-094 | sponsors | `28px` platinum sponsor-name font-size | raw — layout dimension | logged |
+| R-095 | sponsors | `#C4B896 / #E8E0D0` platinum badge/border tones | raw — custom platinum palette | logged |
+| R-096 | sponsors | `-webkit-background-clip: text` gradient text clip | raw — hero title effect | logged |
+| M-045 | sponsors | `.tier-badge.platinum / gold / silver` | flat classes `.tierBadgePlatinum/Gold/Silver` (P-007) | resolved |
+| M-046 | sponsors | `.sponsor-card.platinum / gold / silver` | flat classes `.sponsorCardPlatinum/Gold/Silver` (P-007) | resolved |
+| M-047 | sponsors | `.benefit-tag.platinum / gold / silver` | flat classes `.benefitTagPlatinum/Gold/Silver` (P-007) | resolved |
+| D-062 | sponsors | Page was scaffold pulling mock sponsor data via renderer | full rewrite: CSS module + static SPONSORS_PLATINUM/GOLD/SILVER | fixed |
+| D-063 | sponsors | Missing dark hero with gradient text + glass stats | Added full hero section with ::before + ::after glow pseudo-elements | fixed |
+| D-064 | sponsors | Missing 3-tier grid layout (1/2/3 col) | Added `.gridPlatinum` / `.gridGold` / `.gridSilver` | fixed |
+| D-065 | sponsors | Missing platinum gradient border card | Added `.sponsorCardPlatinum::before` gradient border technique | fixed |
+| D-066 | sponsors | Animation was `fadeInUp` (transform) | D-010 fix: opacity-only `.fadeIn` | fixed |
+
+---
+
+## Exhibitors Page — exhibitors-page.html → exhibitors/ [41]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-097 | exhibitors | `48px` featured section padding | raw — layout dimension | logged |
+| R-098 | exhibitors | `32px` featured h2 font-size | raw — layout dimension | logged |
+| R-099 | exhibitors | `64px` exhibitor logo size | raw — layout dimension | logged |
+| R-100 | exhibitors | `18px` exhibitor name font-size | raw — off type scale | logged |
+| R-101 | exhibitors | `minmax(360px, 1fr)` exhibitor grid | raw — layout dimension | logged |
+| R-102 | exhibitors | `12px 16px / 10px 16px` search/filter padding | raw — off spacing scale | logged |
+| M-048 | exhibitors | `.exhibitor-tag.hardware / software / services / cloud` | flat classes `.exhibitorTagHardware/Software/Services/Cloud` (P-007) | resolved |
+| M-049 | exhibitors | `.filter-chip.active` | flat class `.filterChipActive` (P-007) | resolved |
+| D-067 | exhibitors | Page was scaffold pulling mock exhibitor data via renderer | full rewrite: CSS module + static EXHIBITORS (6 cards) | fixed |
+| D-068 | exhibitors | Missing indigo featured exhibitor banner | Added `.featuredExhibitor` gradient banner with glass product items | fixed |
+| D-069 | exhibitors | Animation was `fadeIn` (transform) | D-010 fix: opacity-only `.fadeIn` | fixed |
+
+---
+
+## Notifications Page — notifications-page.html → notifications/ [42]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-103 | notifications | `36px` h1 font-size | raw — off type scale | logged |
+| R-104 | notifications | `360px` sidebar fixed width | raw — layout dimension | logged |
+| R-105 | notifications | `4px` unread left-bar width | raw — layout dimension | logged |
+| R-106 | notifications | `48px` notification icon size | raw — layout dimension | logged |
+| R-107 | notifications | `22px` icon emoji font-size | raw — off type scale | logged |
+| R-108 | notifications | `14px` activity dot size | raw — layout dimension | logged |
+| R-109 | notifications | `6px` activity timeline left offset | raw — layout dimension | logged |
+| M-050 | notifications | `.notification-icon.success / info / warning / error / revenue / activity` | flat classes `.notificationIconSuccess/Info/Warning/Error/Revenue/Activity` (P-007) | resolved |
+| M-051 | notifications | `.notification-badge.urgent / high / medium` | flat classes `.notificationBadgeUrgent/High/Medium` (P-007) | resolved |
+| M-052 | notifications | `.activity-dot.success / revenue` | flat classes `.activityDotSuccess/Revenue` (P-007) | resolved |
+| M-053 | notifications | `.alert-item.warning` | flat class `.alertItemWarning` (P-007) | resolved |
+| M-054 | notifications | `.filter-tab.active` | flat class `.filterTabActive` (P-007) | resolved |
+| M-055 | notifications | `.action-btn.primary` | flat class `.actionBtnPrimary` (P-007) | resolved |
+| D-070 | notifications | Page was scaffold pulling mock notification data via renderer | full rewrite: CSS module + static NOTIFICATIONS (10 items) | fixed |
+| D-071 | notifications | Missing unread state (i-lt bg + 4px i-md left bar) | Added `.notificationItemUnread` + `::before` accent | fixed |
+| D-072 | notifications | Missing sidebar panels (Quick Stats / Priority Alerts / Recent Activity) | Added all 3 sidebar widgets with timeline | fixed |
+| D-073 | notifications | Animation was `slideIn` (transform translateX) | D-010 fix: opacity-only `.fadeIn` | fixed |

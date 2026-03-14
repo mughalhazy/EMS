@@ -1,152 +1,233 @@
 'use client'
 
 import { useState } from 'react'
-import { Card } from '@/components/ui/Card'
-import { PageHeader } from '@/components/ui/PageHeader'
-import { events, eventKpis, revenueSummary, funnelMetrics, attendanceTrend } from '@/lib/mock-data'
+import styles from './analytics.module.css'
 
-function fmtAmount(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(cents / 100)
-}
-function fmtPct(n: number) {
-  return `${Math.round(n * 100)}%`
-}
-function fmtNum(n: number) {
-  return n.toLocaleString()
-}
+/* ── Static data — faithful port of analytics-page.html ── */
 
-const KPI_DEFS = [
-  { key: 'totalRegistrations', label: 'Registrations',      fmt: (v: number) => fmtNum(v),    color: 'var(--i-md)',  bg: 'var(--i-lt)' },
-  { key: 'totalAttendees',     label: 'Attendees',           fmt: (v: number) => fmtNum(v),    color: 'var(--t-md)',  bg: 'var(--t-lt)' },
-  { key: 'checkedInCount',     label: 'Checked In',          fmt: (v: number) => fmtNum(v),    color: 'var(--f-md)',  bg: 'var(--f-lt)' },
-  { key: 'totalRevenue',       label: 'Revenue',             fmt: (v: number) => fmtAmount(v), color: 'var(--g-dk)',  bg: 'var(--g-lt)' },
-  { key: 'conversionRate',     label: 'Conversion Rate',     fmt: (v: number) => fmtPct(v),    color: 'var(--a-dk)',  bg: 'var(--a-lt)' },
-  { key: 'avgOrderValue',      label: 'Avg Order Value',     fmt: (v: number) => fmtAmount(v), color: 'var(--g-dk)',  bg: 'var(--g-lt)' },
+const DATE_RANGES = ['Last 7 Days', 'Last 30 Days', 'All Time']
+
+const KPIS = [
+  { variant: styles.kpiCardRevenue,      icon: '💰', label: 'Total Revenue',      value: '$487K', change: '+18% vs last month' },
+  { variant: styles.kpiCardAttendees,    icon: '👥', label: 'Total Attendees',     value: '1,847', change: '+24% vs last month' },
+  { variant: styles.kpiCardEngagement,   icon: '📊', label: 'Avg Sessions / Person', value: '4.2',   change: '+0.8 vs last event' },
+  { variant: styles.kpiCardSatisfaction, icon: '⭐', label: 'Satisfaction Score',  value: '4.8',   change: '+0.3 vs last event' },
+]
+
+interface BarData { month: string; revenue: number; target: number }
+
+const BAR_DATA: BarData[] = [
+  { month: 'Sep', revenue: 55,  target: 60  },
+  { month: 'Oct', revenue: 72,  target: 70  },
+  { month: 'Nov', revenue: 48,  target: 65  },
+  { month: 'Dec', revenue: 85,  target: 75  },
+  { month: 'Jan', revenue: 63,  target: 70  },
+  { month: 'Feb', revenue: 91,  target: 80  },
+  { month: 'Mar', revenue: 100, target: 85  },
+  { month: 'Apr', revenue: 78,  target: 80  },
+]
+
+interface Insight { variant: string; title: string; desc: string }
+
+const INSIGHTS: Insight[] = [
+  { variant: styles.insightPositive, title: 'Revenue on Track',        desc: 'Current trajectory exceeds Q1 target by 15%. Strong VIP ticket sales driving growth.' },
+  { variant: styles.insightDefault,  title: 'High Engagement',         desc: 'Attendees averaging 4.2 sessions — 40% above industry benchmark.' },
+  { variant: styles.insightWarning,  title: 'Email Open Rate Dipping',  desc: 'Open rates dropped 6% this week. Consider A/B testing subject lines.' },
+  { variant: styles.insightPositive, title: 'Workshop Demand Surging',  desc: 'All 12 workshops now at 90%+ capacity. Consider adding overflow sessions.' },
+]
+
+interface PerfItem { title: string; metric: string; metricClass: string; pct: number; fillClass: string; label: string; badgeClass: string; badge: string }
+
+const PERFORMANCE: PerfItem[] = [
+  {
+    title:       'Ticket Conversion',
+    metric:      '68%',
+    metricClass: styles.perfMetricHigh,
+    pct:         68,
+    fillClass:   styles.progressFillHigh,
+    label:       'of page visitors converted',
+    badgeClass:  styles.metricBadgeHigh,
+    badge:       'High',
+  },
+  {
+    title:       'Email Open Rate',
+    metric:      '42%',
+    metricClass: styles.perfMetricMedium,
+    pct:         42,
+    fillClass:   styles.progressFillMedium,
+    label:       'industry avg: 38%',
+    badgeClass:  styles.metricBadgeMedium,
+    badge:       'Medium',
+  },
+  {
+    title:       'App Engagement',
+    metric:      '78%',
+    metricClass: styles.perfMetricHigh,
+    pct:         78,
+    fillClass:   styles.progressFillHigh,
+    label:       'of attendees using app',
+    badgeClass:  styles.metricBadgeHigh,
+    badge:       'High',
+  },
+]
+
+interface SessionRow { name: string; speaker: string; attendees: number; rating: string; badge: string; badgeClass: string }
+
+const SESSIONS: SessionRow[] = [
+  { name: 'The Future of AI',           speaker: 'Dr. Sarah Chen',    attendees: 520, rating: '4.9', badge: 'High',   badgeClass: styles.metricBadgeHigh   },
+  { name: 'Cloud Architecture at Scale', speaker: 'Marcus Johnson',   attendees: 380, rating: '4.7', badge: 'High',   badgeClass: styles.metricBadgeHigh   },
+  { name: 'DevOps Best Practices',       speaker: 'Emma Rodriguez',   attendees: 290, rating: '4.5', badge: 'High',   badgeClass: styles.metricBadgeHigh   },
+  { name: 'Web3 & Decentralization',     speaker: 'Alex Thompson',    attendees: 210, rating: '4.2', badge: 'Medium', badgeClass: styles.metricBadgeMedium },
+  { name: 'Security in the Age of AI',   speaker: 'Priya Patel',      attendees: 340, rating: '4.6', badge: 'High',   badgeClass: styles.metricBadgeHigh   },
 ]
 
 export default function AnalyticsPage() {
-  const [eventId, setEventId] = useState(events[0]?.id ?? '')
+  const [activeDateRange, setActiveDateRange] = useState('Last 30 Days')
 
-  const kpis    = eventKpis[eventId]    ?? {}
-  const revenue = revenueSummary[eventId] ?? { byTicketType: [], totalRevenue: 0 }
-  const funnel  = funnelMetrics[eventId]  ?? { byStep: [], pageViews: 0, checkoutCompletions: 0, abandonmentRate: 0, conversionRate: 0 }
-  const trend   = attendanceTrend[eventId] ?? { byDay: [] }
+  const maxRevenue = Math.max(...BAR_DATA.map(b => b.revenue))
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', background: 'var(--off)' }}>
-      <PageHeader title="Analytics" subtitle="Event performance metrics and revenue insights" />
+    <div className={styles.page}>
 
-      {/* Event selector */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 32px', borderBottom: '1px solid var(--border)', background: 'var(--white)', flexShrink: 0 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em', color: 'var(--ink-3)' }}>Event</span>
-        <select value={eventId} onChange={e => setEventId(e.target.value)} style={{ fontFamily: 'var(--font)', fontSize: 13, fontWeight: 600, padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--border)', background: 'var(--white)', color: 'var(--ink)', cursor: 'pointer', outline: 'none' }}>
-          {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
-        </select>
-      </div>
+      {/* ── Page Header ── */}
+      <header className={styles.pageHeader}>
+        <div className={styles.headerContainer}>
+          <div className={styles.headerTop}>
+            <div className={styles.headerTitle}>
+              <h1>Event Analytics</h1>
+              <p className={styles.headerSubtitle}>Comprehensive performance metrics and insights for Tech Summit 2026</p>
+            </div>
+            <div className={styles.dateRange}>
+              {DATE_RANGES.map(r => (
+                <button
+                  key={r}
+                  className={`${styles.dateBtn}${activeDateRange === r ? ` ${styles.dateBtnActive}` : ''}`}
+                  onClick={() => setActiveDateRange(r)}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <div style={{ padding: '24px 32px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* ── Content ── */}
+      <main className={styles.content}>
 
-        {/* KPI grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-          {KPI_DEFS.map(d => {
-            const val = (kpis as Record<string, number>)[d.key] ?? 0
-            return (
-              <div key={d.key} style={{ background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: 14, padding: '18px 20px', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em', color: 'var(--ink-3)', marginBottom: 8 }}>{d.label}</div>
-                <div style={{ fontSize: 26, fontWeight: 800, color: d.color, fontFamily: 'var(--font-mono)' }}>{d.fmt(val)}</div>
-              </div>
-            )
-          })}
+        {/* KPI Grid */}
+        <div className={styles.kpiGrid}>
+          {KPIS.map((k, i) => (
+            <div key={i} className={`${styles.kpiCard} ${k.variant}`}>
+              <div className={styles.kpiIcon}>{k.icon}</div>
+              <div className={styles.kpiLabel}>{k.label}</div>
+              <div className={styles.kpiValue}>{k.value}</div>
+              <div className={styles.kpiChange}>{k.change}</div>
+            </div>
+          ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {/* Revenue by ticket type */}
-          <Card>
-            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>Revenue by Ticket Type</div>
-              {revenue.byTicketType.length === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--ink-4)', padding: '16px 0' }}>No revenue data</div>
-              ) : revenue.byTicketType.map((r, i) => {
-                const frac = revenue.totalRevenue > 0 ? r.revenue / revenue.totalRevenue : 0
-                return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>{r.ticketName}</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--g-dk)' }}>{fmtAmount(r.revenue)}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3 }}>
-                        <div style={{ width: `${Math.round(frac * 100)}%`, height: '100%', background: 'var(--g-md)', borderRadius: 3 }} />
-                      </div>
-                      <span style={{ fontSize: 11, color: 'var(--ink-3)', width: 36, textAlign: 'right' }}>{fmtPct(frac)}</span>
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--ink-4)' }}>{r.count.toLocaleString()} tickets</div>
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
+        {/* Content Grid — chart + insights */}
+        <div className={styles.contentGrid}>
 
-          {/* Checkout funnel */}
-          <Card>
-            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>Checkout Funnel</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 8 }}>
-                <div style={{ padding: '12px', background: 'var(--i-lt)', borderRadius: 10 }}>
-                  <div style={{ fontSize: 11, color: 'var(--i-md)', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Page Views</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 800, color: 'var(--i-dk)' }}>{fmtNum(funnel.pageViews)}</div>
+          {/* Revenue Trends Chart */}
+          <div className={styles.chartCard}>
+            <div className={styles.cardHeader}>
+              <div>
+                <div className={styles.cardTitle}>Revenue Trends</div>
+                <div className={styles.cardSubtitle}>Monthly revenue vs target</div>
+              </div>
+              <div className={styles.chartLegend}>
+                <div className={styles.legendItem}>
+                  <div className={`${styles.legendDot} ${styles.legendDotRevenue}`} />
+                  Revenue
                 </div>
-                <div style={{ padding: '12px', background: 'var(--f-lt)', borderRadius: 10 }}>
-                  <div style={{ fontSize: 11, color: 'var(--f-md)', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Completed</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 800, color: 'var(--f-dk)' }}>{fmtNum(funnel.checkoutCompletions)}</div>
+                <div className={styles.legendItem}>
+                  <div className={`${styles.legendDot} ${styles.legendDotTarget}`} />
+                  Target
                 </div>
               </div>
-              {funnel.byStep.length === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--ink-4)', padding: '16px 0' }}>No funnel data</div>
-              ) : funnel.byStep.map((step, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>{step.step}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>{fmtNum(step.count)}</span>
+            </div>
+            <div className={styles.barChart}>
+              {BAR_DATA.map((b, i) => (
+                <div key={i} className={styles.barGroup}>
+                  <div className={styles.barWrap}>
+                    <div
+                      className={styles.bar}
+                      style={{ height: `${(b.revenue / maxRevenue) * 100}%` }}
+                    />
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--b-dk)' }}>↓ {fmtPct(step.dropOffRate)} drop-off</div>
+                  <div className={styles.barLabel}>{b.month}</div>
                 </div>
               ))}
-              <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                <span style={{ color: 'var(--ink-3)' }}>Abandonment Rate</span>
-                <span style={{ fontWeight: 700, color: 'var(--b-dk)', fontFamily: 'var(--font-mono)' }}>{fmtPct(funnel.abandonmentRate)}</span>
-              </div>
             </div>
-          </Card>
+          </div>
+
+          {/* Key Insights */}
+          <div className={styles.insightsCard}>
+            <div className={styles.cardTitle}>Key Insights</div>
+            <div className={styles.insightsList}>
+              {INSIGHTS.map((ins, i) => (
+                <div key={i} className={`${styles.insightItem} ${ins.variant}`}>
+                  <div className={styles.insightTitle}>{ins.title}</div>
+                  <div className={styles.insightDesc}>{ins.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
 
-        {/* Registration trend table */}
-        {trend.byDay.length > 0 && (
-          <Card flush>
-            <div style={{ padding: '14px 20px 0', fontSize: 13, fontWeight: 700, color: 'var(--ink)', borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>Registration Trend</div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: '10px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' as const, letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>Date</th>
-                  <th style={{ padding: '10px 20px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' as const, letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>Registrations</th>
-                  <th style={{ padding: '10px 20px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase' as const, letterSpacing: '0.05em', background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>Check-ins</th>
+        {/* Performance Grid */}
+        <div className={styles.performanceGrid}>
+          {PERFORMANCE.map((p, i) => (
+            <div key={i} className={styles.perfCard}>
+              <div className={styles.perfHeader}>
+                <div className={styles.perfTitle}>{p.title}</div>
+                <span className={`${styles.metricBadge} ${p.badgeClass}`}>{p.badge}</span>
+              </div>
+              <div className={`${styles.perfMetric} ${p.metricClass}`}>{p.metric}</div>
+              <div className={styles.progressBar}>
+                <div className={`${styles.progressFill} ${p.fillClass}`} style={{ width: `${p.pct}%` }} />
+              </div>
+              <div className={styles.perfLabel}>{p.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Session Performance Table */}
+        <div className={styles.tableCard}>
+          <div className={styles.tableHeader}>
+            <div>
+              <div className={styles.cardTitle}>Session Performance</div>
+              <div className={styles.cardSubtitle}>Top sessions by attendance and rating</div>
+            </div>
+          </div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Session</th>
+                <th>Speaker</th>
+                <th>Attendees</th>
+                <th>Rating</th>
+                <th>Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SESSIONS.map((s, i) => (
+                <tr key={i}>
+                  <td className={styles.sessionName}>{s.name}</td>
+                  <td>{s.speaker}</td>
+                  <td>{s.attendees.toLocaleString()}</td>
+                  <td>{'⭐'.repeat(1)} {s.rating}</td>
+                  <td><span className={`${styles.metricBadge} ${s.badgeClass}`}>{s.badge}</span></td>
                 </tr>
-              </thead>
-              <tbody>
-                {trend.byDay.map((d, i) => (
-                  <tr key={i}>
-                    <td style={{ padding: '10px 20px', borderBottom: '1px solid var(--border)', fontSize: 12, color: 'var(--ink-3)', fontFamily: 'var(--font-mono)' }}>
-                      {new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </td>
-                    <td style={{ padding: '10px 20px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--i-dk)' }}>{d.registrations > 0 ? fmtNum(d.registrations) : '—'}</td>
-                    <td style={{ padding: '10px 20px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--f-dk)' }}>{d.checkins > 0 ? fmtNum(d.checkins) : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        )}
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+      </main>
     </div>
   )
 }

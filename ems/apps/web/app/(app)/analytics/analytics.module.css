@@ -1,72 +1,471 @@
+/* ── Analytics Page — faithful port of analytics-page.html ── */
+
 .page {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  background: var(--off);
+  min-height: 100%;
 }
 
+/* ── PAGE HEADER ── */
+.pageHeader {
+  background: var(--white);
+  padding: var(--space-12) var(--space-10);
+  border-bottom: 1px solid var(--border);
+}
+
+.headerContainer {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.headerTitle h1 {
+  font-size: 42px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-2);
+}
+
+.headerSubtitle {
+  font-size: var(--text-md);
+  color: var(--ink-3);
+}
+
+.dateRange {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dateBtn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  background: var(--white);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.dateBtn:hover {
+  border-color: var(--border-strong);
+  color: var(--ink-2);
+}
+
+.dateBtnActive {
+  background: var(--ink);
+  color: var(--white);
+  border-color: var(--ink);
+}
+
+/* ── CONTENT ── */
 .content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: var(--space-10);
 }
 
-/* ── Event selector bar ──────────────────────────────────────── */
-.selectorBar {
+/* ── KPI GRID ── */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.kpiCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Colored blob glow — P-007 flat variants */
+.kpiCard::before {
+  content: '';
+  position: absolute;
+  top: -40px; /* raw — layout dimension */
+  right: -40px;
+  width: 120px; /* raw — layout dimension */
+  height: 120px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.kpiCardRevenue::before    { background: radial-gradient(circle, rgba(245,158,11,.15) 0%, transparent 70%); }
+.kpiCardAttendees::before  { background: radial-gradient(circle, rgba(13,148,136,.15) 0%, transparent 70%); }
+.kpiCardEngagement::before { background: radial-gradient(circle, rgba(79,70,229,.15) 0%, transparent 70%); }
+.kpiCardSatisfaction::before { background: radial-gradient(circle, rgba(22,163,74,.15) 0%, transparent 70%); }
+
+.kpiIcon {
+  width: 48px; /* raw — layout dimension */
+  height: 48px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
 }
 
-.selectorLabel {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.kpiCardRevenue    .kpiIcon { background: var(--g-lt); border: 1px solid var(--g-border); }
+.kpiCardAttendees  .kpiIcon { background: var(--t-lt); border: 1px solid var(--t-border); }
+.kpiCardEngagement .kpiIcon { background: var(--i-lt); border: 1px solid var(--i-border); }
+.kpiCardSatisfaction .kpiIcon { background: var(--f-lt); border: 1px solid var(--f-border); }
+
+.kpiLabel {
+  font-size: var(--text-sm);
   color: var(--ink-3);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-1);
+}
+
+.kpiValue {
+  font-size: 32px; /* raw — layout dimension */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-1);
+}
+
+.kpiCardRevenue    .kpiValue { color: var(--g-md); }
+.kpiCardAttendees  .kpiValue { color: var(--t-md); }
+.kpiCardEngagement .kpiValue { color: var(--i-md); }
+.kpiCardSatisfaction .kpiValue { color: var(--f-md); }
+
+.kpiChange {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--f-md);
+}
+
+/* ── CONTENT GRID ── */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+/* ── CHART CARD ── */
+.chartCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-6);
+}
+
+.cardTitle {
+  font-size: 18px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+}
+
+.cardSubtitle {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  margin-top: 4px; /* raw — off grid */
+}
+
+.chartLegend {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.legendDot {
+  width: 8px; /* raw — layout dimension */
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legendDotRevenue { background: var(--g-md); }
+.legendDotTarget  { background: var(--border-strong); }
+
+/* Bar chart */
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  height: 200px; /* raw — layout dimension */
+  padding-bottom: 28px; /* raw — space for bar label */
+  position: relative;
+}
+
+.barGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.barWrap {
+  width: 100%;
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0; /* raw — off radius tokens */
+  background: var(--g-md);
+  transition: all 0.15s;
+}
+
+.bar:hover {
+  background: var(--g-dk);
+}
+
+.barLabel {
+  font-size: 11px; /* raw — R-044 */
+  color: var(--ink-3);
+  font-weight: var(--weight-semibold);
+  position: absolute;
+  bottom: -24px; /* raw — layout dimension */
+  left: 50%;
+  transform: translateX(-50%);
   white-space: nowrap;
 }
 
-.select {
-  font-family: var(--font);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  padding: 7px 32px 7px var(--space-3);
-  border-radius: var(--radius);
-  border: var(--border-width) solid var(--border);
-  background: var(--white)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8880' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    no-repeat right 12px center;
-  background-size: 10px 6px;
-  color: var(--ink);
-  appearance: none;
-  cursor: pointer;
-  outline: none;
-  max-width: 400px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+/* ── INSIGHTS PANEL ── */
+.insightsCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
 }
-.select:focus   { border-color: var(--i-md); box-shadow: 0 0 0 3px var(--i-border); }
-.select:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ── KPI grid ────────────────────────────────────────────────── */
-.kpiGrid {
+.insightsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.insightItem {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid transparent; /* raw — accent left border */
+}
+
+.insightPositive {
+  background: var(--f-lt);
+  border-left-color: var(--f-md);
+}
+
+.insightDefault {
+  background: var(--i-lt);
+  border-left-color: var(--i-md);
+}
+
+.insightWarning {
+  background: var(--a-lt);
+  border-left-color: var(--a-md);
+}
+
+.insightTitle {
+  font-size: 13px; /* raw — R-044 */
+  font-weight: var(--weight-bold);
+  margin-bottom: 4px; /* raw — off grid */
+}
+
+.insightPositive .insightTitle { color: var(--f-dk); }
+.insightDefault  .insightTitle { color: var(--i-dk); }
+.insightWarning  .insightTitle { color: var(--a-dk); }
+
+.insightDesc {
+  font-size: 12px; /* raw — R-044 */
+  line-height: 1.5;
+}
+
+.insightPositive .insightDesc { color: var(--f-dk); opacity: 0.8; }
+.insightDefault  .insightDesc { color: var(--i-dk); opacity: 0.8; }
+.insightWarning  .insightDesc { color: var(--a-dk); opacity: 0.8; }
+
+/* ── PERFORMANCE GRID ── */
+.performanceGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
 }
 
-/* ── Two-column layout ───────────────────────────────────────── */
-.twoCol {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+.perfCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
+.perfHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.perfTitle {
+  font-size: 15px; /* raw — R-001 */
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+.perfMetric {
+  font-size: 32px; /* raw — layout dimension */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-3);
+}
+
+.perfMetricHigh   { color: var(--f-md); }
+.perfMetricMedium { color: var(--a-md); }
+
+.progressBar {
+  height: 8px; /* raw — layout dimension */
+  background: var(--border);
+  border-radius: 4px; /* raw — off radius tokens */
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.progressFillHigh   { background: var(--f-md); }
+.progressFillMedium { background: var(--a-md); }
+
+.perfLabel {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  font-weight: var(--weight-semibold);
+}
+
+.metricBadge {
+  padding: 4px 10px; /* raw — off grid */
+  border-radius: 6px; /* raw — off radius tokens */
+  font-size: 11px; /* raw — R-044 */
+  font-weight: var(--weight-bold);
+}
+
+.metricBadgeHigh {
+  background: var(--f-lt);
+  color: var(--f-dk);
+  border: 1px solid var(--f-border);
+}
+
+.metricBadgeMedium {
+  background: var(--a-lt);
+  color: var(--a-dk);
+  border: 1px solid var(--a-border);
+}
+
+/* ── SESSION TABLE ── */
+.tableCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.tableHeader {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: var(--space-3) var(--space-6);
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ink-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: var(--surface);
+}
+
+.sessionName {
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+/* ── ANIMATION (D-010 — opacity only) ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.kpiCard {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.kpiCard:nth-child(1) { animation-delay: 0s;    }
+.kpiCard:nth-child(2) { animation-delay: 0.05s; }
+.kpiCard:nth-child(3) { animation-delay: 0.1s;  }
+.kpiCard:nth-child(4) { animation-delay: 0.15s; }
+
+/* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  .kpiGrid { grid-template-columns: repeat(2, 1fr); }
-  .twoCol  { grid-template-columns: 1fr; }
+  .kpiGrid         { grid-template-columns: repeat(2, 1fr); }
+  .contentGrid     { grid-template-columns: 1fr; }
+  .performanceGrid { grid-template-columns: 1fr; }
+  .pageHeader      { padding: var(--space-8) var(--space-6); }
+  .content         { padding: var(--space-6); }
+  .headerTop       { flex-direction: column; gap: var(--space-4); }
 }
