@@ -1,60 +1,451 @@
-.page    { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-.content { flex: 1; overflow-y: auto; padding: 24px; }
+/* ── Settings Page — faithful port of settings-page.html ── */
 
-/* ── Tabs ── */
-.tabs {
-  display: flex;
-  gap: 2px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--white);
-  flex-shrink: 0;
+.page {
+  background: var(--off);
+  min-height: 100%;
 }
-.tab {
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 12px 16px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: transparent;
+
+/* ── PAGE HEADER ── */
+.pageHeader {
+  background: var(--white);
+  padding: var(--space-10);
+  border-bottom: 1px solid var(--border);
+}
+
+.headerContainer {
+  max-width: 1200px; /* raw — layout dimension */
+  margin: 0 auto;
+}
+
+.headerTitle h1 {
+  font-size: 36px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-2);
+}
+
+.headerSubtitle {
+  font-size: 15px; /* raw — R-001 */
+  color: var(--ink-3);
+}
+
+/* ── CONTENT ── */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-10);
+}
+
+.settingsLayout {
+  display: grid;
+  grid-template-columns: 240px 1fr; /* raw — 240px fixed sidebar */
+  gap: var(--space-8);
+}
+
+/* ── SIDEBAR ── */
+.settingsSidebar {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  height: fit-content;
+  position: sticky;
+  top: 120px; /* raw — layout dimension */
+}
+
+.settingsNav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* raw — off grid */
+}
+
+.settingsTab {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* raw — off spacing */
+  padding: 12px 16px; /* raw — off spacing */
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   color: var(--ink-3);
   cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-bottom: -1px;
+  transition: all 0.15s;
+  border: 1.5px solid transparent; /* raw — 1.5px */
+  background: transparent;
+  text-align: left;
+  font-family: var(--font);
+  width: 100%;
 }
-.tab:hover { color: var(--ink-2); }
-.tabActive  { color: var(--ink); border-bottom-color: var(--i-md); }
 
-/* ── Account grid ── */
-.accountGrid {
+.settingsTab:hover {
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.settingsTabActive {
+  background: var(--i-lt);
+  color: var(--i-dk);
+  border-color: var(--i-border);
+}
+
+.settingsTabIcon {
+  width: 18px; /* raw — layout dimension */
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── SETTINGS PANEL ── */
+.settingsPanel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+}
+
+.panelSection {
+  padding-bottom: var(--space-8);
+  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--border);
+}
+
+.panelSection:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* ── SECTION HEADER ── */
+.sectionHeader {
+  margin-bottom: var(--space-6);
+}
+
+.sectionTitle {
+  font-size: 18px; /* raw — off type scale */
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px; /* raw — off grid */
+}
+
+.sectionDescription {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+/* ── FORM ELEMENTS ── */
+.formGroup {
+  margin-bottom: var(--space-6);
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.formLabel {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  margin-bottom: var(--space-2);
+}
+
+.formHelper {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  margin-top: 6px; /* raw — off grid */
+  line-height: 1.5;
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px 16px; /* raw — off spacing */
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--white);
+  transition: all 0.15s;
+  outline: none;
+}
+
+.formInput:focus {
+  border-color: var(--i-md);
+  box-shadow: 0 0 0 3px var(--i-border); /* raw — focus ring */
+}
+
+.formSelect {
+  width: 100%;
+  padding: 12px 16px; /* raw — off spacing */
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+  outline: none;
+}
+
+.formSelect:focus {
+  border-color: var(--i-md);
+  box-shadow: 0 0 0 3px var(--i-border);
+}
+
+/* ── AVATAR UPLOAD ── */
+.avatarUpload {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* raw — off spacing */
+}
+
+.avatarPreview {
+  width: 80px; /* raw — layout dimension */
+  height: 80px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--i-md) 0%, var(--t-md) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: var(--weight-extrabold);
+  font-size: 28px; /* raw — off type scale */
+  border: 3px solid var(--border); /* raw — 3px */
+  flex-shrink: 0;
+}
+
+.avatarActions {
+  display: flex;
+  gap: 12px; /* raw — off spacing */
+}
+
+/* ── TOGGLE SWITCH ── */
+.toggleGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-4) 0;
+}
+
+.toggleInfo {
+  flex: 1;
+}
+
+.toggleLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  margin-bottom: 4px; /* raw — off grid */
+}
+
+.toggleDescription {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.toggleSwitch {
+  width: 48px; /* raw — layout dimension */
+  height: 28px;
+  background: var(--border-strong);
+  border-radius: 14px; /* raw — pill exactly half */
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  border: none;
+}
+
+.toggleSwitch::after {
+  content: '';
+  position: absolute;
+  top: 3px; /* raw — layout dimension */
+  left: 3px;
+  width: 22px; /* raw — layout dimension */
+  height: 22px;
+  background: var(--white);
+  border-radius: 50%;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.toggleSwitchActive {
+  background: var(--t-md);
+}
+
+.toggleSwitchActive::after {
+  left: 23px; /* raw — layout dimension: 48 - 22 - 3 */
+}
+
+/* ── INTEGRATION CARDS ── */
+.integrationGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  max-width: 800px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
 }
-@media (max-width: 600px) { .accountGrid { grid-template-columns: 1fr; } }
 
-/* ── Detail list ── */
-.detailList { display: flex; flex-direction: column; gap: 0; }
-.detailRow {
+.integrationCard {
+  padding: 20px; /* raw — off spacing */
+  background: var(--surface);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.integrationCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.integrationCardConnected {
+  background: var(--f-lt);
+  border-color: var(--f-border);
+}
+
+.integrationIcon {
+  width: 48px; /* raw — layout dimension */
+  height: 48px;
+  border-radius: var(--radius);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px; /* raw — off type scale */
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+  flex-shrink: 0;
+}
+
+.integrationInfo {
+  flex: 1;
+}
+
+.integrationName {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  margin-bottom: 4px; /* raw — off grid */
+}
+
+.integrationStatus {
+  font-size: 12px; /* raw — R-044 */
+  color: var(--ink-3);
+}
+
+.integrationStatusConnected {
+  color: var(--f-dk);
+  font-weight: var(--weight-semibold);
+}
+
+/* ── DANGER ZONE ── */
+.dangerZone {
+  background: var(--b-lt);
+  border: 2px solid var(--b-border); /* raw — 2px */
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.dangerZoneHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* raw — off spacing */
+  margin-bottom: var(--space-4);
+}
+
+.dangerZoneIcon {
+  font-size: 24px; /* raw — off type scale */
+}
+
+.dangerZoneTitle {
+  font-size: var(--text-md);
+  font-weight: var(--weight-extrabold);
+  color: var(--b-dk);
+}
+
+.dangerZoneDescription {
+  font-size: var(--text-sm);
+  color: var(--b-dk);
+  margin-bottom: var(--space-4);
+  line-height: 1.6;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 10px 20px; /* raw — off spacing */
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btnSecondary {
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 1.5px solid var(--border); /* raw — 1.5px */
+}
+
+.btnSecondary:hover {
+  background: var(--border);
+}
+
+.btnDanger {
+  background: var(--b-lt);
+  color: var(--b-dk);
+  border: 1.5px solid var(--b-border); /* raw — 1.5px */
+}
+
+.btnDanger:hover {
+  background: var(--b-md);
+  color: var(--white);
+}
+
+.btnPrimary {
+  background: var(--t-md);
+  color: var(--white);
+}
+
+.btnPrimary:hover {
+  background: var(--t-dk);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── SETTINGS FOOTER ── */
+.settingsFooter {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  gap: 16px;
 }
-.detailRow:last-child { border-bottom: none; }
-.detailLabel { font-size: 12px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
-.detailValue { font-size: 13px; font-weight: 600; color: var(--ink); text-align: right; }
 
-/* ── Team table ── */
-.memberCell  { display: flex; align-items: center; gap: 10px; }
-.memberName  { font-size: 13px; font-weight: 700; color: var(--ink); }
-.memberEmail { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 1px; }
-.mono        { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+.footerMessage {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
 
-.skeleton { height: 120px; border-radius: var(--radius); background: linear-gradient(90deg, var(--surface) 0%, var(--border) 40%, var(--surface) 80%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-.empty { font-size: 13px; color: var(--ink-3); padding: 8px 0; }
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .settingsLayout {
+    grid-template-columns: 1fr;
+  }
+  .settingsSidebar {
+    position: static;
+  }
+  .integrationGrid {
+    grid-template-columns: 1fr;
+  }
+  .pageHeader { padding: var(--space-8) var(--space-6); }
+  .content    { padding: var(--space-6); }
+}

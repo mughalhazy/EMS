@@ -383,6 +383,43 @@
 
 ---
 
+## Settings Page — settings-page.html → settings/ [43]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-110 | settings | `36px` h1 font-size | raw — off type scale | logged |
+| R-111 | settings | `240px` sidebar grid column width | raw — layout dimension | logged |
+| R-112 | settings | `120px` sidebar sticky top | raw — layout dimension | logged |
+| R-113 | settings | `80px` avatar size | raw — layout dimension | logged |
+| R-114 | settings | `28px` avatar initials font-size | raw — off type scale | logged |
+| R-115 | settings | `3px` avatar border | raw — off border tokens | logged |
+| R-116 | settings | `48px / 28px` toggle switch width/height | raw — layout dimension | logged |
+| R-117 | settings | `14px` toggle border-radius | raw — exactly half of 28px height | logged |
+| R-118 | settings | `22px` toggle knob size | raw — layout dimension | logged |
+| R-119 | settings | `3px / 23px` toggle knob left off/on | raw — layout dimension | logged |
+| R-120 | settings | `18px` settings-tab-icon size | raw — layout dimension | logged |
+| R-121 | settings | `4px` settings-nav gap | raw — off grid | logged |
+| R-122 | settings | `12px 16px` settings-tab padding | raw — off spacing scale | logged |
+| R-123 | settings | `18px` section-title font-size | raw — off type scale | logged |
+| R-124 | settings | `24px` integration-icon font-size | raw — off type scale | logged |
+| R-125 | settings | `48px` integration icon container size | raw — layout dimension | logged |
+| R-126 | settings | `2px` danger-zone border | raw — off border tokens | logged |
+| R-127 | settings | `0 0 0 3px var(--i-border)` input focus ring | raw — custom focus shadow | logged |
+| M-056 | settings | `.settings-tab.active` | flat class `.settingsTabActive` (P-007) | resolved |
+| M-057 | settings | `.toggle-switch.active` | flat class `.toggleSwitchActive` (P-007) | resolved |
+| M-058 | settings | `.integration-card.connected` | flat class `.integrationCardConnected` (P-007) | resolved |
+| M-059 | settings | `.integration-status.connected` | flat class `.integrationStatusConnected` (P-007) | resolved |
+| M-060 | settings | `.btn-primary / .btn-secondary / .btn-danger` | flat classes `.btnPrimary / .btnSecondary / .btnDanger` (P-007) | resolved |
+| D-074 | settings | Page was scaffold pulling from mock tenant/users via renderer | full rewrite: CSS module + static TABS/TOGGLES/INTEGRATIONS, controlled form state | fixed |
+| D-075 | settings | Missing sidebar tab navigation (6 tabs with icons + active state) | Added `.settingsSidebar` + `.settingsNav` + `.settingsTabActive` flat class | fixed |
+| D-076 | settings | Missing toggle switches (functional on/off state) | Added `.toggleSwitch` + `.toggleSwitchActive` with `::after` knob pseudo-element | fixed |
+| D-077 | settings | Missing integration cards (connected variant) | Added `.integrationCardConnected` + `.integrationStatusConnected` flat variants | fixed |
+| D-078 | settings | Missing danger zone (red box with delete action) | Added `.dangerZone` with b-lt bg + 2px b-border + `.btnDanger` | fixed |
+
+---
+
 ## Analytics Page — analytics-page.html → analytics/ [39]
 
 ### Design Decisions

@@ -800,6 +800,16 @@ Full one-pass normalization of `registration-page.html` → `registrations/page.
 
 ---
 
+## [43] Settings Page — Normalized to settings-page.html Spec
+
+Full one-pass normalization of `settings-page.html` → `settings/page.tsx` + `settings/settings.module.css`.
+
+**Key changes:**
+- `settings.module.css` — complete rewrite: white page header (36px h1); content 1200px max-width; settings-layout 240px+1fr grid; sticky sidebar (top 120px, radius-xl, 16px pad) with 6 nav tabs and flat `.settingsTabActive` (i-lt bg, i-dk color, 1.5px i-border); settings panel (radius-xl, 32px pad); panel sections with bottom border separators; form elements (formInput/formSelect with 1.5px border, radius-lg, indigo focus ring); avatar upload (80px radius-lg gradient i-md→t-md, 28px initials, 3px border); toggle switches (48×28px, radius 14px, 22×22px ::after knob, flat `.toggleSwitchActive` t-md); 2-col integration grid (flat `.integrationCardConnected` f-lt bg + f-border, `.integrationStatusConnected` f-dk); danger zone (b-lt bg, 2px b-border, radius-lg); 3 button variants (btnSecondary/btnDanger/btnPrimary); settings footer (border-top, space-between)
+- `settings/page.tsx` — complete rewrite: TABS (6 with inline SVG icons), TOGGLES (5 with initial on/off), INTEGRATIONS (4); activeTab state; toggles boolean[] state with toggleNotification(); controlled inputs (fullName/email/role/language/timezone/dateFormat); flat class helpers; zero inline styles; zero mock-data wiring (P-012)
+
+---
+
 ## [39] Analytics Page — Normalized to analytics-page.html Spec
 
 Full one-pass normalization of `analytics-page.html` → `analytics/page.tsx` + `analytics/analytics.module.css`.
