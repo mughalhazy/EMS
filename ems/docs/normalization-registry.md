@@ -515,3 +515,33 @@
 | D-071 | notifications | Missing unread state (i-lt bg + 4px i-md left bar) | Added `.notificationItemUnread` + `::before` accent | fixed |
 | D-072 | notifications | Missing sidebar panels (Quick Stats / Priority Alerts / Recent Activity) | Added all 3 sidebar widgets with timeline | fixed |
 | D-073 | notifications | Animation was `slideIn` (transform translateX) | D-010 fix: opacity-only `.fadeIn` | fixed |
+
+---
+
+## TopNav — events-top-nav .html → components/nav/ [44]
+
+### Design Decisions
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-128 | top-nav | `rgba(255,255,255,0.9)` topbar bg | raw — glass effect | logged |
+| R-129 | top-nav | `blur(24px)` backdrop filter | raw — spec value | logged |
+| R-130 | top-nav | `1600px` container max-width | raw — layout dimension | logged |
+| R-131 | top-nav | `20px 40px` container padding | raw — layout dimension | logged |
+| R-132 | top-nav | `40px` logo mark size | raw — layout dimension | logged |
+| R-133 | top-nav | `11px` logo mark border-radius | raw — between radius (8px) and radius-lg (14px) | logged |
+| R-134 | top-nav | `19px` logo mark font-size | raw — off type scale | logged |
+| R-135 | top-nav | `rgba(0,0,0,0.03)` nav-group bg | raw — subtle pill bg | logged |
+| R-136 | top-nav | `rgba(13,148,136,0.04)` primary group bg | raw — teal tint | logged |
+| R-137 | top-nav | `10px` nav-group border-radius | raw — between radius (8px) and radius-lg (14px) | logged |
+| R-138 | top-nav | `3px` nav-group padding | raw — off grid | logged |
+| R-139 | top-nav | `7px 12px` nav-link padding | raw — off spacing scale | logged |
+| R-140 | top-nav | `13px` nav-link font-size | raw — matches text-sm token | logged |
+| R-141 | top-nav | `1px × 24px` nav-divider size | raw — layout dimension | logged |
+| R-142 | top-nav | `36px` icon button size | raw — layout dimension | logged |
+| R-143 | top-nav | `8px` notification badge size | raw — layout dimension | logged |
+| M-061 | top-nav | `.nav-link.active` | flat class `.navLinkActive` (P-007) | resolved |
+| M-062 | top-nav | `.nav-group.primary` | flat class `.navGroupPrimary` (P-007) | resolved |
+| D-079 | top-nav | Was flat single NAV_LINKS array, no grouping | Rewrote to 4 GROUP_* arrays + NavGroup helper component | fixed |
+| D-080 | top-nav | Missing pill containers (nav-group) + separators (nav-divider) | Added `.navGroup` + `.navGroupPrimary` + `.navDivider` | fixed |
+| D-081 | top-nav | Missing icon action buttons (notifications + settings) | Added `.navActions` + `.navIconBtn` + `.navBadge` | fixed |

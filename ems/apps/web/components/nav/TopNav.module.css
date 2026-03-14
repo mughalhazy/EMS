@@ -1,12 +1,12 @@
 /* ============================================================
-   TopNav — faithful port of events/agenda/speakers-page.html
-   .topbar + .topbar-container + .nav-links + .nav-link
+   TopNav — faithful port of events-top-nav .html
+   Grouped nav: 4 pill containers + dividers + icon actions
    ============================================================ */
 
 /* matches .topbar */
 .topbar {
-  background: rgba(255, 255, 255, 0.85); /* raw — glass effect */
-  backdrop-filter: blur(20px); /* raw */
+  background: rgba(255, 255, 255, 0.9); /* raw — glass effect */
+  backdrop-filter: blur(24px); /* raw */
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
@@ -16,84 +16,168 @@
 
 /* matches .topbar-container */
 .container {
-  max-width: 1400px; /* raw — layout dimension */
+  max-width: 1600px; /* raw — layout dimension */
   margin: 0 auto;
-  padding: 16px var(--space-10); /* 16px raw */
+  padding: 20px 40px; /* raw — layout dimension */
   display: flex;
   align-items: center;
-  gap: 48px; /* raw — layout dimension */
+  gap: 40px; /* raw — layout dimension */
 }
 
-/* ── Logo — matches .logo ────────────────────────────────── */
+/* ── Logo ──────────────────────────────────────────────────── */
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px; /* raw — R-015 */
+  gap: 10px; /* raw */
   text-decoration: none;
   flex-shrink: 0;
 }
 
 /* matches .logo-mark */
 .logoMark {
-  width: 36px;  /* raw — R-004 */
-  height: 36px; /* raw */
+  width: 40px;  /* raw — layout dimension */
+  height: 40px;
   background: linear-gradient(135deg, var(--t-dk) 0%, var(--t-md) 100%);
-  border-radius: 10px; /* raw — between radius (8px) and radius-lg (14px) */
+  border-radius: 11px; /* raw — between radius (8px) and radius-lg (14px) */
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--white);
   font-weight: var(--weight-extrabold);
-  font-size: 18px; /* raw — T-008 */
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); /* raw — R-022 */
+  font-size: 19px; /* raw */
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); /* raw */
 }
 
 /* matches .logo-text */
 .logoText {
-  font-size: 17px; /* raw — T-021 */
+  font-size: 17px; /* raw */
   font-weight: var(--weight-extrabold);
   letter-spacing: -0.02em;
   color: var(--ink);
 }
 
-/* ── Nav Links — matches .nav-links ─────────────────────── */
-.navLinks {
+/* ── Nav Wrapper ───────────────────────────────────────────── */
+/* matches .nav-wrapper */
+.navWrapper {
   display: flex;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 8px; /* raw — between groups + dividers */
   flex: 1;
-  flex-wrap: wrap;
 }
 
+/* ── Nav Group (pill container) ────────────────────────────── */
+/* matches .nav-group */
+.navGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px; /* raw — between links within group */
+  background: rgba(0, 0, 0, 0.03); /* raw — subtle pill bg */
+  border-radius: 10px; /* raw */
+  padding: 3px; /* raw */
+}
+
+/* matches .nav-group.primary — teal-tinted group */
+.navGroupPrimary {
+  background: rgba(13, 148, 136, 0.04); /* raw — teal tint */
+}
+
+/* ── Nav Link ──────────────────────────────────────────────── */
 /* matches .nav-link */
 .navLink {
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius);
-  font-size: var(--text-md);
+  padding: 7px 12px; /* raw — layout dimension */
+  border-radius: 8px; /* raw */
+  font-size: 13px; /* raw — R-001 */
   font-weight: var(--weight-semibold);
   color: var(--ink-3);
   text-decoration: none;
-  transition: all 0.15s; /* raw */
+  transition: all 0.15s;
   white-space: nowrap;
 }
-.navLink:hover { background: var(--surface); color: var(--ink-2); }
+
+.navLink:hover {
+  background: rgba(0, 0, 0, 0.05); /* raw */
+  color: var(--ink-2);
+}
 
 /* matches .nav-link.active — flat class (P-007) */
 .navLinkActive {
   background: var(--ink);
   color: var(--white);
+  box-shadow: var(--shadow-sm);
 }
 
-/* ── User menu ───────────────────────────────────────────── */
+/* ── Nav Divider ───────────────────────────────────────────── */
+/* matches .nav-divider */
+.navDivider {
+  width: 1px; /* raw */
+  height: 24px; /* raw */
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px; /* raw */
+}
+
+/* ── Nav Actions (icon buttons) ────────────────────────────── */
+/* matches .nav-actions */
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* matches .nav-icon-btn */
+.navIconBtn {
+  width: 36px;  /* raw — layout dimension */
+  height: 36px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  transition: all 0.15s;
+  position: relative;
+  text-decoration: none;
+}
+
+.navIconBtn:hover {
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+/* matches .nav-icon-btn svg */
+.navIconBtn svg {
+  width: 20px; /* raw */
+  height: 20px;
+}
+
+/* matches .nav-badge — red notification dot */
+.navBadge {
+  position: absolute;
+  top: 4px; /* raw */
+  right: 4px;
+  width: 8px; /* raw */
+  height: 8px;
+  background: var(--b-md);
+  border-radius: 50%;
+  border: 1.5px solid var(--white); /* raw — knockout border */
+}
+
+/* ── User menu ─────────────────────────────────────────────── */
 .userMenu {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   flex-shrink: 0;
+  margin-left: var(--space-4);
 }
 
 .userAvatar {
   width: 32px; /* raw */
-  height: 32px; /* raw */
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--t-dk) 0%, var(--t-md) 100%);
   display: flex;
@@ -109,4 +193,23 @@
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   color: var(--ink-2);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1600px) {
+  .container { gap: 32px; padding: 20px 32px; } /* raw */
+  .navWrapper { gap: 6px; }
+}
+
+@media (max-width: 1400px) {
+  .container { gap: 24px; padding: 16px 24px; } /* raw */
+  .navLink   { padding: 6px 10px; font-size: 12px; } /* raw */
+}
+
+@media (max-width: 900px) {
+  .navDivider { display: none; }
+  .navGroup   { background: transparent; padding: 0; }
+  .navWrapper { gap: 4px; flex-wrap: wrap; } /* raw */
+  .container  { padding: 16px var(--space-6); gap: 16px; } /* raw */
+  .userName   { display: none; }
 }

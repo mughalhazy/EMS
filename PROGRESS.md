@@ -848,3 +848,16 @@ Full one-pass normalization of `notifications-page.html` → `notifications/page
 - `notifications.module.css` — complete rewrite: white page header (36px h1, Settings + Mark All Read action buttons); content 1fr+360px grid; filter tabs (pill switcher with ink active); notifications feed (radius-xl, items with unread state: i-lt bg + 4px i-md left bar); notification icon flat variants (6: success/info/warning/error/revenue/activity each with lt bg + border); notification badge flat variants (urgent/high/medium); sidebar (quickStats / priorityAlerts / recentActivity); activity timeline (absolute ::before line, colored dot variants: default i-md / success f-md / revenue g-md); alert items (b-lt + b-md border-left; warning variant a-lt + a-md); opacity-only fadeIn (D-010); flat classes (P-007)
 - `notifications/page.tsx` — complete rewrite: NOTIFICATIONS (10 items from HTML), TABS (4); activeTab state; iconVariantClass() + badgeClass() + badgeLabel() helpers; SettingsIcon + MarkReadIcon SVGs; sidebar with inline stat/activity data; zero inline styles; zero mock-data wiring (P-012)
 
+---
+
+## [44] TopNav — Grouped Nav per events-top-nav .html Spec
+
+Rewrote `components/nav/TopNav.tsx` + `TopNav.module.css` to match `events-top-nav .html` exactly.
+Cascades automatically to all 8 non-dashboard pages via `AppTopLayout`.
+
+**Key changes:**
+- `TopNav.module.css` — complete rewrite: `.topbar` (rgba 0.9, blur 24px); `.container` (1600px max, 20px 40px pad); 40px logoMark (radius 11px, 19px font); `.navWrapper` flex row; `.navGroup` pill containers (rgba(0,0,0,0.03) bg, radius 10px, 3px pad); `.navGroupPrimary` teal-tinted (rgba(13,148,136,0.04)); `.navLink` (7px 12px pad, 13px font, weight-semibold); `.navLinkActive` flat class (ink bg + white + shadow-sm); `.navDivider` (1px × 24px); `.navActions` (margin-left: auto); `.navIconBtn` (36×36, radius 8px); `.navBadge` (8px red dot top-right); 3-breakpoint responsive (1600px / 1400px / 900px)
+- `TopNav.tsx` — complete rewrite: 4 static nav-group arrays (GROUP_PRIMARY/ATTENDEES/EXHIBITS/DATA); `NavGroup` helper component; 3 `navDivider` separators; `navActions` with notifications (Link to /notifications, red badge) + settings (Link to /settings) icon buttons; `usePathname()` active detection; user menu preserved
+
+**Pages updated (via AppTopLayout cascade):** events, agenda, speakers, attendees, registrations, ticketing, sponsors, exhibitors
+
