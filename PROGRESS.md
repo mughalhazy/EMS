@@ -773,3 +773,15 @@ Full one-pass normalization of `attendees-page.html` → `attendees/page.tsx` + 
 - `attendees/page.tsx` — complete rewrite: static ATTENDEES (8 rows matching HTML exactly), STATS (4 cards), FILTERS (All/Checked In/Registered/VIP); filter state + filtered list; all class helpers (ticketClass, statusClass, statusDotClass, statusLabel); inline SVG icons (EyeIcon, EditIcon, PlusIcon, SearchIcon, TrendUpIcon, ChevronLeft/Right); zero inline styles; zero mock-data wiring (P-012)
 
 **Commit:** `f676e16`
+
+---
+
+## [37] Ticketing Page — Normalized to ticketing-page.html Spec
+
+Full one-pass normalization of `ticketing-page.html` → `ticketing/page.tsx` + `ticketing/ticketing.module.css`.
+
+**Key changes:**
+- `ticketing.module.css` — complete rewrite: gold gradient hero (48px h1, 3 meta items), content (max-width 1200px), section headers (label/title/description), 3-column ticket grid with popular variant (`.ticketCardPopular::before` MOST POPULAR badge), ticket icons (64px), price section (48px amount, savings chip), feature list (available/unavailable flat classes), 3 CTA button variants (btnSecondary/btnPopular/btnPrimary); add-ons 2-column grid with selected state; comparison table (display:contents, 2fr 1fr 1fr 1fr); FAQ accordion; indigo footer CTA; opacity-only fadeIn (D-010); flat classes throughout (P-007)
+- `ticketing/page.tsx` — complete rewrite: static TICKETS (3 tiers), ADDONS (4 items), COMPARISON (8 rows), FAQS (4 items); FAQ open/close state; addon toggle selection state; compCellClass() helper for ✓/✕; inline SVG icons; zero inline styles; zero mock-data wiring (P-012)
+
+**Commit:** `bc4dac9`

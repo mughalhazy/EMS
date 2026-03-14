@@ -312,3 +312,38 @@
 | D-040 | attendees | Status was Badge component; HTML uses dot + text inline | Replaced with `.statusIndicator` + `.statusDot` flat-class pattern | fixed |
 | D-041 | attendees | Table was wired to mock-data attendees by event selector | Replaced with static ATTENDEES constant — 8 rows matching HTML exactly (P-012) | fixed |
 | D-042 | attendees | Missing pagination row | Added `.pagination` with prev/next chevrons + 1-4…23 buttons | fixed |
+
+---
+
+### Ticketing Page (ticketing-page.html)
+
+| ID | HTML File | HTML Value | Resolved To | Status |
+|----|-----------|------------|-------------|--------|
+| R-049 | ticketing | `48px` hero h1 + price-amount font-size | raw — off type scale | logged |
+| R-050 | ticketing | `22px` ticket-name + table-header h3 font-size | raw — off type scale | logged |
+| R-051 | ticketing | `16px` section-description + faq-question + addon-name font-size | raw — off type scale | logged |
+| R-052 | ticketing | `64px` ticket-icon width/height | raw — layout dimension | logged |
+| R-053 | ticketing | `56px` addon-icon width/height | raw — layout dimension | logged |
+| R-054 | ticketing | `28px` ticket-icon emoji font-size | raw — emoji display size | logged |
+| R-055 | ticketing | `24px` addon-icon emoji font-size | raw — emoji display size | logged |
+| R-056 | ticketing | `14px` ticket-cta padding-block | raw — off grid | logged |
+| R-057 | ticketing | `20px` faq chevron icon size | raw — layout dimension | logged |
+| R-058 | ticketing | `0 0 0 1px var(--g-md)` popular card ring shadow | raw — custom ring | logged |
+| R-059 | ticketing | `20px` popular badge border-radius | raw — pill shape | logged |
+| R-060 | ticketing | `-12px` popular badge top position | raw — layout dimension | logged |
+| R-061 | ticketing | `80px` comparison/addons/faq section margin-top | raw — layout dimension | logged |
+| M-032 | ticketing | `.ticket-card.popular` | flat class `.ticketCardPopular` (P-007) | resolved |
+| M-033 | ticketing | `.ticket-card.popular .ticket-icon` | flat class `.ticketIconPopular` (P-007) | resolved |
+| M-034 | ticketing | `.feature-item.unavailable` | flat class `.featureItemUnavailable` (P-007) | resolved |
+| M-035 | ticketing | `.btn-primary / .btn-secondary / .btn-popular` on ticket CTA | flat classes `.btnPrimary / .btnSecondary / .btnPopular` (P-007) | resolved |
+| M-036 | ticketing | `.addon-card.selected` | flat class `.addonCardSelected` (P-007) | resolved |
+| M-037 | ticketing | `.comparison-cell.header / .feature-name / .value` | flat classes `.comparisonCellHeader / .Feature / .Value` (P-007) | resolved |
+| D-043 | ticketing | Page was inline styles + ticket table from mock-data | full rewrite: CSS module + hero + ticket grid + add-ons + comparison + FAQ + footer CTA | fixed |
+| D-044 | ticketing | Missing gold gradient hero section | Added `.hero` with h1, subtitle, 3 meta items | fixed |
+| D-045 | ticketing | Missing 3-tier pricing grid | Added `.ticketGrid` repeat(3,1fr) with full card structure | fixed |
+| D-046 | ticketing | Missing popular card `::before` badge | `.ticketCardPopular::before` content: 'MOST POPULAR' | fixed |
+| D-047 | ticketing | Missing add-ons section | Added `.addonsSection` / `.addonGrid` repeat(2,1fr) with toggle state | fixed |
+| D-048 | ticketing | Missing comparison table | Added `.comparisonGrid` display:contents (2fr 1fr 1fr 1fr) | fixed |
+| D-049 | ticketing | Missing FAQ accordion | Added `.faqSection` with openFaq state, answer shown conditionally | fixed |
+| D-050 | ticketing | Missing footer CTA | Added `.footerCta` indigo gradient with purchase button | fixed |
+| D-051 | ticketing | Animation had transform in keyframe (fadeInUp) | Changed to opacity-only fadeIn (D-010) | fixed |
