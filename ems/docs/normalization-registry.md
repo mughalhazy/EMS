@@ -576,3 +576,4 @@
 | D-083 | side-nav | Was indigo active state (i-lt bg + i-dk color) | Spec: ink bg + white color — corrected | fixed |
 | D-084 | side-nav | Was green logoMark gradient (f-dk → f-md) | Spec: teal gradient (t-dk → t-md) — corrected | fixed |
 | D-085 | side-nav | analytics, notifications, settings using AppTopLayout | Moved to AppLayout (sidebar) via SIDEBAR_PATHS in layout.tsx | fixed |
+| D-086 | side-nav | AppLayout `.main` had `overflow: hidden` — pages not scrollable | `overflow-y: auto` per spec `.main { overflow-y: auto }` | fixed |

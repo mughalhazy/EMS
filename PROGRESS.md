@@ -876,3 +876,5 @@ Updated `app/(app)/layout.tsx` to route analytics, notifications, settings to `A
 **Pages on sidebar layout:** dashboard, analytics, notifications, settings
 **Pages on top-nav layout:** events, agenda, speakers, attendees, registrations, ticketing, sponsors, exhibitors
 
+**Bug fix (same commit series):** `AppLayout.module.css` `.main` `overflow: hidden` → `overflow-y: auto` — notifications/analytics/settings were not scrollable after migration to AppLayout. Spec explicitly sets `.main { overflow-y: auto }`.
+
