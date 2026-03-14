@@ -11,6 +11,15 @@ Core principles:
 - **Secure by default**: secure transport, encryption, and auditability are mandatory platform defaults.
 - **Traceability**: security-relevant actions are logged and attributable to an identity.
 
+## Canonical Definitions
+
+- **Authentication**: the process of verifying who (human or service) is making a request, using trusted credentials such as OIDC tokens, SAML assertions, client credentials, or mTLS identity.
+- **RBAC roles**: tenant-scoped role assignments that bundle permissions for allowed actions on EMS resources; roles are evaluated with deny-by-default and least-privilege semantics.
+- **Tenant isolation**: mandatory enforcement of tenant boundaries in identity, request handling, storage, caches, queues, and analytics access so one tenant cannot access another tenant's data.
+- **Audit logging**: immutable, queryable records of security-relevant activity (authentication, authorization, admin actions, sensitive data access) tied to actor identity and request context.
+- **Rate limiting**: request throttling controls that cap sustained and burst traffic by actor/client/IP/tenant to reduce abuse, brute force attempts, and service exhaustion.
+- **PII handling**: controls for collecting, storing, accessing, sharing, and deleting personally identifiable information with minimization, masking, retention, and policy-based access restrictions.
+
 ---
 
 ## 1) Authentication
@@ -39,7 +48,7 @@ EMS uses centralized identity and modern token-based authentication.
 
 ---
 
-## 2) RBAC Authorization
+## 2) RBAC Roles and Authorization
 
 EMS authorization combines tenant scoping and role-based controls.
 
@@ -181,6 +190,53 @@ EMS enforces strict logical isolation between tenants throughout identity, compu
 - Every analytics request must satisfy both role permission checks and tenant analytics policy checks.
 - Tenant policy includes independent switches for analytics enablement, cross-event reporting, and PII analytics access.
 - Analytics APIs should fail closed (`42501`) when tenant policy or permission checks fail.
+
+---
+
+## 8) Rate Limiting
+
+EMS enforces layered throttling to protect availability and security.
+
+### Policy model
+- Multi-dimensional limits applied by IP, user identity, service account, OAuth client, and tenant.
+- Separate limits for authentication endpoints, API reads, API writes, and high-cost operations.
+- Burst and sustained windows are both enforced (e.g., token bucket + rolling window).
+
+### Enforcement
+- Gateway-level limits reject abusive traffic early.
+- Service-level limits protect critical downstream dependencies.
+- Identity flows include stricter lockout/throttle profiles for repeated failed logins and token abuse.
+
+### Operational behavior
+- Limit responses use standard status and retry semantics (e.g., `429 Too Many Requests`, `Retry-After`).
+- Exemptions are explicit, time-bound, and audit logged.
+- Alerting triggers when threshold breaches indicate possible credential stuffing, scraping, or DoS behavior.
+
+---
+
+## 9) PII Handling
+
+EMS treats PII as a protected data class with strict lifecycle controls.
+
+### Classification and minimization
+- PII fields are explicitly classified in schemas and data catalogs.
+- Only minimum required PII is collected for a documented business purpose.
+- Optional/derived PII is disabled by default unless product policy requires it.
+
+### Access and use controls
+- Access to PII requires both role permission and tenant policy allowance.
+- PII reads and exports are audit logged with actor, purpose, and tenant context.
+- Non-production environments must use masked or synthetic datasets.
+
+### Storage, transfer, and retention
+- PII is encrypted in transit and at rest; highly sensitive attributes may use field-level encryption/tokenization.
+- Logs, analytics, and telemetry must redact or pseudonymize PII by default.
+- Retention schedules and deletion workflows enforce data subject rights and contractual/legal requirements.
+
+### Sharing and disclosure
+- External sharing requires explicit legal/policy basis and least-data disclosure.
+- Data exports support scoped fields, watermarking, and expiration controls.
+- Incident response includes expedited handling for suspected PII exposure.
 
 ---
 
