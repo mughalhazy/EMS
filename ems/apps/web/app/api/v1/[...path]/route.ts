@@ -104,7 +104,30 @@ export async function GET(req: Request, { params }: Context) {
   // ── /events/:id/venues ────────────────────────────────────────
   const venuesMatch = path.match(/^events\/([^/]+)\/venues$/)
   if (venuesMatch) {
-    return NextResponse.json([])
+    return NextResponse.json(mock.venues[venuesMatch[1]] ?? [])
+  }
+
+  // ── /events/:id/venues/:venueId/rooms ────────────────────────
+  const roomsMatch = path.match(/^events\/([^/]+)\/venues\/([^/]+)\/rooms$/)
+  if (roomsMatch) {
+    const [_, eventId, venueId] = roomsMatch
+    const venue = (mock.venues[eventId] ?? []).find(v => v.id === venueId)
+    if (!venue) {
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Venue not found', details: [], requestId: 'mock' } }, { status: 404 })
+    }
+
+    return NextResponse.json(mock.rooms[venueId] ?? [])
+  }
+
+  // ── /events/:id/settings ──────────────────────────────────────
+  const settingsMatch = path.match(/^events\/([^/]+)\/settings$/)
+  if (settingsMatch) {
+    const settings = mock.eventSettings[settingsMatch[1]]
+    if (!settings) {
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Event settings not found', details: [], requestId: 'mock' } }, { status: 404 })
+    }
+
+    return NextResponse.json(settings)
   }
 
   // ── /analytics/kpis ──────────────────────────────────────────
@@ -196,12 +219,88 @@ export async function GET(req: Request, { params }: Context) {
   )
 }
 
-// Accept POST/PATCH/DELETE without erroring (return 200 no-op)
-export async function POST(_req: Request, { params }: Context) {
+export async function POST(req: Request, { params }: Context) {
+  const path = params.path.join('/')
+
+  const lifecycleMatch = path.match(/^events\/([^/]+)\/(publish|unpublish|archive)$/)
+  if (lifecycleMatch) {
+    const [_, eventId, action] = lifecycleMatch
+    const ev = mock.events.find(e => e.id === eventId)
+    if (!ev) {
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Event not found', details: [], requestId: 'mock' } }, { status: 404 })
+    }
+
+    const nextStatus = action === 'publish' ? 'published' : action === 'unpublish' ? 'draft' : 'archived'
+    return NextResponse.json({ ...ev, status: nextStatus })
+  }
+
+  const createVenueMatch = path.match(/^events\/([^/]+)\/venues$/)
+  if (createVenueMatch) {
+    const eventId = createVenueMatch[1]
+    const payload = await req.json() as Record<string, unknown>
+    return NextResponse.json({
+      id: `venue-${Date.now()}`,
+      tenantId: mock.tenant.id,
+      eventId,
+      name: payload.name ?? 'New Venue',
+      type: payload.type ?? 'physical',
+      addressLine1: payload.addressLine1,
+      city: payload.city,
+      country: payload.country,
+      virtualUrl: payload.virtualUrl,
+      capacity: payload.capacity,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }, { status: 201 })
+  }
+
+  const createRoomMatch = path.match(/^events\/([^/]+)\/venues\/([^/]+)\/rooms$/)
+  if (createRoomMatch) {
+    const [_, eventId, venueId] = createRoomMatch
+    const payload = await req.json() as Record<string, unknown>
+    return NextResponse.json({
+      id: `room-${Date.now()}`,
+      tenantId: mock.tenant.id,
+      eventId,
+      venueId,
+      name: payload.name ?? 'New Room',
+      floor: payload.floor,
+      capacity: payload.capacity ?? 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }, { status: 201 })
+  }
+
   return NextResponse.json({ ok: true, mock: true })
 }
 
-export async function PATCH(_req: Request, { params }: Context) {
+export async function PATCH(req: Request, { params }: Context) {
+  const path = params.path.join('/')
+
+  const settingsMatch = path.match(/^events\/([^/]+)\/settings$/)
+  if (settingsMatch) {
+    const eventId = settingsMatch[1]
+    const existing = mock.eventSettings[eventId]
+    if (!existing) {
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Event settings not found', details: [], requestId: 'mock' } }, { status: 404 })
+    }
+
+    const payload = await req.json() as Record<string, unknown>
+    return NextResponse.json({ ...existing, ...payload, updatedAt: new Date().toISOString() })
+  }
+
+  const roomMatch = path.match(/^events\/([^/]+)\/venues\/([^/]+)\/rooms\/([^/]+)$/)
+  if (roomMatch) {
+    const [_, eventId, venueId, roomId] = roomMatch
+    const current = (mock.rooms[venueId] ?? []).find(r => r.id === roomId)
+    if (!current) {
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Room not found', details: [], requestId: 'mock' } }, { status: 404 })
+    }
+
+    const payload = await req.json() as Record<string, unknown>
+    return NextResponse.json({ ...current, ...payload, eventId, venueId, updatedAt: new Date().toISOString() })
+  }
+
   return NextResponse.json({ ok: true, mock: true })
 }
 
@@ -210,5 +309,11 @@ export async function PUT(_req: Request, { params }: Context) {
 }
 
 export async function DELETE(_req: Request, { params }: Context) {
+  const path = params.path.join('/')
+  const roomMatch = path.match(/^events\/([^/]+)\/venues\/([^/]+)\/rooms\/([^/]+)$/)
+  if (roomMatch) {
+    return new NextResponse(null, { status: 204 })
+  }
+
   return NextResponse.json({ ok: true, mock: true })
 }

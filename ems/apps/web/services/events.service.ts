@@ -1,5 +1,5 @@
 import { api, paginationParams, PaginatedResponse, PaginationParams } from './api'
-import { Event, Venue, VenueType } from '@/types/domain'
+import { Event, EventSettings, Room, Venue, VenueType } from '@/types/domain'
 
 export type CreateEventPayload = Omit<Event, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>
 export type UpdateEventPayload = Partial<CreateEventPayload>
@@ -12,6 +12,20 @@ export interface CreateVenuePayload {
   country?: string
   virtualUrl?: string
   capacity?: number
+}
+
+export interface CreateRoomPayload {
+  name: string
+  floor?: string
+  capacity: number
+}
+
+export interface UpdateRoomPayload extends Partial<CreateRoomPayload> {}
+
+export interface UpdateEventSettingsPayload {
+  timezone?: string
+  capacity?: number
+  visibility?: 'private' | 'public' | 'unlisted'
 }
 
 export const eventsService = {
@@ -39,6 +53,10 @@ export const eventsService = {
     return api.post(`/events/${id}/publish`, {})
   },
 
+  unpublish(id: string): Promise<Event> {
+    return api.post(`/events/${id}/unpublish`, {})
+  },
+
   archive(id: string): Promise<Event> {
     return api.post(`/events/${id}/archive`, {})
   },
@@ -51,4 +69,29 @@ export const eventsService = {
   createVenue(eventId: string, payload: CreateVenuePayload): Promise<Venue> {
     return api.post(`/events/${eventId}/venues`, payload)
   },
+
+  listRooms(eventId: string, venueId: string): Promise<Room[]> {
+    return api.get(`/events/${eventId}/venues/${venueId}/rooms`)
+  },
+
+  createRoom(eventId: string, venueId: string, payload: CreateRoomPayload): Promise<Room> {
+    return api.post(`/events/${eventId}/venues/${venueId}/rooms`, payload)
+  },
+
+  updateRoom(eventId: string, venueId: string, roomId: string, payload: UpdateRoomPayload): Promise<Room> {
+    return api.patch(`/events/${eventId}/venues/${venueId}/rooms/${roomId}`, payload)
+  },
+
+  removeRoom(eventId: string, venueId: string, roomId: string): Promise<void> {
+    return api.delete(`/events/${eventId}/venues/${venueId}/rooms/${roomId}`)
+  },
+
+  getSettings(eventId: string): Promise<EventSettings> {
+    return api.get(`/events/${eventId}/settings`)
+  },
+
+  updateSettings(eventId: string, payload: UpdateEventSettingsPayload): Promise<EventSettings> {
+    return api.patch(`/events/${eventId}/settings`, payload)
+  },
 }
+

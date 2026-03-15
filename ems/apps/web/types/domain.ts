@@ -78,6 +78,8 @@ export interface Event {
   startAt: string
   endAt: string
   status: EventStatus
+  agenda?: Record<string, unknown>
+  settings?: Record<string, unknown>
   createdAt: string
   updatedAt: string
 }
@@ -100,10 +102,24 @@ export interface Venue {
 export interface Room {
   id: string
   tenantId: string
+  eventId: string
   venueId: string
   name: string
   floor?: string
   capacity: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type EventVisibility = 'private' | 'public' | 'unlisted'
+
+export interface EventSettings {
+  id: string
+  tenantId: string
+  eventId: string
+  timezone: string
+  capacity?: number
+  visibility: EventVisibility
   createdAt: string
   updatedAt: string
 }

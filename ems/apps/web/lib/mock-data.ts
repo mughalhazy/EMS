@@ -4,7 +4,7 @@
 // ============================================================
 
 import type {
-  Tenant, User, Event, Session, Speaker, Ticket,
+  Tenant, User, Event, Session, Speaker, Ticket, Venue, Room, EventSettings,
   Attendee, Registration, Sponsor, Exhibitor,
   Notification, Organization,
 } from '@/types/domain'
@@ -117,6 +117,59 @@ export const events: Event[] = [
     createdAt: '2026-01-20T09:00:00Z', updatedAt: '2026-02-20T09:00:00Z',
   },
 ]
+
+// ── Event module: Venues / Rooms / Settings ───────────────────
+export const venues: Record<string, Venue[]> = {
+  [E1]: [
+    {
+      id: 'venue-001', tenantId: T, eventId: E1,
+      name: 'Moscone Center', type: 'physical',
+      addressLine1: '747 Howard St', city: 'San Francisco', country: 'US',
+      capacity: 3500,
+      createdAt: '2025-11-01T09:00:00Z', updatedAt: '2026-02-15T10:00:00Z',
+    },
+    {
+      id: 'venue-002', tenantId: T, eventId: E1,
+      name: 'TechSummit Livestream', type: 'virtual',
+      virtualUrl: 'https://live.acme-events.dev/tech26',
+      capacity: 10000,
+      createdAt: '2025-11-02T09:00:00Z', updatedAt: '2026-02-20T10:00:00Z',
+    },
+  ],
+  [E2]: [
+    {
+      id: 'venue-003', tenantId: T, eventId: E2,
+      name: 'Brooklyn Expo Hall', type: 'hybrid',
+      addressLine1: '191 Java St', city: 'Brooklyn', country: 'US',
+      virtualUrl: 'https://live.acme-events.dev/pdw26',
+      capacity: 1800,
+      createdAt: '2025-12-10T09:00:00Z', updatedAt: '2026-02-22T10:00:00Z',
+    },
+  ],
+  [E3]: [],
+  [E4]: [],
+  [E5]: [],
+  [E6]: [],
+}
+
+export const rooms: Record<string, Room[]> = {
+  'venue-001': [
+    { id: 'room-001', tenantId: T, eventId: E1, venueId: 'venue-001', name: 'Main Stage', floor: '1', capacity: 1200, createdAt: '2025-11-05T09:00:00Z', updatedAt: '2026-02-01T09:00:00Z' },
+    { id: 'room-002', tenantId: T, eventId: E1, venueId: 'venue-001', name: 'Breakout A', floor: '2', capacity: 320, createdAt: '2025-11-05T09:10:00Z', updatedAt: '2026-02-01T09:10:00Z' },
+  ],
+  'venue-002': [
+    { id: 'room-003', tenantId: T, eventId: E1, venueId: 'venue-002', name: 'Virtual Stage', floor: 'cloud', capacity: 5000, createdAt: '2025-11-06T09:00:00Z', updatedAt: '2026-02-01T09:20:00Z' },
+  ],
+  'venue-003': [
+    { id: 'room-004', tenantId: T, eventId: E2, venueId: 'venue-003', name: 'Design Theater', floor: '1', capacity: 700, createdAt: '2025-12-12T09:00:00Z', updatedAt: '2026-02-10T09:00:00Z' },
+  ],
+}
+
+export const eventSettings: Record<string, EventSettings> = {
+  [E1]: { id: 'event-settings-001', tenantId: T, eventId: E1, timezone: 'America/Los_Angeles', capacity: 3500, visibility: 'public', createdAt: '2025-11-01T09:00:00Z', updatedAt: '2026-02-15T10:00:00Z' },
+  [E2]: { id: 'event-settings-002', tenantId: T, eventId: E2, timezone: 'America/New_York', capacity: 1800, visibility: 'unlisted', createdAt: '2025-12-10T09:00:00Z', updatedAt: '2026-02-22T10:00:00Z' },
+  [E3]: { id: 'event-settings-003', tenantId: T, eventId: E3, timezone: 'America/Chicago', visibility: 'private', createdAt: '2026-01-05T09:00:00Z', updatedAt: '2026-01-05T09:00:00Z' },
+}
 
 // ── Sessions ──────────────────────────────────────────────────
 export const sessions: Session[] = [
