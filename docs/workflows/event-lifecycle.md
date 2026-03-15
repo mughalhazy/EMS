@@ -1,6 +1,15 @@
 # Event Lifecycle Workflow
 
-This workflow describes how an organizer creates, updates, publishes, and unpublishes an event.
+This workflow describes how organizers create, update, publish, unpublish, and clone an event.
+
+## Entities
+
+- Tenant
+- Event
+
+## Owning Service
+
+- Event Service
 
 ## Preconditions
 
@@ -10,30 +19,15 @@ This workflow describes how an organizer creates, updates, publishes, and unpubl
 ## Steps
 
 1. **Create event in draft**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/events`
-   - Purpose:
-     - Creates the event aggregate and initializes agenda/settings.
-2. **Review and update event details**
-   - API command:
-     - `PATCH /api/v1/tenants/:tenantId/events/:eventId`
-   - Purpose:
-     - Applies operational updates before launch (time, description, agenda, status metadata).
+   - API command: `POST /api/v1/tenants/{tenantId}/events`
+2. **Update event details**
+   - API command: `PATCH /api/v1/tenants/{tenantId}/events/{eventId}`
 3. **Publish event for discovery**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/events/:eventId/publish`
-   - Purpose:
-     - Moves the event to a published state.
+   - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/publish`
 4. **Optional: unpublish event**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/events/:eventId/unpublish`
-   - Purpose:
-     - Returns the event to a non-public state.
-5. **Optional: clone event for next cycle**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/events/:eventId/clone`
-   - Purpose:
-     - Seeds a new event from a prior event template.
+   - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/unpublish`
+5. **Optional: clone event**
+   - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/clone`
 
 ## Commands (Domain/API)
 
@@ -43,24 +37,16 @@ This workflow describes how an organizer creates, updates, publishes, and unpubl
 - `UnpublishEvent`
 - `CloneEvent`
 
-> In implementation, these map to the event service endpoints above.
-
 ## Emitted Events
 
-- Topic: `event.lifecycle`
-- Common event types in this flow:
-  - `event.created`
-  - `event.updated`
-  - `event.status_changed`
+- `EventCreated`
+- `EventUpdated`
+- `EventPublished`
+- `EventUnpublished`
+- `EventCloned`
 
 ## Primary Consumers
 
-- Analytics projections
-- Event dashboard read model
-- Audit logging and compliance trail
-
-## Operational Notes
-
-- Event code must be unique per tenant.
-- Publish/unpublish operations should be auditable.
-- If Kafka is unavailable, lifecycle publication may be skipped, but write-path operations still complete.
+- Analytics Service
+- Read model projections
+- Audit/compliance systems

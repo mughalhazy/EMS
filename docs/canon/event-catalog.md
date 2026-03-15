@@ -1,42 +1,44 @@
 # Event Catalog
 
-This catalog defines canonical domain events used across the platform.
+This catalog is the authoritative list of domain events used across EMS.
 
-## Event
+## Event Lifecycle
 
-### EventCreated
-Raised when a new event record is created in the system.
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| EventCreated | `event.created` | A new event is created in draft state. |
+| EventUpdated | `event.updated` | Event metadata is updated. |
+| EventPublished | `event.published` | Event transitions to published/discoverable. |
+| EventUnpublished | `event.unpublished` | Event transitions back to non-public state. |
+| EventCancelled | `event.cancelled` | Event is cancelled and no longer accepts attendance operations. |
+| EventCloned | `event.cloned` | A new event is seeded from an existing event. |
 
-### EventPublished
-Raised when an event transitions from draft/private to published and discoverable.
+## Commerce
 
-### EventCancelled
-Raised when an existing event is cancelled and should no longer accept registrations.
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| OrderCreated | `order.created` | A new order is created. |
+| PaymentAuthorized | `payment.authorized` | Payment authorization succeeds. |
+| PaymentCaptured | `payment.captured` | Funds are captured. |
+| RefundIssued | `refund.issued` | A refund is issued. |
+| TicketIssued | `ticket.issued` | Ticket entitlement is generated. |
 
-## Order & Ticketing
+## Registration
 
-### OrderCreated
-Raised when a new ticketing order is submitted and persisted.
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| RegistrationSubmitted | `registration.submitted` | Registration is submitted. |
+| RegistrationUpdated | `registration.updated` | Registration fields are amended. |
+| RegistrationApproved | `registration.approved` | Registration is approved. |
+| RegistrationCancelled | `registration.cancelled` | Registration is cancelled. |
+| RegistrationConfirmed | `registration.confirmed` | Registration is confirmed for attendance. |
 
-### PaymentAuthorized
-Raised when payment authorization succeeds for an order.
+## Onsite Operations
 
-### PaymentCaptured
-Raised when funds are captured for an authorized payment.
-
-### RefundIssued
-Raised when a full or partial refund is issued for an order.
-
-### TicketIssued
-Raised when one or more tickets are generated and assigned to an order/attendee.
-
-## Registration & Onsite
-
-### RegistrationSubmitted
-Raised when an attendee submits a registration request.
-
-### RegistrationApproved
-Raised when a submitted registration is approved.
-
-### AttendeeCheckedIn
-Raised when an attendee is checked in on-site.
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| CheckInDeviceRegistered | `checkin.device_registered` | A check-in device is registered. |
+| CheckInDeviceStatusUpdated | `checkin.device_status_updated` | Device status changes. |
+| AttendeeCheckedIn | `attendee.checked_in` | Attendee is checked in at venue or gate. |
+| SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded. |
+| BadgePrinted | `badge.printed` | Badge print operation succeeds. |
