@@ -24,6 +24,8 @@ export type VenueType = 'physical' | 'virtual' | 'hybrid'
 export type OrganizationType = 'host' | 'sponsor' | 'exhibitor' | 'agency' | 'vendor' | 'other'
 export type ArtifactType = 'qr_png' | 'qr_svg' | 'wallet_pass' | 'pdf'
 export type LeadStatus = 'new' | 'qualified' | 'disqualified' | 'follow_up' | 'converted'
+export type CampaignStatus = 'draft' | 'scheduled' | 'running' | 'paused' | 'completed' | 'cancelled'
+export type CampaignChannel = 'email' | 'sms' | 'push' | 'in_app'
 
 export interface Tenant {
   id: string
@@ -290,6 +292,35 @@ export interface Notification {
   status: NotificationStatus
   sentAt?: string
   deliveredAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AudienceSegment {
+  id: string
+  tenantId: string
+  eventId: string
+  name: string
+  description?: string
+  criteriaJson: Record<string, unknown>
+  estimatedAudienceSize: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Campaign {
+  id: string
+  tenantId: string
+  eventId: string
+  audienceSegmentId: string
+  name: string
+  description?: string
+  channel: CampaignChannel
+  templateKey: string
+  contentJson: Record<string, unknown>
+  scheduledAt?: string
+  launchedAt?: string
+  status: CampaignStatus
   createdAt: string
   updatedAt: string
 }
