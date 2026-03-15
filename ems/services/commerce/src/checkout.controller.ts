@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Headers,
   HttpCode,
@@ -23,8 +24,11 @@ import {
 } from './dto/create-ticket-order.dto';
 import { OrderEntity, OrderStatus } from './entities/order.entity';
 import { PaymentEntity } from './entities/payment.entity';
+import { IdempotencyService } from './idempotency.service';
 import { OrderService } from './order.service';
 import { PaymentService } from './payment.service';
+import { RateLimitService } from './rate-limit.service';
+import { RequestCacheService } from './request-cache.service';
 
 interface ApiSuccessResponse<T> {
   data: T;
@@ -35,6 +39,9 @@ interface ApiSuccessResponse<T> {
 
 @Controller('api/v1/tenants/:tenantId')
 export class CheckoutController {
+  private static readonly CACHE_TTL_MS = 15_000;
+  private static readonly IDEMPOTENCY_TTL_MS = 10 * 60_000;
+
   constructor(
     @InjectRepository(TicketEntity)
     private readonly ticketRepository: Repository<TicketEntity>,
@@ -42,6 +49,9 @@ export class CheckoutController {
     private readonly registrationQuestionRepository: Repository<RegistrationQuestionEntity>,
     private readonly orderService: OrderService,
     private readonly paymentService: PaymentService,
+    private readonly requestCacheService: RequestCacheService,
+    private readonly rateLimitService: RateLimitService,
+    private readonly idempotencyService: IdempotencyService,
   ) {}
 
   @Post('orders')
@@ -51,32 +61,43 @@ export class CheckoutController {
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: CreateTicketOrderDto,
   ): Promise<ApiSuccessResponse<OrderEntity>> {
-    this.assertIdempotencyKey(idempotencyKey);
-    this.assertAttendeeCounts(payload);
-    await this.assertTicketOwnershipAndRequiredQuestions(tenantId, payload);
+    const normalizedIdempotencyKey = this.assertIdempotencyKey(idempotencyKey);
+    this.rateLimitService.assertWithinLimit(`create-order:${tenantId}`, 30, 60_000);
 
-    const pricedItems = await this.buildPricedItems(tenantId, payload);
-    const subtotal = Number(pricedItems.reduce((total, item) => total + item.quantity * item.unitPrice, 0).toFixed(2));
-    const discount = payload.discount ?? 0;
-    const tax = payload.tax ?? 0;
+    return this.idempotencyService.execute(
+      `create-order:${tenantId}`,
+      normalizedIdempotencyKey,
+      CheckoutController.IDEMPOTENCY_TTL_MS,
+      async () => {
+        this.assertAttendeeCounts(payload);
+        await this.assertTicketOwnershipAndRequiredQuestions(tenantId, payload);
 
-    const order = await this.orderService.create({
-      tenantId,
-      status: OrderStatus.DRAFT,
-      totals: {
-        subtotal,
-        discount,
-        tax,
-        grandTotal: subtotal - discount + tax,
+        const pricedItems = await this.buildPricedItems(tenantId, payload);
+        const subtotal = Number(
+          pricedItems.reduce((total, item) => total + item.quantity * item.unitPrice, 0).toFixed(2),
+        );
+        const discount = payload.discount ?? 0;
+        const tax = payload.tax ?? 0;
+
+        const order = await this.orderService.create({
+          tenantId,
+          status: OrderStatus.DRAFT,
+          totals: {
+            subtotal,
+            discount,
+            tax,
+            grandTotal: subtotal - discount + tax,
+          },
+          reservations: pricedItems.map((item) => ({
+            inventoryId: item.inventoryId,
+            quantity: item.quantity,
+          })),
+          items: pricedItems,
+        });
+
+        return this.success(order);
       },
-      reservations: pricedItems.map((item) => ({
-        inventoryId: item.inventoryId,
-        quantity: item.quantity,
-      })),
-      items: pricedItems,
-    });
-
-    return this.success(order);
+    );
   }
 
   @Post('orders/:orderId/payments')
@@ -87,25 +108,37 @@ export class CheckoutController {
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: CheckoutOrderDto,
   ): Promise<ApiSuccessResponse<PaymentEntity>> {
-    this.assertIdempotencyKey(idempotencyKey);
+    const normalizedIdempotencyKey = this.assertIdempotencyKey(idempotencyKey);
+    this.rateLimitService.assertWithinLimit(`checkout-order:${tenantId}`, 40, 60_000);
 
-    const order = await this.orderService.findByTenantAndId(tenantId, orderId);
-    if (!order) {
-      throw new NotFoundException('Order not found in tenant.');
-    }
+    return this.idempotencyService.execute(
+      `checkout-order:${tenantId}:${orderId}`,
+      normalizedIdempotencyKey,
+      CheckoutController.IDEMPOTENCY_TTL_MS,
+      async () => {
+        const order = await this.orderService.findByTenantAndId(tenantId, orderId);
+        if (!order) {
+          throw new NotFoundException('Order not found in tenant.');
+        }
 
-    const payment = await this.paymentService.createForOrder({
-      tenantId,
-      orderId,
-      amountMinor: payload.amountMinor,
-      currency: payload.currency,
-      metadata: {
-        ...(payload.metadata ?? {}),
-        checkoutSource: 'orders_api',
+        if (order.reservationExpiresAt && order.reservationExpiresAt.getTime() <= Date.now()) {
+          throw new ConflictException('Inventory reservation expired. Please create a new order.');
+        }
+
+        const payment = await this.paymentService.createForOrder({
+          tenantId,
+          orderId,
+          amountMinor: payload.amountMinor,
+          currency: payload.currency,
+          metadata: {
+            ...(payload.metadata ?? {}),
+            checkoutSource: 'orders_api',
+          },
+        });
+
+        return this.success(payment);
       },
-    });
-
-    return this.success(payment);
+    );
   }
 
   @Post('payments/confirmations')
@@ -114,15 +147,23 @@ export class CheckoutController {
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: ConfirmPaymentDto,
   ): Promise<ApiSuccessResponse<PaymentEntity>> {
-    this.assertIdempotencyKey(idempotencyKey);
+    const normalizedIdempotencyKey = this.assertIdempotencyKey(idempotencyKey);
+    this.rateLimitService.assertWithinLimit(`confirm-payment:${tenantId}`, 60, 60_000);
 
-    const payment = await this.paymentService.updatePaymentStatus(
-      tenantId,
-      payload.providerReference,
-      payload.status,
+    return this.idempotencyService.execute(
+      `confirm-payment:${tenantId}:${payload.providerReference}`,
+      normalizedIdempotencyKey,
+      CheckoutController.IDEMPOTENCY_TTL_MS,
+      async () => {
+        const payment = await this.paymentService.updatePaymentStatus(
+          tenantId,
+          payload.providerReference,
+          payload.status,
+        );
+
+        return this.success(payment);
+      },
     );
-
-    return this.success(payment);
   }
 
   private async buildPricedItems(
@@ -134,9 +175,15 @@ export class CheckoutController {
       return [];
     }
 
-    const tickets = await this.ticketRepository.find({
-      where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
-    });
+    const sortedInventoryIds = [...inventoryIds].sort((a, b) => a.localeCompare(b));
+    const tickets = await this.requestCacheService.getOrSet(
+      `tickets:${tenantId}:${sortedInventoryIds.join(',')}`,
+      CheckoutController.CACHE_TTL_MS,
+      () =>
+        this.ticketRepository.find({
+          where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
+        }),
+    );
 
     const ticketByInventoryId = new Map(tickets.map((ticket) => [ticket.inventoryId, ticket]));
 
@@ -162,10 +209,13 @@ export class CheckoutController {
     };
   }
 
-  private assertIdempotencyKey(idempotencyKey?: string): void {
-    if (!idempotencyKey?.trim()) {
+  private assertIdempotencyKey(idempotencyKey?: string): string {
+    const normalizedKey = idempotencyKey?.trim();
+    if (!normalizedKey) {
       throw new BadRequestException('Idempotency-Key header is required.');
     }
+
+    return normalizedKey;
   }
 
   private assertAttendeeCounts(payload: CreateTicketOrderDto): void {
@@ -187,17 +237,29 @@ export class CheckoutController {
       return;
     }
 
-    const tickets = await this.ticketRepository.find({
-      where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
-    });
+    const sortedInventoryIds = [...inventoryIds].sort((a, b) => a.localeCompare(b));
+    const tickets = await this.requestCacheService.getOrSet(
+      `ticket-ownership:${tenantId}:${sortedInventoryIds.join(',')}`,
+      CheckoutController.CACHE_TTL_MS,
+      () =>
+        this.ticketRepository.find({
+          where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
+        }),
+    );
 
     const ticketByInventoryId = new Map(tickets.map((ticket) => [ticket.inventoryId, ticket]));
     const eventIds = Array.from(new Set(tickets.map((ticket) => ticket.eventId)));
+    const sortedEventIds = [...eventIds].sort((a, b) => a.localeCompare(b));
 
-    const questions = eventIds.length
-      ? await this.registrationQuestionRepository.find({
-          where: eventIds.map((eventId) => ({ tenantId, eventId, isActive: true })),
-        })
+    const questions = sortedEventIds.length
+      ? await this.requestCacheService.getOrSet(
+          `registration-questions:${tenantId}:${sortedEventIds.join(',')}`,
+          CheckoutController.CACHE_TTL_MS,
+          () =>
+            this.registrationQuestionRepository.find({
+              where: sortedEventIds.map((eventId) => ({ tenantId, eventId, isActive: true })),
+            }),
+        )
       : [];
 
     const requiredQuestionIdsByEvent = new Map<string, Set<string>>();

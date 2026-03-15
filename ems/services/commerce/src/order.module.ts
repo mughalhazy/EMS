@@ -19,6 +19,9 @@ import { FulfillmentService } from './fulfillment.service';
 import { OrderService } from './order.service';
 import { PaymentService } from './payment.service';
 import { RedisLockService } from './redis-lock.service';
+import { RequestCacheService } from './request-cache.service';
+import { RateLimitService } from './rate-limit.service';
+import { IdempotencyService } from './idempotency.service';
 import { StripeCompatibleGateway } from './stripe-compatible.gateway';
 import { TicketFulfillmentService } from './ticket-fulfillment.service';
 
@@ -42,6 +45,9 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
     OrderService,
     PaymentService,
     RedisLockService,
+    RequestCacheService,
+    RateLimitService,
+    IdempotencyService,
     StripeCompatibleGateway,
     CommerceEventsPublisher,
     RegistrationEventsPublisher,
@@ -49,6 +55,6 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
     EmailConfirmationService,
     FulfillmentService,
   ],
-  exports: [OrderService, PaymentService, RedisLockService],
+  exports: [OrderService, PaymentService, RedisLockService, RequestCacheService, RateLimitService, IdempotencyService],
 })
 export class OrderModule {}

@@ -30,6 +30,8 @@ export interface CreateOrderInput {
 
 @Injectable()
 export class OrderService {
+  private readonly reservationTtlMs = Number(process.env.INVENTORY_RESERVATION_TTL_MS ?? 15 * 60_000);
+
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
@@ -52,6 +54,8 @@ export class OrderService {
       status: input.status ?? OrderStatus.DRAFT,
       totals: this.normalizeTotals(input.totals),
       reservation: reservations.length > 0 ? reservations : null,
+      reservationExpiresAt:
+        reservations.length > 0 ? new Date(Date.now() + this.reservationTtlMs) : null,
     });
 
     const savedOrder = await this.orderRepository.save(order);
@@ -111,11 +115,13 @@ export class OrderService {
       if (status === OrderStatus.PLACED) {
         await this.commitInventories(tenantId, reservations);
         order.reservation = null;
+        order.reservationExpiresAt = null;
       }
 
       if (status === OrderStatus.CANCELLED || status === OrderStatus.REFUNDED) {
         await this.releaseInventories(tenantId, reservations);
         order.reservation = null;
+        order.reservationExpiresAt = null;
       }
     }
 
@@ -124,21 +130,47 @@ export class OrderService {
   }
 
   async findByTenant(tenantId: string): Promise<OrderEntity[]> {
-    return this.orderRepository.find({
+    const orders = await this.orderRepository.find({
       where: { tenantId },
       order: { createdAt: 'DESC' },
       relations: ['items'],
     });
+
+    await Promise.all(orders.map((order) => this.expireReservationIfNeeded(order)));
+    return orders;
   }
 
   async findByTenantAndId(
     tenantId: string,
     orderId: string,
   ): Promise<OrderEntity | null> {
-    return this.orderRepository.findOne({
+    const order = await this.orderRepository.findOne({
       where: { id: orderId, tenantId },
       relations: ['items'],
     });
+
+    if (!order) {
+      return null;
+    }
+
+    await this.expireReservationIfNeeded(order);
+    return order;
+  }
+
+  private async expireReservationIfNeeded(order: OrderEntity): Promise<void> {
+    if (
+      order.status !== OrderStatus.DRAFT ||
+      !order.reservation?.length ||
+      !order.reservationExpiresAt ||
+      order.reservationExpiresAt.getTime() > Date.now()
+    ) {
+      return;
+    }
+
+    await this.releaseInventories(order.tenantId, order.reservation);
+    order.reservation = null;
+    order.reservationExpiresAt = null;
+    await this.orderRepository.save(order);
   }
 
   private async reserveInventories(
