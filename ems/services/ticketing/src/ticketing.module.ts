@@ -3,8 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EventEntity } from '../../event/src/entities/event.entity';
 import { EarlyBirdRuleEntity } from './entities/early-bird-rule.entity';
-import { InventoryHoldEntity } from './entities/inventory-hold.entity';
-import { InventoryEntity } from './entities/inventory.entity';
 import { PricingTierEntity } from './entities/pricing-tier.entity';
 import { PromoCodeEntity } from './entities/promo-code.entity';
 import { TicketEntitlementEntity } from './entities/ticket-entitlement.entity';
@@ -18,8 +16,6 @@ import { TicketEntity } from './entities/ticket.entity';
       TicketProductEntity,
       TicketEntity,
       TicketEntitlementEntity,
-      InventoryEntity,
-      InventoryHoldEntity,
       PricingTierEntity,
       PromoCodeEntity,
       EarlyBirdRuleEntity,

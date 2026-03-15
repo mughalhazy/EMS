@@ -9,7 +9,7 @@ import { PaymentEntity } from './entities/payment.entity';
 
 export const COMMERCE_EVENTS_KAFKA_CLIENT = 'COMMERCE_EVENTS_KAFKA_CLIENT';
 export const ORDER_CREATED_TOPIC = 'order.created';
-export const PAYMENT_COMPLETED_TOPIC = 'payment.completed';
+export const PAYMENT_CAPTURED_TOPIC = 'payment.captured';
 export const ORDER_CONFIRMATION_EMAIL_TOPIC = 'order.confirmation.email.requested';
 
 @Injectable()
@@ -48,7 +48,7 @@ export class CommerceEventsPublisher {
     }, trace));
   }
 
-  async publishPaymentCompleted(
+  async publishPaymentCaptured(
     payment: Pick<PaymentEntity, 'id' | 'tenantId' | 'orderId' | 'status' | 'amountMinor' | 'currency'>,
     trace?: DistributedTraceCarrier,
   ): Promise<void> {
@@ -57,14 +57,14 @@ export class CommerceEventsPublisher {
         JSON.stringify({
           event: 'commerce.publish.skipped',
           reason: 'kafka_client_unavailable',
-          topic: PAYMENT_COMPLETED_TOPIC,
+          topic: PAYMENT_CAPTURED_TOPIC,
           paymentId: payment.id,
         }),
       );
       return;
     }
 
-    await this.kafkaClient.emit(PAYMENT_COMPLETED_TOPIC, attachDistributedTrace({
+    await this.kafkaClient.emit(PAYMENT_CAPTURED_TOPIC, attachDistributedTrace({
       event_id: randomUUID(),
       occurred_at: new Date().toISOString(),
       tenant_id: payment.tenantId,

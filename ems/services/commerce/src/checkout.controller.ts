@@ -15,7 +15,6 @@ import { Repository } from 'typeorm';
 
 import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
-import { TicketPricingService } from '../../ticketing/src/ticket-pricing.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { CheckoutOrderDto } from './dto/checkout-order.dto';
 import {
@@ -27,9 +26,15 @@ import { PaymentEntity } from './entities/payment.entity';
 import { OrderService } from './order.service';
 import { PaymentService } from './payment.service';
 
-@Controller('api/v1/tenants/:tenantId/ticket-purchases')
+interface ApiSuccessResponse<T> {
+  data: T;
+  meta: {
+    timestamp: string;
+  };
+}
+
+@Controller('api/v1/tenants/:tenantId')
 export class CheckoutController {
-  private readonly ticketPricingService = new TicketPricingService();
   constructor(
     @InjectRepository(TicketEntity)
     private readonly ticketRepository: Repository<TicketEntity>,
@@ -45,7 +50,7 @@ export class CheckoutController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: CreateTicketOrderDto,
-  ): Promise<OrderEntity> {
+  ): Promise<ApiSuccessResponse<OrderEntity>> {
     this.assertIdempotencyKey(idempotencyKey);
     this.assertAttendeeCounts(payload);
     await this.assertTicketOwnershipAndRequiredQuestions(tenantId, payload);
@@ -55,7 +60,7 @@ export class CheckoutController {
     const discount = payload.discount ?? 0;
     const tax = payload.tax ?? 0;
 
-    return this.orderService.create({
+    const order = await this.orderService.create({
       tenantId,
       status: OrderStatus.DRAFT,
       totals: {
@@ -70,16 +75,18 @@ export class CheckoutController {
       })),
       items: pricedItems,
     });
+
+    return this.success(order);
   }
 
-  @Post('orders/:orderId/checkout')
+  @Post('orders/:orderId/payments')
   @HttpCode(HttpStatus.CREATED)
   async checkoutOrder(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: CheckoutOrderDto,
-  ): Promise<PaymentEntity> {
+  ): Promise<ApiSuccessResponse<PaymentEntity>> {
     this.assertIdempotencyKey(idempotencyKey);
 
     const order = await this.orderService.findByTenantAndId(tenantId, orderId);
@@ -87,31 +94,35 @@ export class CheckoutController {
       throw new NotFoundException('Order not found in tenant.');
     }
 
-    return this.paymentService.createForOrder({
+    const payment = await this.paymentService.createForOrder({
       tenantId,
       orderId,
       amountMinor: payload.amountMinor,
       currency: payload.currency,
       metadata: {
         ...(payload.metadata ?? {}),
-        checkoutSource: 'ticket_purchase_api',
+        checkoutSource: 'orders_api',
       },
     });
+
+    return this.success(payment);
   }
 
-  @Post('payments/confirm')
+  @Post('payments/confirmations')
   async confirmPayment(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Headers('idempotency-key') idempotencyKey: string | undefined,
     @Body() payload: ConfirmPaymentDto,
-  ): Promise<PaymentEntity> {
+  ): Promise<ApiSuccessResponse<PaymentEntity>> {
     this.assertIdempotencyKey(idempotencyKey);
 
-    return this.paymentService.updatePaymentStatus(
+    const payment = await this.paymentService.updatePaymentStatus(
       tenantId,
       payload.providerReference,
       payload.status,
     );
+
+    return this.success(payment);
   }
 
   private async buildPricedItems(
@@ -125,7 +136,6 @@ export class CheckoutController {
 
     const tickets = await this.ticketRepository.find({
       where: inventoryIds.map((inventoryId) => ({ tenantId, inventoryId })),
-      relations: ['pricingTiers', 'earlyBirdRules', 'promoCodes'],
     });
 
     const ticketByInventoryId = new Map(tickets.map((ticket) => [ticket.inventoryId, ticket]));
@@ -136,15 +146,20 @@ export class CheckoutController {
         throw new BadRequestException(`Ticket not found for inventory '${item.inventoryId}'.`);
       }
 
-      const pricing = this.ticketPricingService.calculate(ticket, {
-        quantity: item.quantity,
-      });
-
       return {
         ...item,
-        unitPrice: pricing.unitPrice,
+        unitPrice: Number(ticket.totalPrice),
       };
     });
+  }
+
+  private success<T>(data: T): ApiSuccessResponse<T> {
+    return {
+      data,
+      meta: {
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
 
   private assertIdempotencyKey(idempotencyKey?: string): void {

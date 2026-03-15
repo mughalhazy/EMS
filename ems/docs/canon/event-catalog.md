@@ -22,6 +22,7 @@ This catalog is the authoritative list of domain events used across EMS.
 | PaymentCaptured | `payment.captured` | Funds are captured. |
 | RefundIssued | `refund.issued` | A refund is issued. |
 | TicketIssued | `ticket.issued` | Ticket entitlement is generated. |
+| OrderConfirmationEmailRequested | `order.confirmation.email.requested` | An order confirmation notification should be queued for delivery. |
 
 ## Registration
 
