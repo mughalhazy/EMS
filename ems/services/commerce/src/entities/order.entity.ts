@@ -53,6 +53,9 @@ export class OrderEntity {
   @Column({ type: 'jsonb', nullable: true })
   reservation!: OrderInventoryReservations | null;
 
+  @Column({ type: 'timestamptz', name: 'reservation_expires_at', nullable: true })
+  reservationExpiresAt!: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
 
