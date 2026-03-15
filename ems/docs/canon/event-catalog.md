@@ -1,28 +1,21 @@
 # Event Catalog
 
-This catalog is the authoritative list of domain events used across EMS.
+This catalog is the authoritative list of currently implemented domain events used across EMS modules.
 
 ## Event Lifecycle
 
 | Event Name | Topic | Trigger |
 | --- | --- | --- |
-| EventCreated | `event.created` | A new event is created in draft state. |
-| EventUpdated | `event.updated` | Event metadata is updated. |
-| EventPublished | `event.published` | Event transitions to published/discoverable. |
-| EventUnpublished | `event.unpublished` | Event transitions back to non-public state. |
-| EventCancelled | `event.cancelled` | Event is cancelled and no longer accepts attendance operations. |
-| EventCloned | `event.cloned` | A new event is seeded from an existing event. |
+| EventLifecycleChanged | `event.lifecycle` | Event create/update/status-change envelopes emitted by Event Service. |
+| SessionLifecycleChanged | `session.lifecycle` | Session create/update lifecycle envelopes emitted by Event/Agenda services. |
 
 ## Commerce
 
 | Event Name | Topic | Trigger |
 | --- | --- | --- |
 | OrderCreated | `order.created` | A new order is created. |
-| PaymentAuthorized | `payment.authorized` | Payment authorization succeeds. |
-| PaymentCaptured | `payment.captured` | Funds are captured. |
-| RefundIssued | `refund.issued` | A refund is issued. |
-| TicketIssued | `ticket.issued` | Ticket entitlement is generated. |
-| OrderConfirmationEmailRequested | `order.confirmation.email.requested` | An order confirmation notification should be queued for delivery. |
+| PaymentCaptured | `payment.captured` | Payment status transitions to captured/succeeded. |
+| OrderConfirmationEmailRequested | `order.confirmation.email.requested` | Order confirmation notification should be queued for delivery. |
 
 ## Registration
 
@@ -30,17 +23,16 @@ This catalog is the authoritative list of domain events used across EMS.
 | --- | --- | --- |
 | RegistrationStarted | `registration.started` | Registration intake begins and a registration record is created. |
 | RegistrationConfirmed | `registration.confirmed` | Registration is confirmed for attendance. |
-| RegistrationTransferred | `registration.transferred` | Registration ownership is transferred to another attendee. |
 | RegistrationCancelled | `registration.cancelled` | Registration is cancelled. |
-
 
 ## Agenda and Program
 
 | Event Name | Topic | Trigger |
 | --- | --- | --- |
-| SessionLifecycleChanged | `session.lifecycle` | Session create/update lifecycle envelope is published. |
-| SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded from agenda operations. |
 | SessionAttended | `session.attended` | Session attendance is confirmed for analytics stream processing. |
+| SessionQuestionAsked | `session.question.asked` | An attendee submits a question for a session Q&A stream. |
+| PollSubmitted | `poll.submitted` | An attendee submits a response for a live poll option. |
+| SurveyCompleted | `survey.completed` | An attendee completes an engagement survey. |
 | ExhibitorCreated | `exhibitor.created` | A new exhibitor profile is created for an event. |
 | LeadCaptured | `lead.captured` | An exhibitor captures an attendee lead. |
 
@@ -48,54 +40,15 @@ This catalog is the authoritative list of domain events used across EMS.
 
 | Event Name | Topic | Trigger |
 | --- | --- | --- |
-| CheckInDeviceRegistered | `checkin.device_registered` | A check-in device is registered. |
-| CheckInDeviceStatusUpdated | `checkin.device_status_updated` | Device status changes. |
 | OnsiteCheckinCompleted | `onsite.checkin.completed` | Attendee event check-in completes at venue or gate. |
-| SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded. |
-| SessionAttended | `session.attended` | Session attendance is confirmed and emitted for downstream analytics consumers. |
+| SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded from onsite operations. |
 | OnsiteAccessGranted | `onsite.access.granted` | A scan grants attendee access at a gate/session boundary. |
 | OnsiteAccessDenied | `onsite.access.denied` | A scan denies attendee access at a gate/session boundary. |
 | OnsiteBadgePrinted | `onsite.badge.printed` | Badge print operation succeeds. |
 
-## Identity and Access
+## Networking
 
 | Event Name | Topic | Trigger |
 | --- | --- | --- |
-| AuthUserCreated | `auth.user.created` | A new platform identity is provisioned. |
-| AuthUserUpdated | `auth.user.updated` | User identity attributes or status are updated. |
-| AuthRoleChanged | `auth.role.changed` | Role definitions or role assignments are changed. |
-| AuthSessionStarted | `auth.session.started` | A user authentication session is established. |
-| AuthSessionEnded | `auth.session.ended` | A user authentication session is terminated. |
-
-## Tenant Lifecycle
-
-| Event Name | Topic | Trigger |
-| --- | --- | --- |
-| TenantProvisioned | `tenant.tenant.provisioned` | A new tenant is created and initialized. |
-| TenantUpdated | `tenant.tenant.updated` | Tenant metadata or settings are updated. |
-| TenantPlanChanged | `tenant.plan.changed` | A tenant plan entitlement changes. |
-| TenantMembershipChanged | `tenant.membership.changed` | Tenant membership assignments are modified. |
-
-## Audit
-
-| Event Name | Topic | Trigger |
-| --- | --- | --- |
-| AuditLogRecorded | `audit.log.recorded` | A compliance/security-relevant action is persisted. |
-| AuditRetentionExpired | `audit.retention.expired` | Retention policy removes or archives an audit record set. |
-
-## Engagement
-
-| Event Name | Topic | Trigger |
-| --- | --- | --- |
-| PollSubmitted | `poll.submitted` | An attendee submits a response for a live poll option. |
-| SessionQuestionAsked | `session.question.asked` | An attendee submits a question for a session Q&A stream. |
-| SurveyCompleted | `survey.completed` | An attendee completes an engagement survey. |
-
-## Notification
-
-| Event Name | Topic | Trigger |
-| --- | --- | --- |
-| NotificationQueued | `notification.queued` | A notification is accepted for channel dispatch. |
-| NotificationSent | `notification.sent` | A notification dispatch attempt succeeds. |
-| NotificationFailed | `notification.failed` | A dispatch attempt fails and is marked failed. |
-| NotificationBounced | `notification.bounced` | A downstream provider reports a bounce. |
+| AttendeeConnectionRequested | `attendee.connection.requested` | An attendee requests a networking connection. |
+| AttendeeConnected | `attendee.connected` | A networking connection request is accepted. |

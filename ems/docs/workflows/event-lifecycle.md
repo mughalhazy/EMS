@@ -39,11 +39,8 @@ This workflow describes how organizers create, update, publish, unpublish, and c
 
 ## Emitted Events
 
-- `EventCreated`
-- `EventUpdated`
-- `EventPublished`
-- `EventUnpublished`
-- `EventCloned`
+- `EventLifecycleChanged` (`event.lifecycle`) with `event_type` values: `event.created`, `event.updated`, `event.status_changed`
+- `SessionLifecycleChanged` (`session.lifecycle`) for session create/update operations attached to events
 
 ## Primary Consumers
 

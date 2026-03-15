@@ -234,7 +234,7 @@ export class PaymentService {
         ...registration,
       });
 
-      await this.registrationEventsPublisher.publishRegistrationCreated(saved);
+      await this.registrationEventsPublisher.publishRegistrationStarted(saved);
       await this.registrationEventsPublisher.publishRegistrationConfirmed(saved);
     }
   }

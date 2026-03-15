@@ -5,7 +5,7 @@ import { readDistributedTrace } from '../../audit/src/distributed-tracing';
 
 import { QUESTION_ASKED_TOPIC, POLL_SUBMITTED_TOPIC } from '../../engagement/src/engagement-events.publisher';
 import { LEAD_CAPTURED_TOPIC } from '../../exhibitor/src/exhibitor-events.publisher';
-import { ATTENDEE_CHECKED_IN_TOPIC } from '../../onsite/src/onsite-events.publisher';
+import { ONSITE_CHECKIN_COMPLETED_TOPIC } from '../../onsite/src/onsite-events.publisher';
 import { REGISTRATION_CONFIRMED_TOPIC } from '../../registration/src/registration-events.publisher';
 import {
   AnalyticsMetricsService,
@@ -39,7 +39,7 @@ export class AnalyticsEventsConsumer {
     );
   }
 
-  @EventPattern(ATTENDEE_CHECKED_IN_TOPIC)
+  @EventPattern(ONSITE_CHECKIN_COMPLETED_TOPIC)
   async handleAttendeeCheckedIn(@Payload() payload: AttendeeCheckedInMetricEvent): Promise<void> {
     const trace = readDistributedTrace(payload as Record<string, unknown>);
     await this.analyticsMetricsService.handleAttendeeCheckedIn(payload);
