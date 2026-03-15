@@ -40,3 +40,5 @@ export class BadgeEntity {
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt!: Date;
 }
+
+export type Badge = BadgeEntity;

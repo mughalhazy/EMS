@@ -35,6 +35,12 @@ export interface BadgePrintResult {
   isReprint: boolean;
 }
 
+export interface BadgeValidationResult {
+  badge: BadgeEntity | null;
+  isValid: boolean;
+  reason: string | null;
+}
+
 export interface ScanningDeviceResult {
   device: ScanningDeviceEntity;
   isNewRegistration: boolean;
@@ -371,6 +377,55 @@ export class OnsiteService {
     });
 
     return badgePrintResult;
+  }
+
+  async validateBadge(
+    tenantId: string,
+    eventId: string,
+    badgeId: string,
+    attendeeId?: string,
+  ): Promise<BadgeValidationResult> {
+    const normalizedBadgeId = badgeId.trim();
+
+    const badge = await this.badgePrintingService.findBadgeByBadgeId(normalizedBadgeId);
+
+    if (!badge) {
+      return {
+        badge: null,
+        isValid: false,
+        reason: 'Badge was not found.',
+      };
+    }
+
+    const attendee = await this.attendeeRepository.findOne({
+      where: {
+        id: badge.attendeeId,
+        tenantId,
+        eventId,
+      },
+    });
+
+    if (!attendee) {
+      return {
+        badge,
+        isValid: false,
+        reason: 'Badge is not assigned to an attendee in this event.',
+      };
+    }
+
+    if (attendeeId && attendee.id !== attendeeId) {
+      return {
+        badge,
+        isValid: false,
+        reason: 'Badge does not belong to the provided attendee.',
+      };
+    }
+
+    return {
+      badge,
+      isValid: true,
+      reason: null,
+    };
   }
 
   async scanSessionCheckIn(
