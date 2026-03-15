@@ -5,12 +5,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { EventEntity } from '../../../event/src/entities/event.entity';
 import { UserEntity } from '../../../user/src/entities/user.entity';
+import { AttendeeTagEntity } from './attendee-tag.entity';
 
 export enum AttendeeStatus {
   PROSPECT = 'prospect',
@@ -66,6 +68,9 @@ export class AttendeeEntity {
     default: AttendeeStatus.REGISTERED,
   })
   status!: AttendeeStatus;
+
+  @OneToMany(() => AttendeeTagEntity, (attendeeTag) => attendeeTag.attendee)
+  tags!: AttendeeTagEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
