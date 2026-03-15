@@ -3,31 +3,19 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  OneToMany,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { SessionSpeakerEntity } from './session-speaker.entity';
-import { SpeakerProfileEntity } from './speaker-profile.entity';
+import { SpeakerEntity } from './speaker.entity';
 
-export enum SpeakerStatus {
-  INVITED = 'invited',
-  CONFIRMED = 'confirmed',
-  DECLINED = 'declined',
-  WITHDRAWN = 'withdrawn',
-}
-
-@Entity({ name: 'speakers' })
-@Index('idx_speakers_tenant_id', ['tenantId'])
-@Index('idx_speakers_event_id', ['eventId'])
-@Index('idx_speakers_status', ['status'])
-@Index('uq_speakers_event_email', ['eventId', 'email'], {
-  unique: true,
-  where: 'email IS NOT NULL',
-})
-export class SpeakerEntity {
+@Entity({ name: 'speaker_profiles' })
+@Index('idx_speaker_profiles_tenant_id', ['tenantId'])
+@Index('idx_speaker_profiles_event_id', ['eventId'])
+@Index('uq_speaker_profiles_speaker_id', ['speakerId'], { unique: true })
+export class SpeakerProfileEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -37,17 +25,15 @@ export class SpeakerEntity {
   @Column({ type: 'uuid', name: 'event_id' })
   eventId!: string;
 
-  @Column({ type: 'uuid', name: 'organization_id', nullable: true })
-  organizationId!: string | null;
+  @Column({ type: 'uuid', name: 'speaker_id' })
+  speakerId!: string;
 
-  @Column({ type: 'varchar', length: 120, name: 'first_name' })
-  firstName!: string;
-
-  @Column({ type: 'varchar', length: 120, name: 'last_name' })
-  lastName!: string;
-
-  @Column({ type: 'varchar', length: 320, nullable: true })
-  email!: string | null;
+  @OneToOne(() => SpeakerEntity, (speaker) => speaker.profile, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'speaker_id' })
+  speaker!: SpeakerEntity;
 
   @Column({ type: 'text', nullable: true })
   bio!: string | null;
@@ -78,16 +64,6 @@ export class SpeakerEntity {
 
   @Column({ type: 'text', array: true, default: '{}', name: 'expertise_tags' })
   expertiseTags!: string[];
-
-  @Column({ type: 'enum', enum: SpeakerStatus, default: SpeakerStatus.INVITED })
-  status!: SpeakerStatus;
-
-
-  @OneToOne(() => SpeakerProfileEntity, (profile) => profile.speaker)
-  profile!: SpeakerProfileEntity | null;
-
-  @OneToMany(() => SessionSpeakerEntity, (sessionSpeaker) => sessionSpeaker.speaker)
-  sessionAssignments!: SessionSpeakerEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
