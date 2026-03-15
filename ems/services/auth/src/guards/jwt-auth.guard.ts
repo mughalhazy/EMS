@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { JwtTokenService } from '../jwt-token.service';
 import { RbacService } from '../rbac.service';
 import { AuthenticatedUser } from '../types/authenticated-user.type';
-import { UserEntity, UserStatus } from '../../../user/src/entities/user.entity';
+import { UserEntity, UserStatus } from '../entities/user.entity';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {

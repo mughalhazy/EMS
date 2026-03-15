@@ -22,14 +22,14 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { TokenPairDto } from './dto/token-pair.dto';
 import { AuthSessionEntity } from './entities/auth-session.entity';
-import { UserEntity, UserStatus } from '../../user/src/entities/user.entity';
+import { UserEntity, UserStatus } from './entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RbacService } from './rbac.service';
 import { ApiDataResponseDto } from './dto/api-response.dto';
 import { PasswordResetRequestDto } from './dto/password-reset-request.dto';
 import { PasswordResetConfirmDto } from './dto/password-reset-confirm.dto';
 
-@Controller('auth')
+@Controller('api/v1/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -171,7 +171,8 @@ export class AuthController {
   @Post('password-reset/confirm')
   async confirmPasswordReset(
     @Body() payload: PasswordResetConfirmDto,
-  ): Promise<void> {
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<{ success: true }>> {
     await this.authService.resetPassword(
       payload.tenantId,
       payload.userId,
@@ -184,12 +185,17 @@ export class AuthController {
       targetUserId: payload.userId,
       action: 'auth.password.reset',
     });
+    return this.successResponse({ success: true }, request);
   }
 
   @Get('sso/:tenantId/providers')
   @UseGuards(JwtAuthGuard)
-  async listSsoProviders(@Param('tenantId', ParseUUIDPipe) tenantId: string) {
-    return this.authService.getTenantSsoProviders(tenantId);
+  async listSsoProviders(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<AuthService['getTenantSsoProviders']>>>> {
+    const providers = await this.authService.getTenantSsoProviders(tenantId);
+    return this.successResponse(providers, request);
   }
 
   private async issueSession(

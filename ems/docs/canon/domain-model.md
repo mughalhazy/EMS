@@ -14,7 +14,7 @@ This document defines the **core EMS entities** and the **service that owns each
 
 | Entity | Purpose | Owning service |
 |---|---|---|
-| `Tenant` | Top-level customer/account boundary | `Identity & Access Service` |
+| `Tenant` | Top-level customer/account boundary | `Tenant Service` |
 | `User` | Authenticated platform identity | `Identity & Access Service` |
 | `Role` | Authorization role definition and scope | `Identity & Access Service` |
 | `Event` | Event container and lifecycle | `Event Service` |

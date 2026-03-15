@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuditModule } from '../../audit/src/audit.module';
-import { UserEntity } from '../../user/src/entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtTokenService } from './jwt-token.service';
@@ -55,8 +55,8 @@ export class AuthModule implements NestModule {
     consumer
       .apply(TenantIsolationMiddleware)
       .exclude(
-        { path: 'auth/login', method: RequestMethod.POST },
-        { path: 'auth/refresh', method: RequestMethod.POST },
+        { path: 'api/v1/auth/login', method: RequestMethod.POST },
+        { path: 'api/v1/auth/refresh', method: RequestMethod.POST },
       )
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }

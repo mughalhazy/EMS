@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 
 import { AuditService } from '../../audit/src/audit.service';
 import { RequirePermissions } from './decorators/require-permissions.decorator';
+import { ApiDataResponseDto } from './dto/api-response.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -20,8 +22,12 @@ export class RolesController {
 
   @Get()
   @RequirePermissions('roles.read')
-  async listRoles(@Param('tenantId', ParseUUIDPipe) tenantId: string) {
-    return this.rbacService.listRoles(tenantId);
+  async listRoles(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<RbacService['listRoles']>>>> {
+    const roles = await this.rbacService.listRoles(tenantId);
+    return this.successResponse(roles, request);
   }
 
   @Post()
@@ -29,7 +35,8 @@ export class RolesController {
   async createRole(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Body() payload: CreateRoleDto,
-  ) {
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<RbacService['createRole']>>>> {
     const role = await this.rbacService.createRole({ tenantId, ...payload });
     await this.auditService.trackRoleChange({
       tenantId,
@@ -37,7 +44,7 @@ export class RolesController {
       targetUserId: null,
       after: { roleId: role.id, name: role.name },
     });
-    return role;
+    return this.successResponse(role, request);
   }
 
   @Patch(':roleId/permissions')
@@ -46,14 +53,15 @@ export class RolesController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('roleId', ParseUUIDPipe) roleId: string,
     @Body() payload: UpdateRolePermissionsDto,
-  ) {
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<RbacService['setRolePermissions']>>>> {
     const role = await this.rbacService.setRolePermissions(tenantId, roleId, payload.permissionIds);
     await this.auditService.trackRoleChange({
       tenantId,
       action: 'role.permissions.updated',
       after: { roleId, permissionIds: payload.permissionIds },
     });
-    return role;
+    return this.successResponse(role, request);
   }
 
   @Post(':roleId/assignments')
@@ -62,7 +70,8 @@ export class RolesController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('roleId', ParseUUIDPipe) roleId: string,
     @Body() payload: AssignRoleDto,
-  ) {
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<RbacService['assignRoleToUser']>>>> {
     const assignment = await this.rbacService.assignRoleToUser({
       tenantId,
       roleId,
@@ -79,18 +88,35 @@ export class RolesController {
       after: { roleId, assignmentId: assignment.id },
     });
 
-    return assignment;
+    return this.successResponse(assignment, request);
   }
 
   @Get('permissions/catalog')
   @RequirePermissions('roles.read')
-  async listPermissions() {
-    return this.rbacService.listPermissions();
+  async listPermissions(
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<RbacService['listPermissions']>>>> {
+    const permissions = await this.rbacService.listPermissions();
+    return this.successResponse(permissions, request);
   }
 
   @Post('permissions/catalog')
   @RequirePermissions('roles.manage')
-  async createPermission(@Body() payload: CreatePermissionDto) {
-    return this.rbacService.createPermission(payload);
+  async createPermission(
+    @Body() payload: CreatePermissionDto,
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<Awaited<ReturnType<RbacService['createPermission']>>>> {
+    const permission = await this.rbacService.createPermission(payload);
+    return this.successResponse(permission, request);
+  }
+
+  private successResponse<T>(data: T, request: Request): ApiDataResponseDto<T> {
+    return {
+      data,
+      meta: {
+        requestId: request.headers['x-request-id']?.toString() ?? 'generated-request-id',
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
 }
