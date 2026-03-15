@@ -6,6 +6,10 @@ export class CreateSessionDto {
   @IsUUID()
   roomId!: string;
 
+  @IsOptional()
+  @IsUUID()
+  trackId?: string;
+
   @IsString()
   @IsNotEmpty()
   title!: string;

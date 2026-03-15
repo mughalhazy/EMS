@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
 import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
@@ -9,6 +9,7 @@ import { RoomEntity } from '../../event/src/entities/room.entity';
 import { AttendeeScheduleEntity } from './entities/attendee-schedule.entity';
 import { SessionEntity, SessionStatus } from './entities/session.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
+import { TrackEntity } from './entities/track.entity';
 import { SessionAttendancePublisher } from './session-attendance.publisher';
 import { SessionLifecyclePublisher } from './session-lifecycle.publisher';
 
@@ -27,6 +28,8 @@ export class SessionService {
     private readonly speakerRepository: Repository<SpeakerEntity>,
     @InjectRepository(RoomEntity)
     private readonly roomRepository: Repository<RoomEntity>,
+    @InjectRepository(TrackEntity)
+    private readonly trackRepository: Repository<TrackEntity>,
     private readonly sessionLifecyclePublisher: SessionLifecyclePublisher,
     private readonly sessionAttendancePublisher: SessionAttendancePublisher,
     private readonly auditService: AuditService,
@@ -35,6 +38,7 @@ export class SessionService {
   async create(input: Partial<SessionEntity>, actorUserId?: string): Promise<SessionEntity> {
     this.ensureValidTimes(input.startTime, input.endTime);
     await this.ensureRoomExists(input.tenantId!, input.eventId!, input.roomId!);
+    await this.ensureTrackExists(input.tenantId!, input.eventId!, input.trackId);
     await this.ensureNoRoomConflict(input.tenantId!, input.eventId!, input.roomId!, input.startTime!, input.endTime!);
 
     const session = this.sessionRepository.create({
@@ -54,7 +58,44 @@ export class SessionService {
   }
 
   async list(tenantId: string, eventId: string): Promise<SessionEntity[]> {
-    return this.sessionRepository.find({ where: { tenantId, eventId }, order: { agendaOrder: 'ASC', startTime: 'ASC' } });
+    return this.queryAgenda(tenantId, eventId, {});
+  }
+
+  async queryAgenda(
+    tenantId: string,
+    eventId: string,
+    query: {
+      trackId?: string;
+      speakerId?: string;
+      startsAfter?: Date;
+      endsBefore?: Date;
+      status?: SessionStatus;
+      search?: string;
+    },
+  ): Promise<SessionEntity[]> {
+    const qb = this.sessionRepository.createQueryBuilder('session')
+      .leftJoinAndSelect('session.track', 'track')
+      .leftJoinAndSelect('session.speakerAssignments', 'speakerAssignments')
+      .where('session.tenant_id = :tenantId', { tenantId })
+      .andWhere('session.event_id = :eventId', { eventId });
+
+    if (query.trackId) qb.andWhere('session.track_id = :trackId', { trackId: query.trackId });
+    if (query.speakerId) qb.andWhere('speakerAssignments.speaker_id = :speakerId', { speakerId: query.speakerId });
+    if (query.startsAfter) qb.andWhere('session.start_time >= :startsAfter', { startsAfter: query.startsAfter.toISOString() });
+    if (query.endsBefore) qb.andWhere('session.end_time <= :endsBefore', { endsBefore: query.endsBefore.toISOString() });
+    if (query.status) qb.andWhere('session.status = :status', { status: query.status });
+    if (query.search) {
+      qb.andWhere(new Brackets((whereBuilder) => {
+        whereBuilder
+          .where('session.title ILIKE :search', { search: `%${query.search}%` })
+          .orWhere('session.description ILIKE :search', { search: `%${query.search}%` });
+      }));
+    }
+
+    return qb
+      .orderBy('session.agenda_order', 'ASC')
+      .addOrderBy('session.start_time', 'ASC')
+      .getMany();
   }
 
   async update(tenantId: string, eventId: string, sessionId: string, input: Partial<SessionEntity>, actorUserId?: string): Promise<SessionEntity | null> {
@@ -67,6 +108,7 @@ export class SessionService {
 
     this.ensureValidTimes(nextStart, nextEnd);
     await this.ensureRoomExists(tenantId, eventId, nextRoomId);
+    await this.ensureTrackExists(tenantId, eventId, input.trackId);
     await this.ensureNoRoomConflict(tenantId, eventId, nextRoomId, nextStart, nextEnd, sessionId);
 
     const before = this.auditSession(existing);
@@ -226,6 +268,13 @@ export class SessionService {
     if (!room) throw new BadRequestException('Room not found in tenant event.');
   }
 
+  private async ensureTrackExists(tenantId: string, eventId: string, trackId?: string | null): Promise<void> {
+    if (!trackId) return;
+
+    const track = await this.trackRepository.findOne({ where: { id: trackId, tenantId, eventId } });
+    if (!track) throw new BadRequestException('Track not found in tenant event.');
+  }
+
   private ensureValidTimes(startTime?: Date, endTime?: Date): void {
     if (!startTime || !endTime || startTime >= endTime) {
       throw new BadRequestException('Invalid session schedule.');
@@ -237,6 +286,7 @@ export class SessionService {
       id: session.id,
       eventId: session.eventId,
       roomId: session.roomId,
+      trackId: session.trackId,
       startTime: session.startTime,
       endTime: session.endTime,
       capacity: session.capacity,
