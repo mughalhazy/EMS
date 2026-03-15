@@ -1,0 +1,186 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.header p {
+  margin: 0.4rem 0 0;
+  color: #5f6b7a;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.actions button {
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  border: 1px solid #d6dee8;
+  background: #fff;
+  color: #2a3240;
+}
+
+.primaryBtn {
+  border-color: #1f7aff !important;
+  background: #1f7aff !important;
+  color: white !important;
+}
+
+.kpis {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.kpiCard {
+  background: white;
+  border: 1px solid #e5eaf0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.kpiCard p {
+  margin: 0;
+  color: #667084;
+  font-size: 0.85rem;
+}
+
+.kpiCard h3 {
+  margin: 0.4rem 0;
+  font-size: 1.5rem;
+}
+
+.kpiCard span {
+  color: #0e9f6e;
+  font-size: 0.85rem;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #e5eaf0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.panelHeader h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.panelHeader button {
+  border: 1px solid #d6dee8;
+  border-radius: 0.45rem;
+  background: #fff;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tableWrap th,
+.tableWrap td {
+  text-align: left;
+  border-bottom: 1px solid #edf1f5;
+  padding: 0.7rem 0.35rem;
+  font-size: 0.88rem;
+}
+
+.tableWrap th {
+  color: #6c7788;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.status {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: #eef4ff;
+  color: #245cc8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.segmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.segmentCard {
+  border: 1px solid #edf1f5;
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.segmentCard h3,
+.segmentCard p {
+  margin: 0;
+}
+
+.segmentCard p {
+  color: #5f6b7a;
+  font-size: 0.86rem;
+}
+
+.segmentCard div {
+  margin-top: 0.4rem;
+  display: flex;
+  justify-content: space-between;
+  color: #6c7788;
+  font-size: 0.8rem;
+}
+
+.segmentCard strong {
+  color: #2a3240;
+}
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+}
