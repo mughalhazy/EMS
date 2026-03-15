@@ -1,4 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, UseInterceptors } from '@nestjs/common';
+
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantSettingsDto } from './dto/update-tenant-settings.dto';
@@ -7,6 +9,7 @@ import { TenantSettingsEntity } from './entities/tenant-settings.entity';
 import { TenantService } from './tenant.service';
 
 @Controller('api/v1/tenants')
+@UseInterceptors(ApiResponseInterceptor)
 export class TenantController {
   constructor(private readonly tenantService: TenantService) {}
 

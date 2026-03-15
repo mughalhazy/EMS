@@ -1,138 +1,139 @@
 # EMS Backend Service Map
 
-This document defines backend service boundaries for EMS. Each service includes:
+This document defines backend service boundaries for **currently implemented modules in this repository**.
 
-- **Purpose**: Why the service exists.
-- **Owned entities**: Data/aggregates for which the service is source of truth.
-- **Published events**: Domain events emitted by the service.
-- **Consumed events**: Domain events the service reacts to from other services.
+Each section lists:
+- **Purpose**
+- **Owned entities** (source-of-truth)
+- **Published events** (implemented topics)
+- **Consumed events** (implemented subscriptions/reactions)
 
 ## auth
-- **Purpose**: Manage identity, authentication, authorization, and service-to-service access policies.
-- **Owned entities**: `User`, `Credential`, `Role`, `Permission`, `Session`, `MfaFactor`, `ApiClient`.
-- **Published events**: `auth.user.created`, `auth.user.updated`, `auth.role.changed`, `auth.session.started`, `auth.session.ended`.
-- **Consumed events**: `tenant.tenant.provisioned`, `tenant.membership.changed`, `integration.identity.sync.requested`.
+- **Purpose**: Identity, authentication, and authorization controls.
+- **Owned entities**: `User`, `Credential`, `Role`, `Permission`, `Session`.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## tenant
-- **Purpose**: Manage tenant/org lifecycle, tenant settings, and feature plan entitlements.
-- **Owned entities**: `Tenant`, `TenantPlan`, `TenantFeatureFlag`, `TenantBranding`, `TenantMembership`.
-- **Published events**: `tenant.tenant.provisioned`, `tenant.tenant.updated`, `tenant.plan.changed`, `tenant.membership.changed`.
-- **Consumed events**: `auth.user.created`, `order.subscription.purchased`, `integration.tenant.imported`.
+- **Purpose**: Tenant lifecycle and tenant-level settings.
+- **Owned entities**: `Tenant`, `TenantSettings`.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
-## audit
-- **Purpose**: Persist immutable compliance and traceability logs for business and security actions.
-- **Owned entities**: `AuditLog`, `AuditActor`, `AuditEvidenceLink`, `RetentionPolicy`.
-- **Published events**: `audit.log.recorded`, `audit.retention.expired`.
-- **Consumed events**: Wildcard consumption of high-value events from all services (for example `auth.*`, `order.*`, `payment.*`, `onsite.*`).
+## user
+- **Purpose**: Tenant-scoped user and organization administration surface.
+- **Owned entities**: `Organization` (and user admin endpoints scoped to tenants).
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## event
-- **Purpose**: Own event master data and lifecycle from draft through archive.
-- **Owned entities**: `Event`, `VenueRef`, `EventPolicy`, `EventStatus`, `EventSettings`.
-- **Published events**: `event.created`, `event.updated`, `event.published`, `event.cancelled`, `event.archived`.
-- **Consumed events**: `tenant.tenant.provisioned`, `integration.event.imported`.
+- **Purpose**: Event lifecycle, venue, room, and event-level session/speaker operations.
+- **Owned entities**: `Event`, `Venue`, `Room`, `EventSettings`.
+- **Published events**: `event.lifecycle`, `session.lifecycle`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## agenda
-- **Purpose**: Plan and publish event program structure (tracks, sessions, slots, rooms).
-- **Owned entities**: `Track`, `Session`, `AgendaSlot`, `RoomAllocation`, `AgendaVersion`.
-- **Published events**: `agenda.session.created`, `agenda.session.updated`, `agenda.session.scheduled`, `agenda.agenda.published`.
-- **Consumed events**: `event.created`, `event.published`, `speaker.profile.approved`.
+- **Purpose**: Agenda/session planning workflows and attendance publication.
+- **Owned entities**: `Session` (agenda view), scheduling metadata.
+- **Published events**: `session.lifecycle`, `session.attended`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## speaker
-- **Purpose**: Manage speaker identity/profile, onboarding, and speaker-session assignment constraints.
-- **Owned entities**: `SpeakerProfile`, `SpeakerCredential`, `SpeakerAvailability`, `SpeakerAssignment`.
-- **Published events**: `speaker.profile.created`, `speaker.profile.approved`, `speaker.assignment.created`, `speaker.assignment.removed`.
-- **Consumed events**: `agenda.session.created`, `event.published`, `auth.user.created`.
+- **Purpose**: Speaker profile and speaker-event participation operations.
+- **Owned entities**: `SpeakerProfile`, `SpeakerAvailability`, assignment metadata.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## exhibitor
-- **Purpose**: Manage exhibitor participation lifecycle and booth/package operations.
-- **Owned entities**: `Exhibitor`, `ExhibitorApplication`, `BoothAllocation`, `ExhibitorPackage`, `ExhibitorContact`.
-- **Published events**: `exhibitor.application.submitted`, `exhibitor.application.approved`, `exhibitor.booth.assigned`, `exhibitor.package.fulfillment.updated`.
-- **Consumed events**: `event.published`, `order.paid`, `payment.refunded`.
+- **Purpose**: Exhibitor management and lead capture.
+- **Owned entities**: `Exhibitor`, `Booth`, `LeadCapture`.
+- **Published events**: `exhibitor.created`, `lead.captured`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## attendee
-- **Purpose**: Own attendee profile, preferences, privacy/consent, and attendee-facing attributes.
-- **Owned entities**: `Attendee`, `AttendeePreference`, `ConsentRecord`, `BadgeProfile`.
-- **Published events**: `attendee.created`, `attendee.updated`, `attendee.consent.updated`, `attendee.badge.updated`.
-- **Consumed events**: `registration.confirmed`, `registration.cancelled`, `fulfillment.ticket.issued`, `onsite.checkin.completed`.
+- **Purpose**: Attendee profile and attendee-facing directory/search projection support.
+- **Owned entities**: `Attendee`, `AttendeePreference`, attendee directory projection data.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: `registration.confirmed`, `registration.cancelled`, `onsite.checkin.completed`, `attendee.connection.requested`, `attendee.connected`, `session.attendance_scanned`.
 
 ## registration
-- **Purpose**: Materialize participation entitlements and lifecycle status for event attendance.
-- **Owned entities**: `Registration`, `RegistrationItem`, `RegistrationStatus`, `TransferRequest`, `CancellationRequest`.
-- **Published events**: `registration.started`, `registration.confirmed`, `registration.transferred`, `registration.cancelled`.
-- **Consumed events**: `order.placed`, `order.paid`, `payment.captured`, `payment.refunded`, `event.cancelled`.
+- **Purpose**: Registration intake and status lifecycle.
+- **Owned entities**: `Registration`, `RegistrationStatus`.
+- **Published events**: `registration.started`, `registration.confirmed`, `registration.cancelled`.
+- **Consumed events**: `order.created`, `payment.captured`.
 
 ## ticketing
-- **Purpose**: Manage ticket catalog and sale policy definitions.
-- **Owned entities**: `TicketType`, `TicketRule`, `SalesWindow`, `AccessTier`, `PromoRule`.
-- **Published events**: `ticketing.tickettype.created`, `ticketing.tickettype.updated`, `ticketing.saleswindow.opened`, `ticketing.promo.applied`.
-- **Consumed events**: `event.created`, `pricing.price.published`, `inventory.stock.changed`.
+- **Purpose**: Ticket catalog, ticket pricing and inventory-related business rules.
+- **Owned entities**: `TicketType`, pricing/inventory ticket policies.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## pricing
-- **Purpose**: Compute and publish prices, discounts, taxes, and fee policies.
-- **Owned entities**: `PriceBook`, `PriceRule`, `DiscountCampaign`, `TaxRule`, `FeePolicy`.
-- **Published events**: `pricing.price.published`, `pricing.discount.activated`, `pricing.discount.expired`, `pricing.taxrule.updated`.
-- **Consumed events**: `event.published`, `ticketing.tickettype.created`, `tenant.plan.changed`.
+- **Purpose**: Price rule and pricing module boundary.
+- **Owned entities**: `PriceRule`/pricing policy primitives.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## inventory
-- **Purpose**: Track allocatable stock/quotas and holds for scarce sellable units.
-- **Owned entities**: `InventoryPool`, `InventoryItem`, `InventoryHold`, `InventoryReservation`, `InventoryLedger`.
-- **Published events**: `inventory.stock.changed`, `inventory.hold.created`, `inventory.hold.released`, `inventory.reservation.confirmed`.
-- **Consumed events**: `ticketing.tickettype.created`, `order.placed`, `order.expired`, `payment.refunded`.
+- **Purpose**: Inventory and stock allocations.
+- **Owned entities**: `InventoryPool`, `InventoryReservation`, stock ledgers.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
-## order
-- **Purpose**: Own cart/order lifecycle, commercial totals, and checkout orchestration.
-- **Owned entities**: `Cart`, `Order`, `OrderLine`, `OrderTotal`, `OrderAdjustment`.
-- **Published events**: `order.started`, `order.placed`, `order.paid`, `order.cancelled`, `order.refunded`, `order.expired`.
-- **Consumed events**: `pricing.price.published`, `inventory.reservation.confirmed`, `payment.captured`, `payment.failed`, `payment.refunded`.
-
-## payment
-- **Purpose**: Execute payment intent, authorization/capture, and refund processes with gateways.
-- **Owned entities**: `PaymentIntent`, `PaymentTransaction`, `PaymentMethodToken`, `Refund`, `SettlementRecord`.
-- **Published events**: `payment.intent.created`, `payment.authorized`, `payment.captured`, `payment.failed`, `payment.refunded`.
-- **Consumed events**: `order.placed`, `order.cancelled`, `order.refunded`, `integration.payment.webhook.received`.
-
-## fulfillment
-- **Purpose**: Generate and revoke post-payment access artifacts (QR/pass/PDF) and delivery states.
-- **Owned entities**: `TicketArtifact`, `Credential`, `FulfillmentJob`, `RevocationRecord`.
-- **Published events**: `fulfillment.ticket.issued`, `fulfillment.ticket.delivered`, `fulfillment.ticket.revoked`.
-- **Consumed events**: `payment.captured`, `payment.refunded`, `registration.confirmed`, `registration.cancelled`.
+## commerce
+- **Purpose**: Checkout orchestration, order/payment lifecycle, and fulfillment actions.
+- **Owned entities**: `Order`, `OrderItem`, `Payment`, `Refund`, `TicketFulfillment`.
+- **Published events**: `order.created`, `payment.captured`, `order.confirmation.email.requested`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## notification
-- **Purpose**: Deliver transactional and campaign communications across channels.
-- **Owned entities**: `Template`, `Notification`, `ChannelRoute`, `DispatchAttempt`, `SubscriptionPreference`.
-- **Published events**: `notification.queued`, `notification.sent`, `notification.failed`, `notification.bounced`.
-- **Consumed events**: `registration.confirmed`, `payment.captured`, `fulfillment.ticket.issued`, `onsite.checkin.completed`, `event.updated`.
+- **Purpose**: Notification and delivery orchestration.
+- **Owned entities**: `Notification`, `Template`, dispatch records.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## engagement
-- **Purpose**: Manage interactive event engagement experiences including polls, session Q&A, and feedback surveys.
+- **Purpose**: Poll, Q&A, and survey interaction management.
 - **Owned entities**: `EngagementPoll`, `EngagementQuestion`, `EngagementSurvey`.
 - **Published events**: `poll.submitted`, `session.question.asked`, `survey.completed`.
-- **Consumed events**: `agenda.session.created`, `registration.confirmed`, `onsite.checkin.completed`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
-## analytics
-- **Purpose**: Build read models, metrics, and reporting datasets from cross-service events.
-- **Owned entities**: `MetricDefinition`, `KpiSnapshot`, `FunnelView`, `AnalyticsExport`, `MaterializedView`.
-- **Published events**: `analytics.snapshot.generated`, `analytics.report.ready`, `analytics.anomaly.detected`.
-- **Consumed events**: Broad consumption from all domain services (notably `event.*`, `registration.*`, `order.*`, `payment.*`, `onsite.*`).
-
-## integration
-- **Purpose**: Manage inbound/outbound connectors, webhooks, and data synchronization.
-- **Owned entities**: `Connector`, `WebhookSubscription`, `SyncJob`, `ExternalMapping`, `IntegrationCredential`.
-- **Published events**: `integration.sync.started`, `integration.sync.completed`, `integration.sync.failed`, `integration.webhook.received`.
-- **Consumed events**: `event.published`, `attendee.updated`, `order.paid`, `payment.refunded`, `onsite.checkin.completed`.
+## networking
+- **Purpose**: Attendee networking connections.
+- **Owned entities**: `AttendeeConnection`.
+- **Published events**: `attendee.connection.requested`, `attendee.connected`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
 ## onsite
-- **Purpose**: Support venue-day operations including check-in, badge print, and access control.
-- **Owned entities**: `CheckinRecord`, `BadgePrintJob`, `GateScan`, `OnsiteDevice`, `ManualOverride`.
-- **Published events**: `onsite.checkin.completed`, `onsite.badge.printed`, `onsite.access.denied`, `onsite.access.granted`.
-- **Consumed events**: `fulfillment.ticket.issued`, `registration.confirmed`, `attendee.badge.updated`, `event.published`.
+- **Purpose**: Onsite check-in, badge printing, and gate/session access scans.
+- **Owned entities**: `CheckinRecord`, `BadgePrintJob`, `SessionScan`.
+- **Published events**: `onsite.checkin.completed`, `session.attendance_scanned`, `onsite.access.granted`, `onsite.access.denied`, `onsite.badge.printed`.
+- **Consumed events**: None cataloged as message-bus topics yet.
 
-## Boundary Notes
+## analytics
+- **Purpose**: Metrics ingestion and reporting read models.
+- **Owned entities**: `KpiSnapshot`, reporting aggregates.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: `registration.confirmed`, `onsite.checkin.completed`, `session.attended`, `poll.submitted`, `session.question.asked`, `lead.captured`.
 
-1. `ticketing` defines sellable products and constraints; `pricing` defines monetary rules; `inventory` defines stock truth.
-2. `order` orchestrates checkout state but never processes funds directly.
-3. `payment` is the system of record for money movement and gateway outcomes.
-4. `registration` grants participation entitlements only from successful commercial outcomes (`order.paid`/`payment.captured`).
-5. `fulfillment` issues access artifacts only after payment success and revokes on cancellation/refund.
-6. `notification` is event-driven and never blocks transactional writes.
-7. `audit` and `analytics` are downstream consumers and should not be hard dependencies in write paths.
+## search
+- **Purpose**: Search indexing and query abstraction.
+- **Owned entities**: Search indexes/projections.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: None cataloged as message-bus topics yet.
+
+## audit
+- **Purpose**: Audit and traceability persistence.
+- **Owned entities**: `AuditLog`.
+- **Published events**: None cataloged as message-bus topics yet.
+- **Consumed events**: Internal audit service calls from domain modules.
+
+## shared
+- **Purpose**: Shared cross-cutting backend primitives and middleware.
+- **Owned entities**: N/A.
+- **Published events**: N/A.
+- **Consumed events**: N/A.
+
+## Notes on planned capabilities
+
+The canonical model still references future split services such as `payment`, `fulfillment`, and `integration`. In the current implementation, those capabilities are hosted inside the `commerce` module and supporting modules, and may be extracted later.

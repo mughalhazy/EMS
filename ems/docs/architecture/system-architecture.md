@@ -238,25 +238,20 @@ These are naturally asynchronous and less transaction-coupled.
 
 ---
 
-## 10) Reference implementation structure (suggested)
+## 10) Reference implementation structure (current repository)
 
 ```text
 ems/
   apps/
-    api-gateway/          # optional separate gateway runtime
-    backend/              # NestJS modular monolith
     web/                  # Next.js frontend
-  services/               # future extracted services
-  infra/
-    postgres/
-    redis/
-    kafka/
-    opensearch/
-  docs/
-    architecture.md
+  services/               # backend modules (domain-oriented service folders)
+    <domain-service>/src/
+    shared/
+  infra/                  # docker/deployment/scripts/tests
+  docs/                   # architecture/canon/workflow documentation
 ```
 
-This structure supports immediate productivity while preserving clear seams for service extraction.
+Current code is organized as modular service folders with explicit boundaries and shared contracts. This preserves seams for extraction while matching the implemented repository layout.
 
 ## 11) QC-01 architecture consistency addendum
 

@@ -1,4 +1,6 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, UseInterceptors } from '@nestjs/common';
+
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { OrganizationEntity } from './entities/organization.entity';
@@ -6,6 +8,7 @@ import { OrganizationService } from './organization.service';
 import { TenantContext } from './tenant-context';
 
 @Controller('api/v1/organizations')
+@UseInterceptors(ApiResponseInterceptor)
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 

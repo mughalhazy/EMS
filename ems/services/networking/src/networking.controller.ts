@@ -7,14 +7,17 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 import { AcceptConnectionRequestDto } from './dto/accept-connection-request.dto';
 import { SendConnectionRequestDto } from './dto/send-connection-request.dto';
 import { AttendeeConnectionEntity } from './entities/attendee-connection.entity';
 import { NetworkingService } from './networking.service';
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId/networking/connections')
+@UseInterceptors(ApiResponseInterceptor)
 export class NetworkingController {
   constructor(private readonly networkingService: NetworkingService) {}
 
