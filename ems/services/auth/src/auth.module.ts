@@ -10,12 +10,16 @@ import { SecretsProviderService } from './secrets-provider.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
 import { RbacModule } from './rbac.module';
 import { RolesController } from './roles.controller';
-import { AuthCredentialEntity } from './entities/auth-credential.entity';
+import { UserCredentialEntity } from './entities/user-credential.entity';
 import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
 import { AuthSsoProviderEntity } from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
+import { PermissionEntity } from './entities/permission.entity';
+import { AuthSessionEntity } from './entities/auth-session.entity';
+import { RoleEntity } from './entities/role.entity';
+import { RolePermissionEntity } from './entities/role-permission.entity';
+import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Module({
@@ -23,12 +27,16 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     AuditModule,
     RbacModule,
     TypeOrmModule.forFeature([
-      AuthCredentialEntity,
+      UserCredentialEntity,
       AuthTokenEntity,
       AuthUserStateEntity,
       AuthSsoProviderEntity,
       AuthFederatedIdentityEntity,
-      RefreshTokenEntity,
+      AuthSessionEntity,
+      RoleEntity,
+      PermissionEntity,
+      RolePermissionEntity,
+      UserRoleAssignmentEntity,
       UserEntity,
     ]),
   ],
