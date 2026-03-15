@@ -17,6 +17,7 @@ This workflow describes attendee registration lifecycle after direct intake or c
 
 - A valid `tenantId` and `eventId` exist.
 - User and ticket context are known.
+- Caller sends an `Idempotency-Key` header for mutating requests.
 
 ## Steps
 
@@ -24,27 +25,25 @@ This workflow describes attendee registration lifecycle after direct intake or c
    - API command: `POST /api/v1/tenants/{tenantId}/registrations`
 2. **List and review registrations**
    - API command: `GET /api/v1/tenants/{tenantId}/registrations`
-3. **Amend registration**
+3. **Amend registration ticket assignment**
    - API command: `PATCH /api/v1/tenants/{tenantId}/registrations/{registrationId}`
-4. **Optional cancellation**
+4. **Optional approval (when status is pending/waitlisted)**
+   - API command: `POST /api/v1/tenants/{tenantId}/registrations/{registrationId}/approve`
+5. **Optional cancellation**
    - API command: `POST /api/v1/tenants/{tenantId}/registrations/{registrationId}/cancel`
-5. **Confirm registration**
-   - System command: `ConfirmRegistration`
 
 ## Commands (Domain/API)
 
 - `CreateRegistration`
 - `UpdateRegistration`
+- `ApproveRegistration`
 - `CancelRegistration`
-- `ConfirmRegistration` (internal/system driven)
 
 ## Emitted Events
 
-- `RegistrationSubmitted`
-- `RegistrationUpdated`
-- `RegistrationApproved`
-- `RegistrationCancelled`
-- `RegistrationConfirmed`
+- `RegistrationStarted` (`registration.started`)
+- `RegistrationConfirmed` (`registration.confirmed`)
+- `RegistrationCancelled` (`registration.cancelled`)
 
 ## Primary Consumers
 

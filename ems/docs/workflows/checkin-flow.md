@@ -32,7 +32,9 @@ This workflow describes onsite attendee check-in, session scans, and badge opera
    - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/check-ins`
 4. **Session-level scan check-in (optional)**
    - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/check-ins/sessions/{sessionId}/scans`
-5. **Print badge (optional)**
+5. **Validate badge eligibility (optional)**
+   - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/check-ins/badges/validate`
+6. **Print badge (optional)**
    - API command: `POST /api/v1/tenants/{tenantId}/events/{eventId}/check-ins/badges/print`
 
 ## Commands (Domain/API)
@@ -41,15 +43,16 @@ This workflow describes onsite attendee check-in, session scans, and badge opera
 - `UpdateScanningDeviceStatus`
 - `CheckInAttendee`
 - `ScanSessionCheckIn`
+- `ValidateBadge`
 - `PrintBadge`
 
 ## Emitted Events
 
-- `CheckInDeviceRegistered`
-- `CheckInDeviceStatusUpdated`
-- `AttendeeCheckedIn`
-- `SessionAttendanceScanned`
-- `BadgePrinted`
+- `OnsiteCheckinCompleted` (`onsite.checkin.completed`)
+- `SessionAttendanceScanned` (`session.attendance_scanned`)
+- `OnsiteAccessGranted` (`onsite.access.granted`)
+- `OnsiteAccessDenied` (`onsite.access.denied`)
+- `OnsiteBadgePrinted` (`onsite.badge.printed`)
 
 ## Primary Consumers
 

@@ -1,13 +1,12 @@
 # Checkout Flow Workflow
 
-This workflow describes ticket order creation, checkout, payment confirmation, and registration handoff.
+This workflow describes ticket order creation, payment confirmation, and registration handoff.
 
 ## Entities
 
 - Tenant
 - Order
 - Payment
-- Ticket
 - Registration
 
 ## Owning Service
@@ -24,12 +23,12 @@ This workflow describes ticket order creation, checkout, payment confirmation, a
 
 1. **Create order**
    - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/orders`
-2. **Checkout order**
-   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/orders/{orderId}/checkout`
+2. **Create/checkout payment for order**
+   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/orders/{orderId}/payments`
 3. **Confirm payment status**
-   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/payments/confirm`
+   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/payments/confirmations`
 4. **Registration handoff on payment success**
-   - System command: `CreateRegistrationFromPaidOrder`
+   - System command: `CreateRegistrationFromOrderItem`
 
 ## Commands (Domain/API)
 
@@ -40,12 +39,11 @@ This workflow describes ticket order creation, checkout, payment confirmation, a
 
 ## Emitted Events
 
-- `OrderCreated`
-- `PaymentAuthorized`
-- `PaymentCaptured`
-- `TicketIssued`
-- `RegistrationSubmitted`
-- `RegistrationConfirmed`
+- `OrderCreated` (`order.created`)
+- `PaymentCaptured` (`payment.captured`)
+- `OrderConfirmationEmailRequested` (`order.confirmation.email.requested`)
+- `RegistrationStarted` (`registration.started`)
+- `RegistrationConfirmed` (`registration.confirmed`)
 
 ## Primary Consumers
 
