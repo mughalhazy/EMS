@@ -35,6 +35,38 @@ export interface EventDashboardOverview extends AggregateEventAnalyticsResult {
   generatedAt: string;
 }
 
+export interface EventDashboardView {
+  tenantId: string;
+  eventId: string;
+  generatedAt: string;
+  overview: EventDashboardOverview;
+  trends: EventDashboardTrendPoint[];
+  topSessions: EventDashboardSessionAnalytics[];
+  topExhibitors: EventDashboardExhibitorAnalytics[];
+}
+
+export interface TicketSalesSummary {
+  tenantId: string;
+  eventId: string;
+  snapshotDate: string;
+  generatedAt: string;
+  registrationsCount: number;
+  ticketsSoldCount: number;
+  ticketSalesAmount: string;
+  conversionRate: string;
+}
+
+export interface AttendanceMetrics {
+  tenantId: string;
+  eventId: string;
+  snapshotDate: string;
+  generatedAt: string;
+  registrationsCount: number;
+  attendeesCheckedInCount: number;
+  checkInRate: string;
+  totalEngagementActionsCount: number;
+}
+
 export interface EventDashboardTrendPoint {
   snapshotDate: string;
   registrationsCount: number;
@@ -239,6 +271,79 @@ export class AnalyticsService {
     return {
       ...aggregate,
       generatedAt: new Date().toISOString(),
+    };
+  }
+
+  async getEventDashboardView(
+    tenantId: string,
+    eventId: string,
+    snapshotDate?: string,
+    startDate?: string,
+    endDate?: string,
+    limit = 5,
+  ): Promise<EventDashboardView> {
+    const normalizedLimit = Math.max(1, Math.min(limit, 50));
+    const [overview, trends, topSessions, topExhibitors] = await Promise.all([
+      this.getDashboardOverview(tenantId, eventId, snapshotDate),
+      this.getDashboardTrends(tenantId, eventId, startDate, endDate),
+      this.getTopSessionsForDashboard(tenantId, eventId, normalizedLimit),
+      this.getTopExhibitorsForDashboard(tenantId, eventId, normalizedLimit),
+    ]);
+
+    return {
+      tenantId,
+      eventId,
+      generatedAt: new Date().toISOString(),
+      overview,
+      trends,
+      topSessions,
+      topExhibitors,
+    };
+  }
+
+  async getTicketSalesSummary(
+    tenantId: string,
+    eventId: string,
+    snapshotDate?: string,
+  ): Promise<TicketSalesSummary> {
+    const aggregate = await this.aggregateEventAnalytics(tenantId, eventId, snapshotDate);
+    const conversionRate =
+      aggregate.registrationsCount > 0
+        ? ((aggregate.ticketsSoldCount / aggregate.registrationsCount) * 100).toFixed(2)
+        : '0.00';
+
+    return {
+      tenantId,
+      eventId,
+      snapshotDate: aggregate.snapshotDate,
+      generatedAt: new Date().toISOString(),
+      registrationsCount: aggregate.registrationsCount,
+      ticketsSoldCount: aggregate.ticketsSoldCount,
+      ticketSalesAmount: aggregate.ticketSalesAmount,
+      conversionRate,
+    };
+  }
+
+  async getAttendanceMetrics(
+    tenantId: string,
+    eventId: string,
+    snapshotDate?: string,
+  ): Promise<AttendanceMetrics> {
+    const aggregate = await this.aggregateEventAnalytics(tenantId, eventId, snapshotDate);
+    const checkInRate =
+      aggregate.registrationsCount > 0
+        ? ((aggregate.attendeesCheckedInCount / aggregate.registrationsCount) * 100).toFixed(2)
+        : '0.00';
+
+    return {
+      tenantId,
+      eventId,
+      snapshotDate: aggregate.snapshotDate,
+      generatedAt: new Date().toISOString(),
+      registrationsCount: aggregate.registrationsCount,
+      attendeesCheckedInCount: aggregate.attendeesCheckedInCount,
+      checkInRate,
+      totalEngagementActionsCount: aggregate.totalEngagementActionsCount,
     };
   }
 

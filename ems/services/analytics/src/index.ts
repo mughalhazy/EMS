@@ -8,3 +8,9 @@ export { RevenueReportingController } from './revenue-reporting.controller';
 export { RevenueReportingService } from './revenue-reporting.service';
 export { RequestMetricsInterceptor } from './request-metrics.interceptor';
 export { RequestMetricsService } from './request-metrics.service';
+
+export type {
+  AttendanceMetrics,
+  EventDashboardView,
+  TicketSalesSummary,
+} from './analytics.service';

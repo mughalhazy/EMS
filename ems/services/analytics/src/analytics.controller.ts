@@ -3,14 +3,17 @@ import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { AggregateEventAnalyticsQueryDto } from './dto/aggregate-event-analytics-query.dto';
 import { EventDashboardQueryDto } from './dto/event-dashboard-query.dto';
 import {
+  AttendanceMetrics,
   AggregateEventAnalyticsResult,
   AnalyticsService,
   AttendeeEngagementReport,
+  EventDashboardView,
   EventDashboardExhibitorAnalytics,
   EventDashboardOverview,
   EventDashboardSessionAnalytics,
   EventDashboardTrendPoint,
   SponsorRoiReport,
+  TicketSalesSummary,
 } from './analytics.service';
 
 @Controller('api/v1/tenants/:tenantId/events/:eventId/analytics')
@@ -33,6 +36,40 @@ export class AnalyticsController {
     @Query() query: EventDashboardQueryDto,
   ): Promise<EventDashboardOverview> {
     return this.analyticsService.getDashboardOverview(tenantId, eventId, query.snapshotDate);
+  }
+
+  @Get('read-models/event-dashboard-view')
+  async getEventDashboardView(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query() query: EventDashboardQueryDto,
+  ): Promise<EventDashboardView> {
+    return this.analyticsService.getEventDashboardView(
+      tenantId,
+      eventId,
+      query.snapshotDate,
+      query.startDate,
+      query.endDate,
+      this.resolveLimit(query.limit),
+    );
+  }
+
+  @Get('read-models/ticket-sales-summary')
+  async getTicketSalesSummary(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query() query: EventDashboardQueryDto,
+  ): Promise<TicketSalesSummary> {
+    return this.analyticsService.getTicketSalesSummary(tenantId, eventId, query.snapshotDate);
+  }
+
+  @Get('read-models/attendance-metrics')
+  async getAttendanceMetrics(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query() query: EventDashboardQueryDto,
+  ): Promise<AttendanceMetrics> {
+    return this.analyticsService.getAttendanceMetrics(tenantId, eventId, query.snapshotDate);
   }
 
   @Get('dashboard/trends')
