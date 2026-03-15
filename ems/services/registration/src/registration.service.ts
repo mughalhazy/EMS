@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
 import { buildDistributedTraceContext } from '../../audit/src/distributed-tracing';
@@ -36,32 +36,32 @@ export interface RegistrationApprovalInput {
 
 @Injectable()
 export class RegistrationService {
+  private readonly logger = new Logger(RegistrationService.name);
+
   constructor(
     @InjectRepository(RegistrationEntity)
     private readonly registrationRepository: Repository<RegistrationEntity>,
     @InjectRepository(EventSettingEntity)
     private readonly eventSettingRepository: Repository<EventSettingEntity>,
-    @InjectRepository(TicketEntity)
-    private readonly ticketRepository: Repository<TicketEntity>,
-    @InjectRepository(OrderEntity)
-    private readonly orderRepository: Repository<OrderEntity>,
-    @InjectRepository(OrderItemEntity)
-    private readonly orderItemRepository: Repository<OrderItemEntity>,
     @InjectRepository(RegistrantProfileEntity)
     private readonly registrantProfileRepository: Repository<RegistrantProfileEntity>,
-    @InjectRepository(RegistrationQuestionEntity)
-    private readonly registrationQuestionRepository: Repository<RegistrationQuestionEntity>,
     private readonly registrationEventsPublisher: RegistrationEventsPublisher,
     private readonly auditService: AuditService,
   ) {}
 
   async register(input: RegisterForEventInput): Promise<RegistrationEntity> {
-    return this.registrationRepository.manager.transaction(async (manager) => {
-      const registrationRepo = manager.getRepository(RegistrationEntity);
-      const eventSettingRepo = manager.getRepository(EventSettingEntity);
-      const registrantProfileRepo = manager.getRepository(RegistrantProfileEntity);
+    try {
+      return await this.registrationRepository.manager.transaction(async (manager) => {
+        const registrationRepo = manager.getRepository(RegistrationEntity);
+        const eventSettingRepo = manager.getRepository(EventSettingEntity);
+        const registrantProfileRepo = manager.getRepository(RegistrantProfileEntity);
 
-      await this.assertRegistrationInput(input);
+        await this.assertRegistrationInput(input, {
+          ticketRepository: manager.getRepository(TicketEntity),
+          orderRepository: manager.getRepository(OrderEntity),
+          orderItemRepository: manager.getRepository(OrderItemEntity),
+          registrationQuestionRepository: manager.getRepository(RegistrationQuestionEntity),
+        });
 
       const existing = await registrationRepo.findOne({
         where: {
@@ -138,11 +138,49 @@ export class RegistrationService {
       });
 
       return savedRegistration;
-    });
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      if (error instanceof QueryFailedError && (error as QueryFailedError & { driverError?: { code?: string } }).driverError?.code === '23505') {
+        this.logger.warn(
+          JSON.stringify({
+            event: 'registration.register.idempotent_conflict',
+            tenantId: input.tenantId,
+            eventId: input.eventId,
+            userId: input.userId,
+            ticketId: input.ticketId,
+          }),
+        );
+        throw new ConflictException('Registration already exists for this user and ticket.');
+      }
+
+      this.logger.error(
+        JSON.stringify({
+          event: 'registration.register.failed',
+          tenantId: input.tenantId,
+          eventId: input.eventId,
+          userId: input.userId,
+          ticketId: input.ticketId,
+          error: error instanceof Error ? error.message : 'Unknown register error',
+        }),
+      );
+      throw new InternalServerErrorException('Unable to register for event at this time.');
+    }
   }
 
-  private async assertRegistrationInput(input: RegisterForEventInput): Promise<void> {
-    const ticket = await this.ticketRepository.findOne({
+  private async assertRegistrationInput(
+    input: RegisterForEventInput,
+    repositories: {
+      ticketRepository: Repository<TicketEntity>;
+      orderRepository: Repository<OrderEntity>;
+      orderItemRepository: Repository<OrderItemEntity>;
+      registrationQuestionRepository: Repository<RegistrationQuestionEntity>;
+    },
+  ): Promise<void> {
+    const ticket = await repositories.ticketRepository.findOne({
       where: {
         id: input.ticketId,
         tenantId: input.tenantId,
@@ -158,7 +196,7 @@ export class RegistrationService {
         throw new BadRequestException('orderId, orderItemId, and attendeeIndex must be provided together.');
       }
 
-      const order = await this.orderRepository.findOne({
+      const order = await repositories.orderRepository.findOne({
         where: {
           id: input.orderId,
           tenantId: input.tenantId,
@@ -169,7 +207,7 @@ export class RegistrationService {
         throw new BadRequestException('Order does not exist in the tenant context.');
       }
 
-      const orderItem = await this.orderItemRepository.findOne({
+      const orderItem = await repositories.orderItemRepository.findOne({
         where: {
           id: input.orderItemId,
           tenantId: input.tenantId,
@@ -191,7 +229,7 @@ export class RegistrationService {
       }
     }
 
-    const requiredQuestions = await this.registrationQuestionRepository.find({
+    const requiredQuestions = await repositories.registrationQuestionRepository.find({
       where: {
         tenantId: input.tenantId,
         eventId: input.eventId,
