@@ -1,6 +1,6 @@
 import { IsArray, IsBoolean, IsDateString, IsEnum, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 
-import { SurveyStatus } from '../../../event/src/entities/survey.entity';
+import { EngagementSurveyStatus } from '../entities/engagement-survey.entity';
 
 export class UpdateSurveyDto {
   @IsOptional()
@@ -13,8 +13,8 @@ export class UpdateSurveyDto {
   description?: string;
 
   @IsOptional()
-  @IsEnum(SurveyStatus)
-  status?: SurveyStatus;
+  @IsEnum(EngagementSurveyStatus)
+  status?: EngagementSurveyStatus;
 
   @IsOptional()
   @IsBoolean()

@@ -80,3 +80,20 @@ This catalog is the authoritative list of domain events used across EMS.
 | --- | --- | --- |
 | AuditLogRecorded | `audit.log.recorded` | A compliance/security-relevant action is persisted. |
 | AuditRetentionExpired | `audit.retention.expired` | Retention policy removes or archives an audit record set. |
+
+## Engagement
+
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| PollSubmitted | `poll.submitted` | An attendee submits a response for a live poll option. |
+| SessionQuestionAsked | `session.question.asked` | An attendee submits a question for a session Q&A stream. |
+| SurveyCompleted | `survey.completed` | An attendee completes an engagement survey. |
+
+## Notification
+
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| NotificationQueued | `notification.queued` | A notification is accepted for channel dispatch. |
+| NotificationSent | `notification.sent` | A notification dispatch attempt succeeds. |
+| NotificationFailed | `notification.failed` | A dispatch attempt fails and is marked failed. |
+| NotificationBounced | `notification.bounced` | A downstream provider reports a bounce. |

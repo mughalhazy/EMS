@@ -2,17 +2,17 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { SessionQnaEntity } from '../../agenda/src/entities/session-qna.entity';
 import { SessionEntity } from '../../agenda/src/entities/session.entity';
 import { AuditService } from '../../audit/src/audit.service';
 import { AttendeeEntity } from '../../attendee/src/entities/attendee.entity';
-import { SurveyEntity } from '../../event/src/entities/survey.entity';
 import { CreatePollDto } from './dto/create-poll.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreateSurveyDto } from './dto/create-survey.dto';
 import { UpdatePollDto } from './dto/update-poll.dto';
 import { UpdateSurveyDto } from './dto/update-survey.dto';
+import { EngagementQuestionEntity } from './entities/engagement-question.entity';
 import { PollEntity } from './entities/poll.entity';
+import { EngagementSurveyEntity } from './entities/engagement-survey.entity';
 import { EngagementEventsPublisher } from './engagement-events.publisher';
 
 @Injectable()
@@ -20,10 +20,10 @@ export class EngagementService {
   constructor(
     @InjectRepository(PollEntity)
     private readonly pollRepository: Repository<PollEntity>,
-    @InjectRepository(SessionQnaEntity)
-    private readonly questionRepository: Repository<SessionQnaEntity>,
-    @InjectRepository(SurveyEntity)
-    private readonly surveyRepository: Repository<SurveyEntity>,
+    @InjectRepository(EngagementQuestionEntity)
+    private readonly questionRepository: Repository<EngagementQuestionEntity>,
+    @InjectRepository(EngagementSurveyEntity)
+    private readonly surveyRepository: Repository<EngagementSurveyEntity>,
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(AttendeeEntity)
@@ -135,7 +135,7 @@ export class EngagementService {
     tenantId: string,
     eventId: string,
     payload: CreateQuestionDto,
-  ): Promise<SessionQnaEntity> {
+  ): Promise<EngagementQuestionEntity> {
     await this.assertSessionBelongsToTenantEvent(tenantId, eventId, payload.sessionId);
 
     const attendee = await this.attendeeRepository.findOne({
@@ -151,6 +151,8 @@ export class EngagementService {
     }
 
     const question = this.questionRepository.create({
+      tenantId,
+      eventId,
       sessionId: payload.sessionId,
       attendeeId: payload.attendeeId,
       question: payload.question.trim(),
@@ -168,34 +170,22 @@ export class EngagementService {
     return savedQuestion;
   }
 
-  async listQuestions(tenantId: string, eventId: string, sessionId?: string): Promise<SessionQnaEntity[]> {
+  async listQuestions(tenantId: string, eventId: string, sessionId?: string): Promise<EngagementQuestionEntity[]> {
     if (sessionId) {
       await this.assertSessionBelongsToTenantEvent(tenantId, eventId, sessionId);
       return this.questionRepository.find({
-        where: { sessionId },
+        where: { tenantId, eventId, sessionId },
         order: { createdAt: 'DESC' },
       });
     }
 
-    const sessions = await this.sessionRepository.find({
+    return this.questionRepository.find({
       where: { tenantId, eventId },
-      select: { id: true },
+      order: { createdAt: 'DESC' },
     });
-
-    const sessionIds = sessions.map((session) => session.id);
-
-    if (!sessionIds.length) {
-      return [];
-    }
-
-    return this.questionRepository
-      .createQueryBuilder('question')
-      .where('question.session_id IN (:...sessionIds)', { sessionIds })
-      .orderBy('question.created_at', 'DESC')
-      .getMany();
   }
 
-  async createSurvey(tenantId: string, eventId: string, payload: CreateSurveyDto): Promise<SurveyEntity> {
+  async createSurvey(tenantId: string, eventId: string, payload: CreateSurveyDto): Promise<EngagementSurveyEntity> {
     this.assertScheduleWindow(payload.openAt, payload.closeAt);
 
     const existingSurvey = await this.surveyRepository.findOne({
@@ -262,7 +252,7 @@ export class EngagementService {
     return { status: 'completed' };
   }
 
-  async listSurveys(tenantId: string, eventId: string): Promise<SurveyEntity[]> {
+  async listSurveys(tenantId: string, eventId: string): Promise<EngagementSurveyEntity[]> {
     return this.surveyRepository.find({
       where: { tenantId, eventId },
       order: { createdAt: 'DESC' },
@@ -274,7 +264,7 @@ export class EngagementService {
     eventId: string,
     surveyId: string,
     payload: UpdateSurveyDto,
-  ): Promise<SurveyEntity> {
+  ): Promise<EngagementSurveyEntity> {
     const survey = await this.surveyRepository.findOne({
       where: { id: surveyId, tenantId, eventId },
     });

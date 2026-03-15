@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 
 import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
 
-import { SessionQnaEntity } from '../../agenda/src/entities/session-qna.entity';
+import { EngagementQuestionEntity } from './entities/engagement-question.entity';
 import { PollEntity } from './entities/poll.entity';
 
 export const ENGAGEMENT_EVENTS_KAFKA_CLIENT = 'ENGAGEMENT_EVENTS_KAFKA_CLIENT';
@@ -54,7 +54,7 @@ export class EngagementEventsPublisher {
 
 
   async publishQuestionAsked(
-    question: Pick<SessionQnaEntity, 'id' | 'sessionId' | 'attendeeId' | 'createdAt'>,
+    question: Pick<EngagementQuestionEntity, 'id' | 'sessionId' | 'attendeeId' | 'createdAt'>,
     metadata: { tenantId: string; eventId: string },
     trace?: DistributedTraceCarrier,
   ): Promise<void> {
