@@ -11,7 +11,8 @@ import { RegistrationQuestionEntity } from '../../event/src/entities/registratio
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { CreateRegistrantProfileDto } from './dto/create-registration.dto';
 import { RegistrantProfileEntity } from './entities/registrant-profile.entity';
-import { RegistrationEntity, RegistrationStatus } from './entities/registration.entity';
+import { RegistrationEntity } from './entities/registration.entity';
+import { RegistrationStatus } from './entities/registration-status.entity';
 import { RegistrationEventsPublisher } from './registration-events.publisher';
 
 export interface RegisterForEventInput {
@@ -27,6 +28,10 @@ export interface RegisterForEventInput {
 
 export interface UpdateRegistrationInput {
   ticketId?: string;
+}
+
+export interface RegistrationApprovalInput {
+  actorUserId: string | null;
 }
 
 @Injectable()
@@ -78,11 +83,9 @@ export class RegistrationService {
         .andWhere('eventSetting.eventId = :eventId', { eventId: input.eventId })
         .getOne();
 
-      const status = await this.resolveStatus(registrationRepo, {
-        tenantId: input.tenantId,
-        eventId: input.eventId,
-        capacity: eventSetting?.capacity ?? null,
-      });
+      const status = eventSetting?.capacity === null
+        ? RegistrationStatus.CONFIRMED
+        : RegistrationStatus.PENDING;
 
       const registration = registrationRepo.create({
         ...(existing ?? {}),
@@ -256,6 +259,75 @@ export class RegistrationService {
     return this.registrationRepository.save(registration);
   }
 
+  async approve(
+    registrationId: string,
+    tenantId: string,
+    input: RegistrationApprovalInput,
+  ): Promise<RegistrationEntity | null> {
+    return this.registrationRepository.manager.transaction(async (manager) => {
+      const registrationRepo = manager.getRepository(RegistrationEntity);
+      const eventSettingRepo = manager.getRepository(EventSettingEntity);
+
+      const registration = await registrationRepo.findOne({
+        where: {
+          id: registrationId,
+          tenantId,
+        },
+      });
+
+      if (!registration || registration.status === RegistrationStatus.CANCELLED) {
+        return registration;
+      }
+
+      const previousStatus = registration.status;
+
+      if (previousStatus !== RegistrationStatus.PENDING && previousStatus !== RegistrationStatus.WAITLISTED) {
+        return registration;
+      }
+
+      const eventSetting = await eventSettingRepo
+        .createQueryBuilder('eventSetting')
+        .setLock('pessimistic_write')
+        .where('eventSetting.tenantId = :tenantId', { tenantId })
+        .andWhere('eventSetting.eventId = :eventId', { eventId: registration.eventId })
+        .getOne();
+
+      const hasCapacity = await this.hasCapacityForConfirmation(registrationRepo, {
+        tenantId,
+        eventId: registration.eventId,
+        capacity: eventSetting?.capacity ?? null,
+      });
+
+      registration.status = hasCapacity ? RegistrationStatus.CONFIRMED : RegistrationStatus.WAITLISTED;
+      const saved = await registrationRepo.save(registration);
+
+      const trace = buildDistributedTraceContext();
+
+      if (saved.status === RegistrationStatus.CONFIRMED) {
+        await this.registrationEventsPublisher.publishRegistrationConfirmed(saved, trace);
+      }
+
+      await this.auditService.trackRegistrationChange({
+        tenantId: saved.tenantId,
+        actorUserId: input.actorUserId,
+        targetUserId: saved.userId,
+        action: 'registration.approved',
+        before: { status: previousStatus },
+        after: { status: saved.status },
+        metadata: {
+          registrationId: saved.id,
+          eventId: saved.eventId,
+          ticketId: saved.ticketId,
+          traceId: trace.trace_id,
+          spanId: trace.span_id,
+          parentSpanId: trace.parent_span_id ?? null,
+        },
+      });
+
+      return saved;
+    });
+  }
+
   async cancel(registrationId: string, tenantId: string): Promise<RegistrationEntity | null> {
     return this.registrationRepository.manager.transaction(async (manager) => {
       const registrationRepo = manager.getRepository(RegistrationEntity);
@@ -298,12 +370,12 @@ export class RegistrationService {
     });
   }
 
-  private async resolveStatus(
+  private async hasCapacityForConfirmation(
     repository: Repository<RegistrationEntity>,
     params: { tenantId: string; eventId: string; capacity: number | null },
-  ): Promise<RegistrationStatus> {
+  ): Promise<boolean> {
     if (params.capacity === null) {
-      return RegistrationStatus.CONFIRMED;
+      return true;
     }
 
     const confirmedCount = await repository.count({
@@ -314,9 +386,7 @@ export class RegistrationService {
       },
     });
 
-    return confirmedCount >= params.capacity
-      ? RegistrationStatus.WAITLISTED
-      : RegistrationStatus.CONFIRMED;
+    return confirmedCount < params.capacity;
   }
 
   private async promoteNextWaitlisted(

@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AuditService } from '../../audit/src/audit.service';
-import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
+import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
+import { RegistrationStatus } from '../../registration/src/entities/registration-status.entity';
 import { RegistrationEventsPublisher } from '../../registration/src/registration-events.publisher';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';

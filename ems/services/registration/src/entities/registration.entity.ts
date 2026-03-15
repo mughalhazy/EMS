@@ -12,14 +12,7 @@ import {
 import { EventEntity } from '../../../event/src/entities/event.entity';
 import { TicketEntity } from '../../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../../user/src/entities/user.entity';
-
-export enum RegistrationStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  CONFIRMED = 'confirmed',
-  WAITLISTED = 'waitlisted',
-  CANCELLED = 'cancelled',
-}
+import { RegistrationStatus } from './registration-status.entity';
 
 @Entity({ name: 'registrations' })
 @Index('idx_registrations_tenant_id', ['tenantId'])

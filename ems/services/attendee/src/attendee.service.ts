@@ -10,7 +10,8 @@ import {
 } from '../../networking/src/entities/attendee-connection.entity';
 import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { RegistrantProfileEntity } from '../../registration/src/entities/registrant-profile.entity';
-import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
+import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
+import { RegistrationStatus } from '../../registration/src/entities/registration-status.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { AttendeeDirectorySearchIndexService } from './attendee-directory-search-index.service';
 import { AttendeeProfileEntity } from './entities/attendee-profile.entity';
