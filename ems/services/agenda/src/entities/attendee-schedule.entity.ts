@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { AttendeeEntity } from '../../../attendee/src/entities/attendee.entity';
 import { SessionEntity } from './session.entity';
 
 @Entity({ name: 'attendee_schedules' })
@@ -27,10 +26,6 @@ export class AttendeeScheduleEntity {
 
   @Column({ type: 'uuid', name: 'attendee_id' })
   attendeeId!: string;
-
-  @ManyToOne(() => AttendeeEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'attendee_id' })
-  attendee!: AttendeeEntity;
 
   @Column({ type: 'uuid', name: 'session_id' })
   sessionId!: string;

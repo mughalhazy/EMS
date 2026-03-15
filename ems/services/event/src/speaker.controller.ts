@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   Body,
   ConflictException,
   Controller,
@@ -18,7 +18,9 @@ import { UpdateSpeakerDto } from './dto/update-speaker.dto';
 import { SpeakerEntity, SpeakerStatus } from './entities/speaker.entity';
 import { EventService } from './event.service';
 import { SpeakerService } from './speaker.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/speakers')
 export class SpeakerController {
   constructor(

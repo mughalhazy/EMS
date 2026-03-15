@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { AttendeeEntity } from '../../../attendee/src/entities/attendee.entity';
 import { BoothEntity } from './booth.entity';
 import { ExhibitorEntity } from './exhibitor.entity';
 
@@ -45,10 +44,6 @@ export class BoothInteractionEntity {
 
   @Column({ type: 'uuid', name: 'attendee_id' })
   attendeeId!: string;
-
-  @ManyToOne(() => AttendeeEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'attendee_id' })
-  attendee!: AttendeeEntity;
 
   @Column({ type: 'varchar', length: 64, name: 'interaction_type', default: 'visit' })
   interactionType!: string;

@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { UseInterceptors, Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 
 import { CreateSpeakerDto } from './dto/create-speaker.dto';
 import { UpdateSpeakerDto } from './dto/update-speaker.dto';
 import { SpeakerEntity } from './entities/speaker.entity';
 import { SpeakerService } from './speaker.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/speakers')
 export class SpeakerController {
   constructor(private readonly speakerService: SpeakerService) {}

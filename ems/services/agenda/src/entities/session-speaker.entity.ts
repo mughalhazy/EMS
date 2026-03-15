@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { SpeakerEntity } from '../../../speaker/src/entities/speaker.entity';
 import { SessionEntity } from './session.entity';
 
 @Entity({ name: 'session_speakers' })
@@ -36,13 +35,6 @@ export class SessionSpeakerEntity {
 
   @Column({ type: 'uuid', name: 'speaker_id' })
   speakerId!: string;
-
-  @ManyToOne(() => SpeakerEntity, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'speaker_id' })
-  speaker!: SpeakerEntity;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;

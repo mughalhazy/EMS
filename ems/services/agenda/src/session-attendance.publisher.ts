@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
 
 export const SESSION_ATTENDANCE_KAFKA_CLIENT = 'SESSION_ATTENDANCE_KAFKA_CLIENT';
-export const SESSION_ATTENDED_TOPIC = 'session.attended';
+export const SESSION_ATTENDED_TOPIC = 'session.attendance_scanned';
 
 @Injectable()
 export class SessionAttendancePublisher {

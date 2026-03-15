@@ -3,13 +3,10 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { EventEntity } from '../../../event/src/entities/event.entity';
 import { AttendeeEntity } from './attendee.entity';
 
 @Entity({ name: 'attendee_tags' })
@@ -28,16 +25,8 @@ export class AttendeeTagEntity {
   @Column({ type: 'uuid', name: 'event_id' })
   eventId!: string;
 
-  @ManyToOne(() => EventEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'event_id' })
-  event!: EventEntity;
-
   @Column({ type: 'uuid', name: 'attendee_id' })
   attendeeId!: string;
-
-  @ManyToOne(() => AttendeeEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'attendee_id' })
-  attendee!: AttendeeEntity;
 
   @Column({ type: 'varchar', length: 64 })
   tag!: string;

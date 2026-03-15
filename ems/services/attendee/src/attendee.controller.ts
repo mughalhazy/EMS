@@ -1,6 +1,7 @@
-import { Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { UseInterceptors, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 
 import { SearchAttendeeDirectoryQueryDto } from './dto/search-attendee-directory-query.dto';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 import {
   AttendeeCheckInResult,
   AttendeeConnectionView,
@@ -10,6 +11,7 @@ import {
   AttendeeService,
 } from './attendee.service';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/attendees')
 export class AttendeeController {
   constructor(private readonly attendeeService: AttendeeService) {}

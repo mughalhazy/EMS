@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   BadRequestException,
   Body,
   Controller,
@@ -12,7 +12,9 @@ import {
 import { UpdateEventSettingDto } from './dto/update-event-setting.dto';
 import { EventSettingEntity } from './entities/event-setting.entity';
 import { EventSettingService } from './event-setting.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/settings')
 export class EventSettingController {
   constructor(private readonly eventSettingService: EventSettingService) {}

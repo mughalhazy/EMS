@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { UseInterceptors, Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 
 import { AssignSpeakerDto } from './dto/assign-speaker.dto';
 import { CreateSessionDto } from './dto/create-session.dto';
@@ -7,7 +7,9 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 import { SessionEntity } from './entities/session.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { SessionService } from './session.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/sessions')
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}

@@ -33,6 +33,16 @@ This catalog is the authoritative list of domain events used across EMS.
 | RegistrationCancelled | `registration.cancelled` | Registration is cancelled. |
 | RegistrationConfirmed | `registration.confirmed` | Registration is confirmed for attendance. |
 
+
+## Agenda and Program
+
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| SessionLifecycleChanged | `session.lifecycle` | Session create/update lifecycle envelope is published. |
+| SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded from agenda operations. |
+| ExhibitorCreated | `exhibitor.created` | A new exhibitor profile is created for an event. |
+| LeadCaptured | `lead.captured` | An exhibitor captures an attendee lead. |
+
 ## Onsite Operations
 
 | Event Name | Topic | Trigger |

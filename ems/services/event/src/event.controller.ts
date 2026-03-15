@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   BadRequestException,
   Body,
   ConflictException,
@@ -22,6 +22,7 @@ import { ListEventsQueryDto } from './dto/list-events-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventEntity, EventStatus } from './entities/event.entity';
 import { EventAgendaView, EventService } from './event.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
 
 
@@ -35,6 +36,7 @@ type PaginatedEventsResponse = {
   totalPages: number;
 };
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events')
 export class EventController {
   constructor(

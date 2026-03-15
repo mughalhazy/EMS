@@ -3,15 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { EventEntity } from '../../../event/src/entities/event.entity';
-import { UserEntity } from '../../../user/src/entities/user.entity';
 import { AttendeeTagEntity } from './attendee-tag.entity';
 
 export enum AttendeeStatus {
@@ -36,16 +32,8 @@ export class AttendeeEntity {
   @Column({ type: 'uuid', name: 'event_id' })
   eventId!: string;
 
-  @ManyToOne(() => EventEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'event_id' })
-  event!: EventEntity;
-
   @Column({ type: 'uuid', name: 'user_id', nullable: true })
   userId!: string | null;
-
-  @ManyToOne(() => UserEntity, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'user_id' })
-  user!: UserEntity | null;
 
   @Column({ type: 'varchar', length: 100, name: 'first_name' })
   firstName!: string;
