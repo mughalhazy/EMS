@@ -296,7 +296,7 @@ export class OnsiteService {
 
     const savedCheckIn = await this.checkInRepository.save(checkIn);
 
-    await this.onsiteEventsPublisher.publishAttendeeCheckedIn({
+    await this.onsiteEventsPublisher.publishOnsiteCheckInCompleted({
       tenantId,
       eventId,
       attendeeId,
@@ -359,6 +359,16 @@ export class OnsiteService {
     }
 
     const badgePrintResult = await this.badgePrintingService.printBadge(attendeeId, eventId);
+
+    await this.onsiteEventsPublisher.publishOnsiteBadgePrinted({
+      tenantId,
+      eventId,
+      attendeeId,
+      badgeId: badgePrintResult.badge.badgeId,
+      deviceId,
+      printedAt: badgePrintResult.badge.printedAt,
+      isReprint: badgePrintResult.isReprint,
+    });
 
     await this.auditService.trackOnsiteChange({
       tenantId,
@@ -529,17 +539,19 @@ export class OnsiteService {
           scannedAt: sessionCheckIn.scannedAt,
         }),
       );
-
-      await this.onsiteEventsPublisher.publishSessionAttended({
-        tenantId,
-        eventId,
-        attendeeId,
-        sessionId,
-        sessionCheckInId: sessionCheckIn.id,
-        deviceId,
-        scannedAt: sessionCheckIn.scannedAt,
-      });
     }
+
+    await this.onsiteEventsPublisher.publishSessionAttendanceScanned({
+      tenantId,
+      eventId,
+      attendeeId,
+      sessionId,
+      sessionCheckInId: sessionCheckIn.id,
+      deviceId,
+      scannedAt: sessionCheckIn.scannedAt,
+      accessGranted: sessionCheckIn.accessGranted,
+      denialReason: sessionCheckIn.denialReason,
+    });
 
     await this.auditService.trackOnsiteChange({
       tenantId,

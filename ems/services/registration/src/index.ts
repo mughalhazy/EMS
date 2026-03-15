@@ -6,7 +6,8 @@ export { RegistrationStatus } from './entities/registration-status.entity';
 
 export {
   REGISTRATION_EVENTS_KAFKA_CLIENT,
-  REGISTRATION_CREATED_TOPIC,
+  REGISTRATION_STARTED_TOPIC,
   REGISTRATION_CONFIRMED_TOPIC,
+  REGISTRATION_CANCELLED_TOPIC,
   RegistrationEventsPublisher,
 } from './registration-events.publisher';
