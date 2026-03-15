@@ -15,6 +15,7 @@ export * from './tenant-context';
 export * from './middleware/tenant-isolation.middleware';
 
 export * from './rbac.service';
+export * from './rbac.module';
 export * from './decorators/require-permissions.decorator';
 export * from './guards/jwt-auth.guard';
 export * from './guards/rbac.guard';
@@ -22,4 +23,6 @@ export * from './entities/permission.entity';
 export * from './entities/role.entity';
 export * from './entities/role-permission.entity';
 export * from './entities/user-role-assignment.entity';
+export * from './entities/user-role.entity';
+export * from './middleware/rbac.middleware';
 export * from './secrets-provider.service';

@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 import { JwtTokenService } from './jwt-token.service';
 import { SecretsProviderService } from './secrets-provider.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
-import { RbacService } from './rbac.service';
+import { RbacModule } from './rbac.module';
 import { RolesController } from './roles.controller';
 import { UserCredentialEntity } from './entities/user-credential.entity';
 import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
@@ -21,11 +21,11 @@ import { RoleEntity } from './entities/role.entity';
 import { RolePermissionEntity } from './entities/role-permission.entity';
 import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RbacGuard } from './guards/rbac.guard';
 
 @Module({
   imports: [
     AuditModule,
+    RbacModule,
     TypeOrmModule.forFeature([
       UserCredentialEntity,
       AuthTokenEntity,
@@ -45,12 +45,10 @@ import { RbacGuard } from './guards/rbac.guard';
     AuthService,
     JwtTokenService,
     SecretsProviderService,
-    RbacService,
     JwtAuthGuard,
-    RbacGuard,
     TenantIsolationMiddleware,
   ],
-  exports: [AuthService, JwtTokenService, RbacService, JwtAuthGuard, RbacGuard],
+  exports: [AuthService, JwtTokenService, JwtAuthGuard, RbacModule],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
