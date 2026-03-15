@@ -13,6 +13,7 @@ import {
 import { EventEntity } from '../../../event/src/entities/event.entity';
 import { Tenant } from '../../../tenant/src/tenant.entity';
 import { BoothEntity } from './booth.entity';
+import { SponsorPackageEntity } from './sponsor-package.entity';
 import { SponsorTier } from './sponsor-tier.enum';
 
 @Entity({ name: 'exhibitors' })
@@ -54,6 +55,16 @@ export class ExhibitorEntity {
 
   @Column({ type: 'jsonb', name: 'contact_info', nullable: true })
   contactInfo!: Record<string, unknown> | null;
+
+  @Column({ type: 'uuid', name: 'sponsor_package_id', nullable: true })
+  sponsorPackageId!: string | null;
+
+  @ManyToOne(() => SponsorPackageEntity, (sponsorPackage) => sponsorPackage.exhibitors, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'sponsor_package_id' })
+  sponsorPackage!: SponsorPackageEntity | null;
 
   @OneToMany(() => BoothEntity, (booth) => booth.exhibitor)
   booths!: BoothEntity[];
