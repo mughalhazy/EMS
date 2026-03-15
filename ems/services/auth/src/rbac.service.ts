@@ -223,6 +223,19 @@ export class RbacService {
     return permissions.includes(permissionCode);
   }
 
+  async userHasPermissions(
+    tenantId: string,
+    userId: string,
+    requiredPermissions: string[],
+  ): Promise<boolean> {
+    if (!requiredPermissions.length) {
+      return true;
+    }
+
+    const { permissions } = await this.getUserRbac(tenantId, userId);
+    return requiredPermissions.every((permission) => permissions.includes(permission));
+  }
+
   private validateScope(scopeType: string | null, scopeId: string | null): void {
     if ((!scopeType && scopeId) || (scopeType && !scopeId)) {
       throw new BadRequestException('scopeType and scopeId must be provided together');
