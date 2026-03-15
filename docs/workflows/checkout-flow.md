@@ -1,6 +1,18 @@
 # Checkout Flow Workflow
 
-This workflow describes ticket order creation, checkout, and payment confirmation.
+This workflow describes ticket order creation, checkout, payment confirmation, and registration handoff.
+
+## Entities
+
+- Tenant
+- Order
+- Payment
+- Ticket
+- Registration
+
+## Owning Service
+
+- Commerce Service
 
 ## Preconditions
 
@@ -10,26 +22,14 @@ This workflow describes ticket order creation, checkout, and payment confirmatio
 
 ## Steps
 
-1. **Create order (reserve intent + pricing snapshot)**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/ticket-purchases/orders`
-   - Purpose:
-     - Validates attendees/required answers, resolves ticket pricing, and creates a draft order.
-2. **Checkout order (create payment attempt)**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/ticket-purchases/orders/:orderId/checkout`
-   - Purpose:
-     - Starts payment flow for the order amount.
+1. **Create order**
+   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/orders`
+2. **Checkout order**
+   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/orders/{orderId}/checkout`
 3. **Confirm payment status**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/ticket-purchases/payments/confirm`
-   - Purpose:
-     - Updates payment state based on processor callback or reconciliation.
-4. **Registration handoff (on successful payment)**
-   - System command:
-     - `CreateRegistrationFromPaidOrder`
-   - Purpose:
-     - Creates and confirms attendee registrations tied to purchased tickets.
+   - API command: `POST /api/v1/tenants/{tenantId}/ticket-purchases/payments/confirm`
+4. **Registration handoff on payment success**
+   - System command: `CreateRegistrationFromPaidOrder`
 
 ## Commands (Domain/API)
 
@@ -40,22 +40,15 @@ This workflow describes ticket order creation, checkout, and payment confirmatio
 
 ## Emitted Events
 
-- Topic: `order.created`
-  - Published when order is created.
-- Topic: `payment.completed`
-  - Published when payment reaches completed state.
-- Downstream registration events (triggered by successful payment):
-  - `registration.created`
-  - `registration.confirmed`
+- `OrderCreated`
+- `PaymentAuthorized`
+- `PaymentCaptured`
+- `TicketIssued`
+- `RegistrationSubmitted`
+- `RegistrationConfirmed`
 
 ## Primary Consumers
 
-- Registration service
-- Analytics and revenue reporting
-- Support/order-detail read models
-
-## Operational Notes
-
-- `Idempotency-Key` is required for order creation, checkout, and payment confirm endpoints.
-- Each order item must contain attendee entries that match quantity.
-- Exactly one attendee per item must be marked as ticket owner.
+- Registration Service
+- Analytics Service
+- Order detail/read-model consumers

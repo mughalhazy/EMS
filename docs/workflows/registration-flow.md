@@ -1,6 +1,17 @@
 # Registration Flow Workflow
 
-This workflow describes attendee registration lifecycle after intake or commerce handoff.
+This workflow describes attendee registration lifecycle after direct intake or commerce handoff.
+
+## Entities
+
+- Tenant
+- Event
+- Registration
+- AttendeeProfile
+
+## Owning Service
+
+- Registration Service
 
 ## Preconditions
 
@@ -10,30 +21,15 @@ This workflow describes attendee registration lifecycle after intake or commerce
 ## Steps
 
 1. **Submit registration**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/registrations`
-   - Purpose:
-     - Creates a registration record for attendee + ticket context.
+   - API command: `POST /api/v1/tenants/{tenantId}/registrations`
 2. **List and review registrations**
-   - API command:
-     - `GET /api/v1/tenants/:tenantId/registrations`
-   - Purpose:
-     - Retrieves registrations by event, user, or status.
+   - API command: `GET /api/v1/tenants/{tenantId}/registrations`
 3. **Amend registration**
-   - API command:
-     - `PATCH /api/v1/tenants/:tenantId/registrations/:registrationId`
-   - Purpose:
-     - Applies valid changes (for example ticket reassignment).
+   - API command: `PATCH /api/v1/tenants/{tenantId}/registrations/{registrationId}`
 4. **Optional cancellation**
-   - API command:
-     - `POST /api/v1/tenants/:tenantId/registrations/:registrationId/cancel`
-   - Purpose:
-     - Cancels a registration no longer valid for attendance.
+   - API command: `POST /api/v1/tenants/{tenantId}/registrations/{registrationId}/cancel`
 5. **Confirm registration**
-   - System command:
-     - `ConfirmRegistration`
-   - Purpose:
-     - Marks registration as confirmed, often after successful payment.
+   - System command: `ConfirmRegistration`
 
 ## Commands (Domain/API)
 
@@ -44,16 +40,14 @@ This workflow describes attendee registration lifecycle after intake or commerce
 
 ## Emitted Events
 
-- Topic: `registration.created`
-- Topic: `registration.confirmed`
+- `RegistrationSubmitted`
+- `RegistrationUpdated`
+- `RegistrationApproved`
+- `RegistrationCancelled`
+- `RegistrationConfirmed`
 
 ## Primary Consumers
 
-- Onsite check-in console
-- Attendee profile projection
-- Analytics registration metrics
-
-## Operational Notes
-
-- Registration writes are tenant-scoped and must enforce tenant isolation.
-- Registration confirmation can be produced asynchronously from commerce payment completion.
+- Onsite Service
+- Analytics Service
+- Attendee profile/read-model consumers
