@@ -10,6 +10,7 @@ import { PaymentEntity } from './entities/payment.entity';
 export const COMMERCE_EVENTS_KAFKA_CLIENT = 'COMMERCE_EVENTS_KAFKA_CLIENT';
 export const ORDER_CREATED_TOPIC = 'order.created';
 export const PAYMENT_COMPLETED_TOPIC = 'payment.completed';
+export const ORDER_CONFIRMATION_EMAIL_TOPIC = 'order.confirmation.email.requested';
 
 @Injectable()
 export class CommerceEventsPublisher {
@@ -74,5 +75,41 @@ export class CommerceEventsPublisher {
       currency: payment.currency,
     }, trace));
   }
-}
 
+  async publishOrderConfirmationEmailRequested(
+    payload: {
+      tenantId: string;
+      orderId: string;
+      paymentId: string;
+      recipientEmails: string[];
+    },
+    trace?: DistributedTraceCarrier,
+  ): Promise<void> {
+    if (!this.kafkaClient) {
+      this.logger.warn(
+        JSON.stringify({
+          event: 'commerce.publish.skipped',
+          reason: 'kafka_client_unavailable',
+          topic: ORDER_CONFIRMATION_EMAIL_TOPIC,
+          orderId: payload.orderId,
+        }),
+      );
+      return;
+    }
+
+    await this.kafkaClient.emit(
+      ORDER_CONFIRMATION_EMAIL_TOPIC,
+      attachDistributedTrace(
+        {
+          event_id: randomUUID(),
+          occurred_at: new Date().toISOString(),
+          tenant_id: payload.tenantId,
+          order_id: payload.orderId,
+          payment_id: payload.paymentId,
+          recipient_emails: payload.recipientEmails,
+        },
+        trace,
+      ),
+    );
+  }
+}

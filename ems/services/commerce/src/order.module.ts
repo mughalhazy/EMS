@@ -14,6 +14,8 @@ import { OrderEntity } from './entities/order.entity';
 import { PaymentEntity } from './entities/payment.entity';
 import { TicketFulfillmentEntity } from './entities/ticket-fulfillment.entity';
 import { CheckoutController } from './checkout.controller';
+import { EmailConfirmationService } from './email-confirmation.service';
+import { FulfillmentService } from './fulfillment.service';
 import { OrderService } from './order.service';
 import { PaymentService } from './payment.service';
 import { RedisLockService } from './redis-lock.service';
@@ -44,6 +46,8 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
     CommerceEventsPublisher,
     RegistrationEventsPublisher,
     TicketFulfillmentService,
+    EmailConfirmationService,
+    FulfillmentService,
   ],
   exports: [OrderService, PaymentService, RedisLockService],
 })
