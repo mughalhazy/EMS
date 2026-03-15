@@ -77,7 +77,7 @@ export class PaymentService {
       }),
     );
 
-    await this.publishPaymentCompletedIfNeeded(null, payment);
+    await this.publishPaymentCapturedIfNeeded(null, payment);
     await this.syncRegistrationsForPayment(payment);
     await this.fulfillmentService.processPayment(payment);
     await this.trackPurchaseOrRefundAudit(null, payment);
@@ -101,7 +101,7 @@ export class PaymentService {
     const previousStatus = payment.status;
     payment.status = status;
     const savedPayment = await this.paymentRepository.save(payment);
-    await this.publishPaymentCompletedIfNeeded(previousStatus, savedPayment);
+    await this.publishPaymentCapturedIfNeeded(previousStatus, savedPayment);
     await this.syncRegistrationsForPayment(savedPayment);
     await this.fulfillmentService.processPayment(savedPayment);
     await this.trackPurchaseOrRefundAudit(previousStatus, savedPayment);
@@ -109,7 +109,7 @@ export class PaymentService {
     return savedPayment;
   }
 
-  private async publishPaymentCompletedIfNeeded(
+  private async publishPaymentCapturedIfNeeded(
     previousStatus: PaymentStatus | null,
     payment: PaymentEntity,
   ): Promise<void> {
@@ -117,7 +117,7 @@ export class PaymentService {
       return;
     }
 
-    await this.commerceEventsPublisher.publishPaymentCompleted(payment);
+    await this.commerceEventsPublisher.publishPaymentCaptured(payment);
   }
 
   private async syncRegistrationsForPayment(payment: PaymentEntity): Promise<void> {

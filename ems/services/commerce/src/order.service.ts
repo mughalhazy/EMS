@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
-import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
+import { InventoryPoolEntity } from '../../inventory/src/entities/inventory-pool.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderItemAttendee, OrderItemEntity } from './entities/order-item.entity';
 import {
@@ -35,8 +35,8 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
     @InjectRepository(OrderItemEntity)
     private readonly orderItemRepository: Repository<OrderItemEntity>,
-    @InjectRepository(InventoryEntity)
-    private readonly inventoryRepository: Repository<InventoryEntity>,
+    @InjectRepository(InventoryPoolEntity)
+    private readonly inventoryRepository: Repository<InventoryPoolEntity>,
     private readonly redisLockService: RedisLockService,
     private readonly commerceEventsPublisher: CommerceEventsPublisher,
   ) {}
@@ -167,7 +167,7 @@ export class OrderService {
           throw new NotFoundException(`Inventory item '${inventoryId}' not found.`);
         }
 
-        const remaining = inventory.totalQuantity - inventory.reservedQuantity;
+        const remaining = inventory.capacity - inventory.reservedQuantity;
         if (remaining < quantity) {
           throw new ConflictException('Not enough inventory available to reserve.');
         }
@@ -233,7 +233,7 @@ export class OrderService {
           throw new NotFoundException(`Inventory item '${inventoryId}' not found.`);
         }
 
-        if (inventory.reservedQuantity < quantity || inventory.totalQuantity < quantity) {
+        if (inventory.reservedQuantity < quantity || inventory.capacity < quantity) {
           throw new ConflictException('Inventory is out of sync for commit.');
         }
       }
@@ -241,7 +241,7 @@ export class OrderService {
       for (const { inventoryId, quantity } of grouped) {
         const inventory = inventoryById.get(inventoryId)!;
         inventory.reservedQuantity -= quantity;
-        inventory.totalQuantity -= quantity;
+        inventory.capacity -= quantity;
       }
 
       await this.inventoryRepository.save([...inventoryById.values()]);

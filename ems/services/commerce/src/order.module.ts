@@ -5,7 +5,7 @@ import { AuditModule } from '../../audit/src/audit.module';
 import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
 import { RegistrationEventsPublisher } from '../../registration/src/registration-events.publisher';
-import { InventoryEntity } from '../../ticketing/src/entities/inventory.entity';
+import { InventoryPoolEntity } from '../../inventory/src/entities/inventory-pool.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
@@ -29,7 +29,7 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
       OrderItemEntity,
       PaymentEntity,
       TicketFulfillmentEntity,
-      InventoryEntity,
+      InventoryPoolEntity,
       RegistrationQuestionEntity,
       TicketEntity,
       UserEntity,

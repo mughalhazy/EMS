@@ -12,7 +12,6 @@ import {
 
 import { EventEntity } from '../../../event/src/entities/event.entity';
 import { EarlyBirdRuleEntity } from './early-bird-rule.entity';
-import { InventoryEntity } from './inventory.entity';
 import { PricingTierEntity } from './pricing-tier.entity';
 import { PromoCodeEntity } from './promo-code.entity';
 import { TicketEntitlementEntity } from './ticket-entitlement.entity';
@@ -50,12 +49,6 @@ export class TicketEntity {
   ticketProduct!: TicketProductEntity | null;
 
 
-  @ManyToOne(() => InventoryEntity, (inventory) => inventory.tickets, {
-    nullable: false,
-    onDelete: 'RESTRICT',
-  })
-  @JoinColumn({ name: 'inventory_id' })
-  inventory!: InventoryEntity;
 
   @Column({ type: 'varchar', length: 255 })
   name!: string;
