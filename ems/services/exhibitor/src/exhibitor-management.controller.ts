@@ -19,14 +19,17 @@ import { AssignExhibitorBoothDto } from './dto/assign-exhibitor-booth.dto';
 import { CaptureLeadDto } from './dto/capture-lead.dto';
 import { CreateBoothDto } from './dto/create-booth.dto';
 import { CreateExhibitorDto } from './dto/create-exhibitor.dto';
+import { CreateSponsorPackageDto } from './dto/create-sponsor-package.dto';
 import { CreateSponsorProfileDto } from './dto/create-sponsor-profile.dto';
 import { RecordBoothInteractionDto } from './dto/record-booth-interaction.dto';
 import { UpdateExhibitorDto } from './dto/update-exhibitor.dto';
+import { UpdateSponsorPackageDto } from './dto/update-sponsor-package.dto';
 import { UpdateSponsorProfileDto } from './dto/update-sponsor-profile.dto';
 import { BoothEntity } from './entities/booth.entity';
 import { BoothInteractionEntity } from './entities/booth-interaction.entity';
 import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.entity';
 import { ExhibitorEntity } from './entities/exhibitor.entity';
+import { SponsorPackageEntity } from './entities/sponsor-package.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
 import {
   ExhibitorManagementService,
@@ -36,6 +39,71 @@ import {
 @Controller('api/v1/tenants/:tenantId/events/:eventId')
 export class ExhibitorManagementController {
   constructor(private readonly exhibitorManagementService: ExhibitorManagementService) {}
+
+  @Post('sponsor-packages')
+  @HttpCode(HttpStatus.CREATED)
+  async createSponsorPackage(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() payload: CreateSponsorPackageDto,
+  ): Promise<SponsorPackageEntity> {
+    return this.exhibitorManagementService.createSponsorPackage({
+      tenantId,
+      eventId,
+      name: payload.name,
+      description: payload.description,
+      price: payload.price,
+      benefits: payload.benefits,
+      isActive: payload.isActive,
+    });
+  }
+
+  @Get('sponsor-packages')
+  async listSponsorPackages(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<SponsorPackageEntity[]> {
+    return this.exhibitorManagementService.listSponsorPackages(tenantId, eventId);
+  }
+
+  @Patch('sponsor-packages/:sponsorPackageId')
+  async updateSponsorPackage(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('sponsorPackageId', ParseUUIDPipe) sponsorPackageId: string,
+    @Body() payload: UpdateSponsorPackageDto,
+  ): Promise<SponsorPackageEntity> {
+    const sponsorPackage = await this.exhibitorManagementService.updateSponsorPackage(
+      tenantId,
+      eventId,
+      sponsorPackageId,
+      payload,
+    );
+
+    if (!sponsorPackage) {
+      throw new NotFoundException('Sponsor package not found in event.');
+    }
+
+    return sponsorPackage;
+  }
+
+  @Delete('sponsor-packages/:sponsorPackageId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteSponsorPackage(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('sponsorPackageId', ParseUUIDPipe) sponsorPackageId: string,
+  ): Promise<void> {
+    const deleted = await this.exhibitorManagementService.deleteSponsorPackage(
+      tenantId,
+      eventId,
+      sponsorPackageId,
+    );
+
+    if (!deleted) {
+      throw new NotFoundException('Sponsor package not found in event.');
+    }
+  }
 
   @Post('sponsors')
   @HttpCode(HttpStatus.CREATED)
@@ -140,6 +208,7 @@ export class ExhibitorManagementController {
       description: payload.description,
       sponsorshipTier: payload.sponsorshipTier,
       contactInfo: payload.contactInfo,
+      sponsorPackageId: payload.sponsorPackageId,
     });
   }
 

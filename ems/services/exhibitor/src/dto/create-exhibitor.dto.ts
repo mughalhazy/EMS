@@ -5,4 +5,5 @@ export class CreateExhibitorDto {
   description?: string | null;
   sponsorshipTier?: SponsorTier | null;
   contactInfo?: Record<string, unknown> | null;
+  sponsorPackageId?: string | null;
 }
