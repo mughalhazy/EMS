@@ -14,28 +14,30 @@ This document defines the **core EMS entities** and the **service that owns each
 
 | Entity | Purpose | Owning service |
 |---|---|---|
-| `Tenant` | Top-level customer/account boundary | `Tenant Service` |
-| `User` | Authenticated platform identity | `Identity & Access Service` |
-| `Role` | Authorization role definition and scope | `Identity & Access Service` |
-| `Event` | Event container and lifecycle | `Event Service` |
-| `Venue` | Event location (physical/virtual/hybrid) | `Event Service` |
-| `Session` | Agenda item scheduled within an event | `Program Service` |
-| `Speaker` | Speaker profile and participation | `Program Service` |
-| `Exhibitor` | Exhibitor participation in event | `Partner Service` |
-| `Attendee` | Person record attending an event | `Attendee Service` |
-| `Registration` | Enrollment of attendee into an event/ticket | `Registration Service` |
-| `TicketProduct` | Sellable admission product for an event | `Ticketing Catalog Service` |
-| `PriceRule` | Dynamic/static pricing policy for ticket products | `Ticketing Catalog Service` |
-| `InventoryReservation` | Temporary hold of ticket inventory | `Inventory Service` |
-| `Order` | Commercial checkout aggregate | `Commerce Service` |
-| `OrderItem` | Individual line item within an order | `Commerce Service` |
-| `Payment` | Payment authorization/capture record | `Billing Service` |
-| `Refund` | Refund instruction and settlement status | `Billing Service` |
-| `Ticket` | Issued admission entitlement artifact | `Fulfillment Service` |
-| `Badge` | Printed/digital attendee badge artifact | `Fulfillment Service` |
-| `EngagementPoll` | Interactive live poll attached to an event session | `Engagement Service` |
-| `EngagementQuestion` | Attendee-submitted session Q&A prompt | `Engagement Service` |
-| `EngagementSurvey` | Event feedback survey and completion window | `Engagement Service` |
+| `Tenant` | Top-level customer/account boundary | `tenant` |
+| `User` | Authenticated platform identity | `auth` |
+| `Role` | Authorization role definition and scope | `auth` |
+| `Organization` | Organizer account/workspace identity metadata | `user` |
+| `Event` | Event container and lifecycle | `event` |
+| `Venue` | Event location (physical/virtual/hybrid) | `event` |
+| `Session` | Agenda item scheduled within an event | `agenda` |
+| `Speaker` | Speaker profile and participation | `agenda` |
+| `Exhibitor` | Exhibitor participation in event | `exhibitor` |
+| `Attendee` | Person record attending an event | `attendee` |
+| `Registration` | Enrollment of attendee into an event/ticket | `registration` |
+| `TicketProduct` | Sellable admission product for an event | `ticketing` |
+| `PriceRule` | Dynamic/static pricing policy for ticket products | `ticketing` |
+| `InventoryReservation` | Temporary hold of ticket inventory | `inventory` |
+| `Order` | Commercial checkout aggregate | `commerce` |
+| `OrderItem` | Individual line item within an order | `commerce` |
+| `Payment` | Payment authorization/capture record | `commerce` |
+| `Refund` | Refund instruction and settlement status | `commerce` |
+| `Ticket` | Issued admission entitlement artifact | `commerce` |
+| `Badge` | Printed/digital attendee badge artifact | `commerce` |
+| `EngagementPoll` | Interactive live poll attached to an event session | `engagement` |
+| `EngagementQuestion` | Attendee-submitted session Q&A prompt | `engagement` |
+| `EngagementSurvey` | Event feedback survey and completion window | `engagement` |
+| `AttendeeConnection` | Networking connection request and acceptance state | `networking` |
 
 ---
 

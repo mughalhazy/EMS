@@ -1,54 +1,54 @@
 # Event Catalog
 
-This catalog is the authoritative list of currently implemented domain events used across EMS modules.
+This catalog is the authoritative list of currently implemented message-bus domain events/topics used across EMS modules.
 
 ## Event Lifecycle
 
-| Event Name | Topic | Trigger |
+| Event Name | Topic | Producer |
 | --- | --- | --- |
-| EventLifecycleChanged | `event.lifecycle` | Event create/update/status-change envelopes emitted by Event Service. |
-| SessionLifecycleChanged | `session.lifecycle` | Session create/update lifecycle envelopes emitted by Event/Agenda services. |
+| EventLifecycleChanged | `event.lifecycle` | `event` |
+| SessionLifecycleChanged | `session.lifecycle` | `event`, `agenda` |
 
 ## Commerce
 
-| Event Name | Topic | Trigger |
+| Event Name | Topic | Producer |
 | --- | --- | --- |
-| OrderCreated | `order.created` | A new order is created. |
-| PaymentCaptured | `payment.captured` | Payment status transitions to captured/succeeded. |
-| OrderConfirmationEmailRequested | `order.confirmation.email.requested` | Order confirmation notification should be queued for delivery. |
+| OrderCreated | `order.created` | `commerce` |
+| PaymentCaptured | `payment.captured` | `commerce` |
+| OrderConfirmationEmailRequested | `order.confirmation.email.requested` | `commerce` |
 
 ## Registration
 
-| Event Name | Topic | Trigger |
+| Event Name | Topic | Producer |
 | --- | --- | --- |
-| RegistrationStarted | `registration.started` | Registration intake begins and a registration record is created. |
-| RegistrationConfirmed | `registration.confirmed` | Registration is confirmed for attendance. |
-| RegistrationCancelled | `registration.cancelled` | Registration is cancelled. |
+| RegistrationStarted | `registration.started` | `registration` |
+| RegistrationConfirmed | `registration.confirmed` | `registration` |
+| RegistrationCancelled | `registration.cancelled` | `registration` |
 
 ## Agenda and Program
 
-| Event Name | Topic | Trigger |
+| Event Name | Topic | Producer |
 | --- | --- | --- |
-| SessionAttended | `session.attended` | Session attendance is confirmed for analytics stream processing. |
-| SessionQuestionAsked | `session.question.asked` | An attendee submits a question for a session Q&A stream. |
-| PollSubmitted | `poll.submitted` | An attendee submits a response for a live poll option. |
-| SurveyCompleted | `survey.completed` | An attendee completes an engagement survey. |
-| ExhibitorCreated | `exhibitor.created` | A new exhibitor profile is created for an event. |
-| LeadCaptured | `lead.captured` | An exhibitor captures an attendee lead. |
+| SessionAttended | `session.attended` | `agenda` |
+| SessionQuestionAsked | `session.question.asked` | `engagement` |
+| PollSubmitted | `poll.submitted` | `engagement` |
+| SurveyCompleted | `survey.completed` | `engagement` |
+| ExhibitorCreated | `exhibitor.created` | `exhibitor` |
+| LeadCaptured | `lead.captured` | `exhibitor` |
 
 ## Onsite Operations
 
-| Event Name | Topic | Trigger |
+| Event Name | Topic | Producer |
 | --- | --- | --- |
-| OnsiteCheckinCompleted | `onsite.checkin.completed` | Attendee event check-in completes at venue or gate. |
-| SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded from onsite operations. |
-| OnsiteAccessGranted | `onsite.access.granted` | A scan grants attendee access at a gate/session boundary. |
-| OnsiteAccessDenied | `onsite.access.denied` | A scan denies attendee access at a gate/session boundary. |
-| OnsiteBadgePrinted | `onsite.badge.printed` | Badge print operation succeeds. |
+| OnsiteCheckinCompleted | `onsite.checkin.completed` | `onsite` |
+| SessionAttendanceScanned | `session.attendance_scanned` | `onsite` |
+| OnsiteAccessGranted | `onsite.access.granted` | `onsite` |
+| OnsiteAccessDenied | `onsite.access.denied` | `onsite` |
+| OnsiteBadgePrinted | `onsite.badge.printed` | `onsite` |
 
 ## Networking
 
-| Event Name | Topic | Trigger |
+| Event Name | Topic | Producer |
 | --- | --- | --- |
-| AttendeeConnectionRequested | `attendee.connection.requested` | An attendee requests a networking connection. |
-| AttendeeConnected | `attendee.connected` | A networking connection request is accepted. |
+| AttendeeConnectionRequested | `attendee.connection.requested` | `networking` |
+| AttendeeConnected | `attendee.connected` | `networking` |

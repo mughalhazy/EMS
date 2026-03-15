@@ -11,7 +11,10 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
+
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
@@ -19,6 +22,7 @@ import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 
 @Controller('api/v1/tenants/:tenantId/users')
+@UseInterceptors(ApiResponseInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
