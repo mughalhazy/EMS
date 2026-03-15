@@ -1,5 +1,6 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseInterceptors } from '@nestjs/common';
 
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 import { AggregateEventAnalyticsQueryDto } from './dto/aggregate-event-analytics-query.dto';
 import { EventDashboardQueryDto } from './dto/event-dashboard-query.dto';
 import {
@@ -16,6 +17,7 @@ import {
   TicketSalesSummary,
 } from './analytics.service';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/analytics')
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
@@ -132,12 +134,12 @@ export class AnalyticsController {
   }
 
   private resolveLimit(limit?: string): number {
-    const parsedLimit = Number.parseInt(limit ?? '10', 10);
+    const parsedLimit = Number.parseInt(limit ?? '25', 10);
 
     if (Number.isNaN(parsedLimit)) {
-      return 10;
+      return 25;
     }
 
-    return Math.max(1, Math.min(parsedLimit, 50));
+    return Math.max(1, Math.min(parsedLimit, 100));
   }
 }

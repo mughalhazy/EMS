@@ -40,6 +40,7 @@ This catalog is the authoritative list of domain events used across EMS.
 | --- | --- | --- |
 | SessionLifecycleChanged | `session.lifecycle` | Session create/update lifecycle envelope is published. |
 | SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded from agenda operations. |
+| SessionAttended | `session.attended` | Session attendance is confirmed for analytics stream processing. |
 | ExhibitorCreated | `exhibitor.created` | A new exhibitor profile is created for an event. |
 | LeadCaptured | `lead.captured` | An exhibitor captures an attendee lead. |
 
@@ -51,6 +52,7 @@ This catalog is the authoritative list of domain events used across EMS.
 | CheckInDeviceStatusUpdated | `checkin.device_status_updated` | Device status changes. |
 | OnsiteCheckinCompleted | `onsite.checkin.completed` | Attendee event check-in completes at venue or gate. |
 | SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded. |
+| SessionAttended | `session.attended` | Session attendance is confirmed and emitted for downstream analytics consumers. |
 | OnsiteAccessGranted | `onsite.access.granted` | A scan grants attendee access at a gate/session boundary. |
 | OnsiteAccessDenied | `onsite.access.denied` | A scan denies attendee access at a gate/session boundary. |
 | OnsiteBadgePrinted | `onsite.badge.printed` | Badge print operation succeeds. |

@@ -31,7 +31,7 @@ export class SearchService {
     eventId: string,
     query: string,
     indexes: readonly SearchIndexName[] = SEARCH_INDEXES,
-    limit = 20,
+    limit = 25,
   ): Promise<SearchHit[]> {
     const safeLimit = Math.max(1, Math.min(limit, 100));
 

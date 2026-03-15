@@ -1,8 +1,18 @@
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
+
 import { SearchIndexName } from '../search.types';
 
 export class SearchQueryDto {
-  q!: string;
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @IsString()
   indexes?: string;
+
+  @IsOptional()
+  @IsNumberString()
   limit?: string;
 
   parseIndexes(): SearchIndexName[] {
