@@ -10,11 +10,10 @@ import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderItemEntity } from './entities/order-item.entity';
-import { OrderEntity, OrderStatus } from './entities/order.entity';
+import { OrderEntity } from './entities/order.entity';
 import { PaymentEntity, PaymentStatus } from './entities/payment.entity';
-import { OrderService } from './order.service';
+import { FulfillmentService } from './fulfillment.service';
 import { StripeCompatibleGateway } from './stripe-compatible.gateway';
-import { TicketFulfillmentService } from './ticket-fulfillment.service';
 
 export interface CreatePaymentInput {
   tenantId: string;
@@ -39,10 +38,9 @@ export class PaymentService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(RegistrationEntity)
     private readonly registrationRepository: Repository<RegistrationEntity>,
-    private readonly orderService: OrderService,
     private readonly commerceEventsPublisher: CommerceEventsPublisher,
     private readonly stripeCompatibleGateway: StripeCompatibleGateway,
-    private readonly ticketFulfillmentService: TicketFulfillmentService,
+    private readonly fulfillmentService: FulfillmentService,
     private readonly registrationEventsPublisher: RegistrationEventsPublisher,
     private readonly auditService: AuditService,
   ) {}
@@ -80,9 +78,8 @@ export class PaymentService {
     );
 
     await this.publishPaymentCompletedIfNeeded(null, payment);
-    await this.syncOrderStatusFromPayment(payment);
     await this.syncRegistrationsForPayment(payment);
-    await this.ticketFulfillmentService.syncForPayment(payment);
+    await this.fulfillmentService.processPayment(payment);
     await this.trackPurchaseOrRefundAudit(null, payment);
 
     return payment;
@@ -105,37 +102,11 @@ export class PaymentService {
     payment.status = status;
     const savedPayment = await this.paymentRepository.save(payment);
     await this.publishPaymentCompletedIfNeeded(previousStatus, savedPayment);
-    await this.syncOrderStatusFromPayment(savedPayment);
     await this.syncRegistrationsForPayment(savedPayment);
-    await this.ticketFulfillmentService.syncForPayment(savedPayment);
+    await this.fulfillmentService.processPayment(savedPayment);
     await this.trackPurchaseOrRefundAudit(previousStatus, savedPayment);
 
     return savedPayment;
-  }
-
-  private async syncOrderStatusFromPayment(payment: PaymentEntity): Promise<void> {
-    const mappedOrderStatus = this.mapPaymentToOrderStatus(payment.status);
-    if (!mappedOrderStatus) {
-      return;
-    }
-
-    await this.orderService.updateStatus(payment.tenantId, payment.orderId, mappedOrderStatus);
-  }
-
-  private mapPaymentToOrderStatus(status: PaymentStatus): OrderStatus | null {
-    switch (status) {
-      case PaymentStatus.SUCCEEDED:
-        return OrderStatus.PLACED;
-      case PaymentStatus.REFUNDED:
-        return OrderStatus.REFUNDED;
-      case PaymentStatus.FAILED:
-      case PaymentStatus.CANCELED:
-        return OrderStatus.CANCELLED;
-      case PaymentStatus.PENDING:
-      case PaymentStatus.AUTHORIZED:
-      default:
-        return null;
-    }
   }
 
   private async publishPaymentCompletedIfNeeded(
