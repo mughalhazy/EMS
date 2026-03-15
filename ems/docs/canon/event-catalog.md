@@ -27,11 +27,10 @@ This catalog is the authoritative list of domain events used across EMS.
 
 | Event Name | Topic | Trigger |
 | --- | --- | --- |
-| RegistrationSubmitted | `registration.submitted` | Registration is submitted. |
-| RegistrationUpdated | `registration.updated` | Registration fields are amended. |
-| RegistrationApproved | `registration.approved` | Registration is approved. |
-| RegistrationCancelled | `registration.cancelled` | Registration is cancelled. |
+| RegistrationStarted | `registration.started` | Registration intake begins and a registration record is created. |
 | RegistrationConfirmed | `registration.confirmed` | Registration is confirmed for attendance. |
+| RegistrationTransferred | `registration.transferred` | Registration ownership is transferred to another attendee. |
+| RegistrationCancelled | `registration.cancelled` | Registration is cancelled. |
 
 
 ## Agenda and Program
@@ -49,9 +48,11 @@ This catalog is the authoritative list of domain events used across EMS.
 | --- | --- | --- |
 | CheckInDeviceRegistered | `checkin.device_registered` | A check-in device is registered. |
 | CheckInDeviceStatusUpdated | `checkin.device_status_updated` | Device status changes. |
-| AttendeeCheckedIn | `attendee.checked_in` | Attendee is checked in at venue or gate. |
+| OnsiteCheckinCompleted | `onsite.checkin.completed` | Attendee event check-in completes at venue or gate. |
 | SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded. |
-| BadgePrinted | `badge.printed` | Badge print operation succeeds. |
+| OnsiteAccessGranted | `onsite.access.granted` | A scan grants attendee access at a gate/session boundary. |
+| OnsiteAccessDenied | `onsite.access.denied` | A scan denies attendee access at a gate/session boundary. |
+| OnsiteBadgePrinted | `onsite.badge.printed` | Badge print operation succeeds. |
 
 ## Identity and Access
 

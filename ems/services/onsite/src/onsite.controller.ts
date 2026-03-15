@@ -8,6 +8,7 @@ import {
   Patch,
   ParseUUIDPipe,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { CheckInAttendeeDto } from './dto/check-in-attendee.dto';
@@ -25,7 +26,9 @@ import {
   ScanningDeviceResult,
   SessionScanResult,
 } from './onsite.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/check-ins')
 export class OnsiteController {
   constructor(private readonly onsiteService: OnsiteService) {}

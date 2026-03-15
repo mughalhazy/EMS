@@ -113,7 +113,7 @@ export class RegistrationService {
 
       const registrationTrace = buildDistributedTraceContext();
 
-      await this.registrationEventsPublisher.publishRegistrationCreated(savedRegistration, registrationTrace);
+      await this.registrationEventsPublisher.publishRegistrationStarted(savedRegistration, registrationTrace);
 
       if (savedRegistration.status === RegistrationStatus.CONFIRMED) {
         await this.registrationEventsPublisher.publishRegistrationConfirmed(savedRegistration, registrationTrace);
@@ -348,6 +348,9 @@ export class RegistrationService {
       registration.status = RegistrationStatus.CANCELLED;
       await registrationRepo.save(registration);
 
+      const cancellationTrace = buildDistributedTraceContext();
+      await this.registrationEventsPublisher.publishRegistrationCancelled(registration, cancellationTrace);
+
       await this.auditService.trackRegistrationChange({
         tenantId: registration.tenantId,
         actorUserId: registration.userId,
@@ -411,7 +414,10 @@ export class RegistrationService {
 
     nextWaitlisted.status = RegistrationStatus.CONFIRMED;
     const promotedRegistration = await repository.save(nextWaitlisted);
-    await this.registrationEventsPublisher.publishRegistrationConfirmed(promotedRegistration);
+    await this.registrationEventsPublisher.publishRegistrationConfirmed(
+      promotedRegistration,
+      buildDistributedTraceContext(),
+    );
     await this.auditService.trackRegistrationChange({
       tenantId: promotedRegistration.tenantId,
       actorUserId: null,
