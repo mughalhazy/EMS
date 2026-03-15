@@ -15,6 +15,7 @@ import {
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { ListRegistrationsQueryDto } from './dto/list-registrations-query.dto';
 import { UpdateRegistrationDto } from './dto/update-registration.dto';
+import { ApproveRegistrationDto } from './dto/approve-registration.dto';
 import { RegistrationEntity } from './entities/registration.entity';
 import { RegistrationService } from './registration.service';
 
@@ -67,6 +68,24 @@ export class RegistrationController {
     }
 
     return updatedRegistration;
+  }
+
+
+  @Post(':registrationId/approve')
+  async approveRegistration(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('registrationId', ParseUUIDPipe) registrationId: string,
+    @Body() payload: ApproveRegistrationDto,
+  ): Promise<RegistrationEntity> {
+    const approvedRegistration = await this.registrationService.approve(registrationId, tenantId, {
+      actorUserId: payload.actorUserId ?? null,
+    });
+
+    if (!approvedRegistration) {
+      throw new NotFoundException('Registration not found in tenant.');
+    }
+
+    return approvedRegistration;
   }
 
   @Post(':registrationId/cancel')

@@ -8,7 +8,8 @@ import {
   AttendeeConnectionEntity,
   AttendeeConnectionStatus,
 } from '../../networking/src/entities/attendee-connection.entity';
-import { RegistrationEntity, RegistrationStatus } from '../../registration/src/entities/registration.entity';
+import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
+import { RegistrationStatus } from '../../registration/src/entities/registration-status.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { CheckInEntity } from '../../onsite/src/entities/check-in.entity';
 import { EventEntity } from '../../event/src/entities/event.entity';
