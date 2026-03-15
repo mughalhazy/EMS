@@ -2,11 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuditModule } from '../../audit/src/audit.module';
-import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { RegistrationEntity } from '../../registration/src/entities/registration.entity';
 import { RegistrationEventsPublisher } from '../../registration/src/registration-events.publisher';
 import { InventoryPoolEntity } from '../../inventory/src/entities/inventory-pool.entity';
-import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
 import { UserEntity } from '../../user/src/entities/user.entity';
 import { CommerceEventsPublisher } from './commerce-events.publisher';
 import { OrderItemEntity } from './entities/order-item.entity';
@@ -19,7 +17,6 @@ import { FulfillmentService } from './fulfillment.service';
 import { OrderService } from './order.service';
 import { PaymentService } from './payment.service';
 import { RedisLockService } from './redis-lock.service';
-import { RequestCacheService } from './request-cache.service';
 import { RateLimitService } from './rate-limit.service';
 import { IdempotencyService } from './idempotency.service';
 import { StripeCompatibleGateway } from './stripe-compatible.gateway';
@@ -33,8 +30,6 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
       PaymentEntity,
       TicketFulfillmentEntity,
       InventoryPoolEntity,
-      RegistrationQuestionEntity,
-      TicketEntity,
       UserEntity,
       RegistrationEntity,
     ]),
@@ -45,7 +40,6 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
     OrderService,
     PaymentService,
     RedisLockService,
-    RequestCacheService,
     RateLimitService,
     IdempotencyService,
     StripeCompatibleGateway,
@@ -55,6 +49,6 @@ import { TicketFulfillmentService } from './ticket-fulfillment.service';
     EmailConfirmationService,
     FulfillmentService,
   ],
-  exports: [OrderService, PaymentService, RedisLockService, RequestCacheService, RateLimitService, IdempotencyService],
+  exports: [OrderService, PaymentService, RedisLockService, RateLimitService, IdempotencyService],
 })
 export class OrderModule {}
