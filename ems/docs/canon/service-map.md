@@ -103,6 +103,12 @@ This document defines backend service boundaries for EMS. Each service includes:
 - **Published events**: `notification.queued`, `notification.sent`, `notification.failed`, `notification.bounced`.
 - **Consumed events**: `registration.confirmed`, `payment.captured`, `fulfillment.ticket.issued`, `onsite.checkin.completed`, `event.updated`.
 
+## engagement
+- **Purpose**: Manage interactive event engagement experiences including polls, session Q&A, and feedback surveys.
+- **Owned entities**: `EngagementPoll`, `EngagementQuestion`, `EngagementSurvey`.
+- **Published events**: `poll.submitted`, `session.question.asked`, `survey.completed`.
+- **Consumed events**: `agenda.session.created`, `registration.confirmed`, `onsite.checkin.completed`.
+
 ## analytics
 - **Purpose**: Build read models, metrics, and reporting datasets from cross-service events.
 - **Owned entities**: `MetricDefinition`, `KpiSnapshot`, `FunnelView`, `AnalyticsExport`, `MaterializedView`.

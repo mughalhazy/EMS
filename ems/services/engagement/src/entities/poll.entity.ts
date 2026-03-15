@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { SessionEntity } from '../../../event/src/entities/session.entity';
+import { SessionEntity } from '../../../agenda/src/entities/session.entity';
 
 export enum PollStatus {
   DRAFT = 'draft',

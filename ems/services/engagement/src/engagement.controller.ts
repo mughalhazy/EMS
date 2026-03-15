@@ -9,17 +9,19 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-import { SessionQnaEntity } from '../../agenda/src/entities/session-qna.entity';
-import { SurveyEntity } from '../../event/src/entities/survey.entity';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 import { CreatePollDto } from './dto/create-poll.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreateSurveyDto } from './dto/create-survey.dto';
 import { UpdatePollDto } from './dto/update-poll.dto';
 import { UpdateSurveyDto } from './dto/update-survey.dto';
+import { EngagementQuestionEntity } from './entities/engagement-question.entity';
 import { PollEntity } from './entities/poll.entity';
+import { EngagementSurveyEntity } from './entities/engagement-survey.entity';
 import { EngagementService } from './engagement.service';
 
 class SubmitPollDto {
@@ -36,6 +38,7 @@ class CompleteSurveyDto {
   attendeeId!: string;
 }
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/engagement')
 export class EngagementController {
   constructor(private readonly engagementService: EngagementService) {}
@@ -85,7 +88,7 @@ export class EngagementController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() payload: CreateQuestionDto,
-  ): Promise<SessionQnaEntity> {
+  ): Promise<EngagementQuestionEntity> {
     return this.engagementService.createQuestion(tenantId, eventId, payload);
   }
 
@@ -94,7 +97,7 @@ export class EngagementController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Query('sessionId') sessionId?: string,
-  ): Promise<SessionQnaEntity[]> {
+  ): Promise<EngagementQuestionEntity[]> {
     return this.engagementService.listQuestions(tenantId, eventId, sessionId);
   }
 
@@ -104,7 +107,7 @@ export class EngagementController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() payload: CreateSurveyDto,
-  ): Promise<SurveyEntity> {
+  ): Promise<EngagementSurveyEntity> {
     return this.engagementService.createSurvey(tenantId, eventId, payload);
   }
 
@@ -112,7 +115,7 @@ export class EngagementController {
   async listSurveys(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
-  ): Promise<SurveyEntity[]> {
+  ): Promise<EngagementSurveyEntity[]> {
     return this.engagementService.listSurveys(tenantId, eventId);
   }
 
@@ -133,7 +136,7 @@ export class EngagementController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Param('surveyId', ParseUUIDPipe) surveyId: string,
     @Body() payload: UpdateSurveyDto,
-  ): Promise<SurveyEntity> {
+  ): Promise<EngagementSurveyEntity> {
     return this.engagementService.updateSurvey(tenantId, eventId, surveyId, payload);
   }
 }

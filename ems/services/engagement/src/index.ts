@@ -3,11 +3,15 @@ export {
   ENGAGEMENT_EVENTS_KAFKA_CLIENT,
   EngagementEventsPublisher,
   POLL_SUBMITTED_TOPIC,
+  QUESTION_ASKED_TOPIC,
   SURVEY_COMPLETED_TOPIC,
 } from './engagement-events.publisher';
+export { EngagementQuestionEntity } from './entities/engagement-question.entity';
 export { PollEntity, PollStatus } from './entities/poll.entity';
+export { EngagementSurveyEntity, EngagementSurveyStatus } from './entities/engagement-survey.entity';
 export { CreatePollDto } from './dto/create-poll.dto';
 export { UpdatePollDto } from './dto/update-poll.dto';
 export { CreateQuestionDto } from './dto/create-question.dto';
 export { CreateSurveyDto } from './dto/create-survey.dto';
 export { UpdateSurveyDto } from './dto/update-survey.dto';
+export { CreateEngagementFeedbackTables1719100000000 } from './migrations/1719100000000-CreateEngagementFeedbackTables';

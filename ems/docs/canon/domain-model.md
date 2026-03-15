@@ -33,6 +33,9 @@ This document defines the **core EMS entities** and the **service that owns each
 | `Refund` | Refund instruction and settlement status | `Billing Service` |
 | `Ticket` | Issued admission entitlement artifact | `Fulfillment Service` |
 | `Badge` | Printed/digital attendee badge artifact | `Fulfillment Service` |
+| `EngagementPoll` | Interactive live poll attached to an event session | `Engagement Service` |
+| `EngagementQuestion` | Attendee-submitted session Q&A prompt | `Engagement Service` |
+| `EngagementSurvey` | Event feedback survey and completion window | `Engagement Service` |
 
 ---
 
@@ -142,6 +145,23 @@ This document defines the **core EMS entities** and the **service that owns each
 - **Description:** Attendee-facing badge artifact for check-in/onsite identity.
 - **Key fields:** `id`, `tenant_id`, `event_id`, `attendee_id`, `ticket_id` (optional), `badge_code`, `print_status`, `issued_at`.
 - **Invariants:** one active badge per attendee per event unless explicit reprint policy.
+
+### Engagement
+
+#### `EngagementPoll`
+- **Description:** Session-scoped poll used for audience interaction.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `session_id`, `question`, `options`, `status`, `starts_at`, `ends_at`.
+- **Invariants:** poll schedule must satisfy `starts_at < ends_at` when both timestamps are set.
+
+#### `EngagementQuestion`
+- **Description:** Q&A item submitted by an attendee against a session.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `session_id`, `attendee_id`, `question`, `created_at`.
+- **Invariants:** referenced attendee and session must belong to the same `tenant_id` and `event_id`.
+
+#### `EngagementSurvey`
+- **Description:** Feedback survey definition and lifecycle for an event.
+- **Key fields:** `id`, `tenant_id`, `event_id`, `code`, `title`, `status`, `is_anonymous`, `open_at`, `close_at`, `questions`, `settings`.
+- **Invariants:** (`tenant_id`, `event_id`, `code`) unique; survey schedule must satisfy `open_at < close_at` when both timestamps are set.
 
 ---
 
