@@ -6,3 +6,4 @@ export * from './migrations/1712000000001-AddEventDomainToAuditLogs';
 export * from './migrations/1712000000002-AddCommerceDomainToAuditLogs';
 
 export * from './distributed-tracing';
+export * from './migrations/1725000000000-ExpandAuditLogsCaptureScope';

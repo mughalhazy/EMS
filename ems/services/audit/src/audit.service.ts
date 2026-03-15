@@ -2,18 +2,34 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 
-import { AuditDomain, AuditLogEntity } from './entities/audit-log.entity';
+import {
+  AuditCategory,
+  AuditDomain,
+  AuditLogEntity,
+  AuditSeverity,
+} from './entities/audit-log.entity';
 
 export interface TrackAuditChangeInput {
   tenantId: string;
   actorUserId?: string | null;
   targetUserId?: string | null;
   action: string;
+  category?: AuditCategory;
+  severity?: AuditSeverity;
+  entityType?: string | null;
+  entityId?: string | null;
   before?: Record<string, unknown> | null;
   after?: Record<string, unknown> | null;
   metadata?: Record<string, unknown> | null;
 }
 
+
+
+export interface ListAuditLogsInput {
+  tenantId: string;
+  domain?: AuditDomain;
+  category?: AuditCategory;
+}
 @Injectable()
 export class AuditService {
   constructor(
@@ -49,10 +65,12 @@ export class AuditService {
     return this.createAuditLog(AuditDomain.ONSITE, input);
   }
 
-  async listByTenant(tenantId: string, domain?: AuditDomain): Promise<AuditLogEntity[]> {
-    const where: FindOptionsWhere<AuditLogEntity> = domain
-      ? { tenantId, domain }
-      : { tenantId };
+  async listByTenant(input: ListAuditLogsInput): Promise<AuditLogEntity[]> {
+    const where: FindOptionsWhere<AuditLogEntity> = {
+      tenantId: input.tenantId,
+      ...(input.domain ? { domain: input.domain } : {}),
+      ...(input.category ? { category: input.category } : {}),
+    };
 
     return this.auditLogRepository.find({
       where,
@@ -70,6 +88,10 @@ export class AuditService {
       targetUserId: input.targetUserId ?? null,
       domain,
       action: input.action,
+      category: input.category ?? AuditCategory.USER_ACTION,
+      severity: input.severity ?? AuditSeverity.INFO,
+      entityType: input.entityType ?? null,
+      entityId: input.entityId ?? null,
       before: input.before ?? null,
       after: input.after ?? null,
       metadata: input.metadata ?? null,
