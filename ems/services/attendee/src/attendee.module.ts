@@ -13,6 +13,7 @@ import { AttendeeDirectorySearchIndexService } from './attendee-directory-search
 import { AttendeeEventsConsumer } from './attendee-events.consumer';
 import { AttendeeService } from './attendee.service';
 import { AttendeeProfileEntity } from './entities/attendee-profile.entity';
+import { AttendeeTagEntity } from './entities/attendee-tag.entity';
 import { AttendeeEntity } from './entities/attendee.entity';
 
 @Module({
@@ -23,6 +24,7 @@ import { AttendeeEntity } from './entities/attendee.entity';
       RegistrantProfileEntity,
       UserEntity,
       AttendeeProfileEntity,
+      AttendeeTagEntity,
       AttendeeConnectionEntity,
       AttendeeScheduleEntity,
       SessionEntity,
