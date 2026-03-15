@@ -1,8 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseInterceptors } from '@nestjs/common';
+
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
 import { RevenueReportQueryDto } from './dto/revenue-report-query.dto';
 import { EventRevenueReport, RevenueReportingService } from './revenue-reporting.service';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/revenue')
 export class RevenueReportingController {
   constructor(private readonly revenueReportingService: RevenueReportingService) {}
