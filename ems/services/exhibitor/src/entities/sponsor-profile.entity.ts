@@ -3,14 +3,10 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { EventEntity } from '../../../event/src/entities/event.entity';
-import { Tenant } from '../../../tenant/src/tenant.entity';
 import { SponsorTier } from './sponsor-tier.enum';
 
 @Entity({ name: 'sponsor_profiles' })
@@ -24,16 +20,8 @@ export class SponsorProfileEntity {
   @Column({ type: 'uuid', name: 'tenant_id' })
   tenantId!: string;
 
-  @ManyToOne(() => Tenant, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'tenant_id' })
-  tenant!: Tenant;
-
   @Column({ type: 'uuid', name: 'event_id' })
   eventId!: string;
-
-  @ManyToOne(() => EventEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'event_id' })
-  event!: EventEntity;
 
   @Column({ type: 'varchar', length: 255 })
   name!: string;

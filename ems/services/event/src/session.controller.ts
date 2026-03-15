@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   Body,
   Controller,
   Delete,
@@ -17,7 +17,9 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 import { SessionEntity } from './entities/session.entity';
 import { EventService } from './event.service';
 import { SessionService } from './session.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/sessions')
 export class SessionController {
   constructor(

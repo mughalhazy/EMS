@@ -10,7 +10,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { VenueEntity } from '../../../event/src/entities/venue.entity';
 import { ExhibitorEntity } from './exhibitor.entity';
 
 @Entity({ name: 'booths' })
@@ -42,13 +41,6 @@ export class BoothEntity {
 
   @Column({ type: 'uuid', name: 'venue_id' })
   venueId!: string;
-
-  @ManyToOne(() => VenueEntity, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'venue_id' })
-  venue!: VenueEntity;
 
   @Column({ type: 'varchar', length: 64, name: 'location_code' })
   locationCode!: string;

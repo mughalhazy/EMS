@@ -6,7 +6,6 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
-import { AttendeeEntity } from '../../../attendee/src/entities/attendee.entity';
 import { ExhibitorEntity } from './exhibitor.entity';
 
 @Entity({ name: 'exhibitor_lead_captures' })
@@ -15,10 +14,6 @@ import { ExhibitorEntity } from './exhibitor.entity';
 export class ExhibitorLeadCaptureEntity {
   @PrimaryColumn({ type: 'uuid', name: 'attendee_id' })
   attendeeId!: string;
-
-  @ManyToOne(() => AttendeeEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'attendee_id' })
-  attendee!: AttendeeEntity;
 
   @PrimaryColumn({ type: 'uuid', name: 'exhibitor_id' })
   exhibitorId!: string;

@@ -11,8 +11,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { EventEntity } from '../../../event/src/entities/event.entity';
-import { RoomEntity } from '../../../event/src/entities/room.entity';
 import { AttendeeScheduleEntity } from './attendee-schedule.entity';
 import { SessionSpeakerEntity } from './session-speaker.entity';
 import { SessionQnaEntity } from './session-qna.entity';
@@ -46,16 +44,8 @@ export class SessionEntity {
   @Column({ type: 'uuid', name: 'event_id' })
   eventId!: string;
 
-  @ManyToOne(() => EventEntity, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'event_id' })
-  event!: EventEntity;
-
   @Column({ type: 'uuid', name: 'room_id' })
   roomId!: string;
-
-  @ManyToOne(() => RoomEntity, { nullable: false, onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'room_id' })
-  room!: RoomEntity;
 
   @Column({ type: 'uuid', name: 'track_id', nullable: true })
   trackId!: string | null;

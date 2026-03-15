@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   Body,
   Controller,
   Delete,
@@ -14,7 +14,9 @@ import {
 import { AssignSpeakerDto } from './dto/assign-speaker.dto';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
 import { SpeakerAssignmentService } from './speaker-assignment.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId')
 export class SpeakerAssignmentController {
   constructor(private readonly speakerAssignmentService: SpeakerAssignmentService) {}

@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   Body,
   Controller,
   Delete,
@@ -17,7 +17,9 @@ import { UpdateVenueDto } from './dto/update-venue.dto';
 import { VenueEntity } from './entities/venue.entity';
 import { EventService } from './event.service';
 import { VenueService } from './venue.service';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId/venues')
 export class VenueController {
   constructor(

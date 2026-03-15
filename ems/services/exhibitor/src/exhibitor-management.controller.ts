@@ -1,4 +1,4 @@
-import {
+import { UseInterceptors,
   Body,
   Controller,
   Delete,
@@ -31,11 +31,13 @@ import { ExhibitorLeadCaptureEntity } from './entities/exhibitor-lead-capture.en
 import { ExhibitorEntity } from './entities/exhibitor.entity';
 import { SponsorPackageEntity } from './entities/sponsor-package.entity';
 import { SponsorProfileEntity } from './entities/sponsor-profile.entity';
+import { ApiResponseInterceptor } from '../../shared/src/api-response.interceptor';
 import {
   ExhibitorManagementService,
   SponsorRoiReportRow,
 } from './exhibitor-management.service';
 
+@UseInterceptors(ApiResponseInterceptor)
 @Controller('api/v1/tenants/:tenantId/events/:eventId')
 export class ExhibitorManagementController {
   constructor(private readonly exhibitorManagementService: ExhibitorManagementService) {}
