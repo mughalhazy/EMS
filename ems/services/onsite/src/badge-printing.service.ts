@@ -17,6 +17,13 @@ export class BadgePrintingService {
     });
   }
 
+  async findBadgeByBadgeId(badgeId: string): Promise<BadgeEntity | null> {
+    return this.badgeRepository.findOne({
+      where: { badgeId },
+    });
+  }
+
+
   async printBadge(attendeeId: string, eventId: string): Promise<{ badge: BadgeEntity; isReprint: boolean }> {
     const existingBadge = await this.findBadgeByAttendee(attendeeId);
 

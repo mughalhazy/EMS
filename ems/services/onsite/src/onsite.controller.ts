@@ -15,8 +15,10 @@ import { RegisterScanningDeviceDto } from './dto/register-scanning-device.dto';
 import { ScanSessionCheckInDto } from './dto/scan-session-check-in.dto';
 import { UpdateScanningDeviceStatusDto } from './dto/update-scanning-device-status.dto';
 import { PrintBadgeDto } from './dto/print-badge.dto';
+import { ValidateBadgeDto } from './dto/validate-badge.dto';
 import {
   BadgePrintResult,
+  BadgeValidationResult,
   CheckInResult,
   DeviceMonitorResult,
   OnsiteService,
@@ -96,6 +98,22 @@ export class OnsiteController {
       payload.attendeeId,
       payload.deviceId,
       payload.qrTicketCode,
+    );
+  }
+
+
+  @Post('badges/validate')
+  @HttpCode(HttpStatus.OK)
+  async validateBadge(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() payload: ValidateBadgeDto,
+  ): Promise<BadgeValidationResult> {
+    return this.onsiteService.validateBadge(
+      tenantId,
+      eventId,
+      payload.badgeId,
+      payload.attendeeId,
     );
   }
 

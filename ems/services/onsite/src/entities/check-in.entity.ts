@@ -38,3 +38,5 @@ export class CheckInEntity {
   @Column({ type: 'varchar', length: 255, name: 'device_id' })
   deviceId!: string;
 }
+
+export type CheckinRecord = CheckInEntity;
