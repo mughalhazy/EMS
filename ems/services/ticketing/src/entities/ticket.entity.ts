@@ -15,10 +15,13 @@ import { EarlyBirdRuleEntity } from './early-bird-rule.entity';
 import { InventoryEntity } from './inventory.entity';
 import { PricingTierEntity } from './pricing-tier.entity';
 import { PromoCodeEntity } from './promo-code.entity';
+import { TicketEntitlementEntity } from './ticket-entitlement.entity';
+import { TicketProductEntity } from './ticket-product.entity';
 
 @Entity({ name: 'tickets' })
 @Index('idx_tickets_event_id', ['eventId'])
 @Index('idx_tickets_inventory_id', ['inventoryId'])
+@Index('idx_tickets_ticket_product_id', ['ticketProductId'])
 export class TicketEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -35,6 +38,17 @@ export class TicketEntity {
 
   @Column({ type: 'uuid', name: 'inventory_id' })
   inventoryId!: string;
+
+  @Column({ type: 'uuid', name: 'ticket_product_id', nullable: true })
+  ticketProductId!: string | null;
+
+  @ManyToOne(() => TicketProductEntity, (ticketProduct) => ticketProduct.tickets, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'ticket_product_id' })
+  ticketProduct!: TicketProductEntity | null;
+
 
   @ManyToOne(() => InventoryEntity, (inventory) => inventory.tickets, {
     nullable: false,
@@ -69,6 +83,9 @@ export class TicketEntity {
 
   @OneToMany(() => PromoCodeEntity, (promoCode) => promoCode.ticket)
   promoCodes!: PromoCodeEntity[];
+
+  @OneToMany(() => TicketEntitlementEntity, (entitlement) => entitlement.ticket)
+  entitlements!: TicketEntitlementEntity[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt!: Date;
