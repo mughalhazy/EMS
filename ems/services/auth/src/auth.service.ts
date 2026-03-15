@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
 import { Repository } from 'typeorm';
 
-import { AuthCredentialEntity } from './entities/auth-credential.entity';
+import { UserCredentialEntity } from './entities/user-credential.entity';
 import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
 import {
   AuthSsoProviderEntity,
@@ -52,8 +52,8 @@ export interface FederatedSignInInput {
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(AuthCredentialEntity)
-    private readonly credentialRepository: Repository<AuthCredentialEntity>,
+    @InjectRepository(UserCredentialEntity)
+    private readonly credentialRepository: Repository<UserCredentialEntity>,
     @InjectRepository(AuthTokenEntity)
     private readonly tokenRepository: Repository<AuthTokenEntity>,
     @InjectRepository(AuthUserStateEntity)
@@ -343,7 +343,7 @@ export class AuthService {
   private async findCredentialByTenantAndUserId(
     tenantId: string,
     userId: string,
-  ): Promise<AuthCredentialEntity | null> {
+  ): Promise<UserCredentialEntity | null> {
     return this.credentialRepository
       .createQueryBuilder('credential')
       .innerJoin(UserEntity, 'user', 'user.id = credential.user_id')

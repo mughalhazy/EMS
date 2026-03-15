@@ -7,9 +7,11 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -19,10 +21,13 @@ import { JwtTokenService } from './jwt-token.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { TokenPairDto } from './dto/token-pair.dto';
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
+import { AuthSessionEntity } from './entities/auth-session.entity';
 import { UserEntity, UserStatus } from '../../user/src/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RbacService } from './rbac.service';
+import { ApiDataResponseDto } from './dto/api-response.dto';
+import { PasswordResetRequestDto } from './dto/password-reset-request.dto';
+import { PasswordResetConfirmDto } from './dto/password-reset-confirm.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,13 +38,16 @@ export class AuthController {
     private readonly rbacService: RbacService,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(RefreshTokenEntity)
-    private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    @InjectRepository(AuthSessionEntity)
+    private readonly authSessionRepository: Repository<AuthSessionEntity>,
   ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() payload: LoginDto): Promise<TokenPairDto> {
+  async login(
+    @Body() payload: LoginDto,
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<TokenPairDto>> {
     const user = await this.userRepository.findOne({
       where: { tenantId: payload.tenantId, email: payload.email },
     });
@@ -67,12 +75,15 @@ export class AuthController {
       metadata: { ip: payload.ip ?? null, userAgent: payload.userAgent ?? null },
     });
 
-    return session;
+    return this.successResponse(session, request);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() payload: RefreshTokenDto): Promise<TokenPairDto> {
+  async refresh(
+    @Body() payload: RefreshTokenDto,
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<TokenPairDto>> {
     let decoded: { sub: string; tid: string };
 
     try {
@@ -82,7 +93,7 @@ export class AuthController {
     }
 
     const tokenHash = this.jwtTokenService.hashToken(payload.refreshToken);
-    const storedToken = await this.refreshTokenRepository.findOne({
+    const storedToken = await this.authSessionRepository.findOne({
       where: {
         userId: decoded.sub,
         tenantId: decoded.tid,
@@ -106,7 +117,7 @@ export class AuthController {
     const nextSession = await this.issueSession(user, payload.userAgent, payload.ip);
 
     storedToken.revokedAt = new Date();
-    await this.refreshTokenRepository.save(storedToken);
+    await this.authSessionRepository.save(storedToken);
     await this.auditService.trackAuthChange({
       tenantId: user.tenantId,
       actorUserId: user.id,
@@ -114,7 +125,7 @@ export class AuthController {
       action: 'auth.refresh',
     });
 
-    return nextSession;
+    return this.successResponse(nextSession, request);
   }
 
   @Post('logout')
@@ -123,7 +134,7 @@ export class AuthController {
     try {
       const decoded = this.jwtTokenService.verify(payload.refreshToken, 'refresh');
       const tokenHash = this.jwtTokenService.hashToken(payload.refreshToken);
-      const storedToken = await this.refreshTokenRepository.findOne({
+      const storedToken = await this.authSessionRepository.findOne({
         where: {
           userId: decoded.sub,
           tenantId: decoded.tid,
@@ -134,7 +145,7 @@ export class AuthController {
 
       if (storedToken) {
         storedToken.revokedAt = new Date();
-        await this.refreshTokenRepository.save(storedToken);
+        await this.authSessionRepository.save(storedToken);
       }
 
       await this.auditService.trackAuthChange({
@@ -148,25 +159,29 @@ export class AuthController {
     }
   }
 
-  @Post('password-reset/request/:tenantId/:userId')
+  @Post('password-reset/request')
   async issuePasswordReset(
-    @Param('tenantId', ParseUUIDPipe) tenantId: string,
-    @Param('userId', ParseUUIDPipe) userId: string,
-  ) {
-    return this.authService.issuePasswordReset(tenantId, userId);
+    @Body() payload: PasswordResetRequestDto,
+    @Req() request: Request,
+  ): Promise<ApiDataResponseDto<{ expiresAt: Date }>> {
+    const resetToken = await this.authService.issuePasswordReset(payload.tenantId, payload.userId);
+    return this.successResponse({ expiresAt: resetToken.expiresAt }, request);
   }
 
-  @Post('password-reset/confirm/:tenantId/:userId')
+  @Post('password-reset/confirm')
   async confirmPasswordReset(
-    @Param('tenantId', ParseUUIDPipe) tenantId: string,
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() payload: { token: string; newPassword: string },
+    @Body() payload: PasswordResetConfirmDto,
   ): Promise<void> {
-    await this.authService.resetPassword(tenantId, userId, payload.token, payload.newPassword);
+    await this.authService.resetPassword(
+      payload.tenantId,
+      payload.userId,
+      payload.token,
+      payload.newPassword,
+    );
     await this.auditService.trackAuthChange({
-      tenantId,
-      actorUserId: userId,
-      targetUserId: userId,
+      tenantId: payload.tenantId,
+      actorUserId: payload.userId,
+      targetUserId: payload.userId,
       action: 'auth.password.reset',
     });
   }
@@ -185,7 +200,7 @@ export class AuthController {
     const accessToken = this.jwtTokenService.signAccessToken(user.id, user.tenantId);
     const refreshToken = this.jwtTokenService.signRefreshToken(user.id, user.tenantId);
 
-    const refreshTokenRecord = this.refreshTokenRepository.create({
+    const refreshTokenRecord = this.authSessionRepository.create({
       tenantId: user.tenantId,
       userId: user.id,
       tokenHash: this.jwtTokenService.hashToken(refreshToken.token),
@@ -195,7 +210,7 @@ export class AuthController {
       revokedAt: null,
       replacedBy: null,
     });
-    await this.refreshTokenRepository.save(refreshTokenRecord);
+    await this.authSessionRepository.save(refreshTokenRecord);
 
     user.lastLoginAt = new Date();
     await this.userRepository.save(user);
@@ -213,6 +228,16 @@ export class AuthController {
         email: user.email,
         roleNames: roles,
         permissions,
+      },
+    };
+  }
+
+  private successResponse<T>(data: T, request: Request): ApiDataResponseDto<T> {
+    return {
+      data,
+      meta: {
+        requestId: request.headers['x-request-id']?.toString() ?? 'generated-request-id',
+        timestamp: new Date().toISOString(),
       },
     };
   }
