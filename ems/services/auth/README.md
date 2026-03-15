@@ -115,3 +115,23 @@ Analytics endpoints should call `auth_require_tenant_analytics_access(...)` to e
 
 ### Next integration step
 - Replace `SecretsProviderService.getSecret(...)` with provider-specific lookups (AWS Secrets Manager / Vault / GCP Secret Manager) while keeping the same call site contract.
+
+## Auth module capabilities
+
+- JWT access token issuance and validation via `JwtTokenService`.
+- Login/logout flows with revocable refresh-token-backed sessions.
+- Password reset token issuance and confirmation.
+- Refresh-token rotation via `/auth/refresh`.
+
+## Auth entities
+
+- `UserCredentialEntity` (legacy export alias: `AuthCredentialEntity`) for credential storage.
+- `AuthSessionEntity` (legacy export alias: `RefreshTokenEntity`) for refresh-token-backed auth sessions.
+
+## Auth endpoints
+
+- `POST /auth/login`
+- `POST /auth/logout`
+- `POST /auth/refresh`
+- `POST /auth/password-reset/request`
+- `POST /auth/password-reset/confirm`

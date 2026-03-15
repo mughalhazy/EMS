@@ -10,13 +10,13 @@ import { SecretsProviderService } from './secrets-provider.service';
 import { TenantIsolationMiddleware } from './middleware/tenant-isolation.middleware';
 import { RbacService } from './rbac.service';
 import { RolesController } from './roles.controller';
-import { AuthCredentialEntity } from './entities/auth-credential.entity';
+import { UserCredentialEntity } from './entities/user-credential.entity';
 import { AuthFederatedIdentityEntity } from './entities/auth-federated-identity.entity';
 import { AuthSsoProviderEntity } from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
 import { PermissionEntity } from './entities/permission.entity';
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
+import { AuthSessionEntity } from './entities/auth-session.entity';
 import { RoleEntity } from './entities/role.entity';
 import { RolePermissionEntity } from './entities/role-permission.entity';
 import { UserRoleAssignmentEntity } from './entities/user-role-assignment.entity';
@@ -27,12 +27,12 @@ import { RbacGuard } from './guards/rbac.guard';
   imports: [
     AuditModule,
     TypeOrmModule.forFeature([
-      AuthCredentialEntity,
+      UserCredentialEntity,
       AuthTokenEntity,
       AuthUserStateEntity,
       AuthSsoProviderEntity,
       AuthFederatedIdentityEntity,
-      RefreshTokenEntity,
+      AuthSessionEntity,
       RoleEntity,
       PermissionEntity,
       RolePermissionEntity,
