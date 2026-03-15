@@ -1,12 +1,10 @@
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
-import { randomUUID } from 'crypto';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { attachDistributedTrace, DistributedTraceCarrier } from '../../audit/src/distributed-tracing';
+import { createDomainEvent, OutboxService } from '../../shared/src/event-bus';
 
 import { RegistrationEntity } from './entities/registration.entity';
 
-export const REGISTRATION_EVENTS_KAFKA_CLIENT = 'REGISTRATION_EVENTS_KAFKA_CLIENT';
 export const REGISTRATION_STARTED_TOPIC = 'registration.started';
 export const REGISTRATION_CONFIRMED_TOPIC = 'registration.confirmed';
 export const REGISTRATION_CANCELLED_TOPIC = 'registration.cancelled';
@@ -15,11 +13,7 @@ export const REGISTRATION_CANCELLED_TOPIC = 'registration.cancelled';
 export class RegistrationEventsPublisher {
   private readonly logger = new Logger(RegistrationEventsPublisher.name);
 
-  constructor(
-    @Optional()
-    @Inject(REGISTRATION_EVENTS_KAFKA_CLIENT)
-    private readonly kafkaClient?: ClientKafka,
-  ) {}
+  constructor(private readonly outboxService: OutboxService) {}
 
   async publishRegistrationStarted(
     registration: Pick<RegistrationEntity, 'id' | 'tenantId' | 'eventId' | 'userId' | 'ticketId' | 'status'>,
@@ -62,33 +56,41 @@ export class RegistrationEventsPublisher {
     },
     trace?: DistributedTraceCarrier,
   ): Promise<void> {
-    if (!this.kafkaClient) {
-      this.logger.warn(
-        JSON.stringify({
-          event: 'registration.publish.skipped',
-          reason: 'kafka_client_unavailable',
-          topic,
-          registrationId: registration.id,
-        }),
-      );
-      return;
-    }
+    const eventPayload = attachDistributedTrace(
+      {
+        event_id_ref: registration.eventId,
+        registration_id: registration.id,
+        status: registration.status,
+        ticket_id: registration.ticketId,
+        user_id: registration.userId,
+      },
+      trace,
+    );
 
-    await this.kafkaClient.emit(
-      topic,
-      attachDistributedTrace(
-        {
-          event_id: randomUUID(),
-          occurred_at: new Date().toISOString(),
-          tenant_id: registration.tenantId,
-          registration_id: registration.id,
-          event_id_ref: registration.eventId,
-          user_id: registration.userId,
-          ticket_id: registration.ticketId,
-          status: registration.status,
+    await this.outboxService.enqueue(
+      createDomainEvent({
+        id: `${registration.id}:${topic}`,
+        type: topic,
+        aggregateType: 'registration',
+        aggregateId: registration.id,
+        tenantId: registration.tenantId,
+        payload: eventPayload,
+        metadata: {
+          traceId: trace?.trace_id,
+          spanId: trace?.span_id,
+          parentSpanId: trace?.parent_span_id,
         },
-        trace,
-      ),
+        partitionKey: registration.id,
+      }),
+    );
+
+    this.logger.debug(
+      JSON.stringify({
+        event: 'registration.outbox.enqueued',
+        topic,
+        registrationId: registration.id,
+        tenantId: registration.tenantId,
+      }),
     );
   }
 }

@@ -7,6 +7,7 @@ import { OrderEntity } from '../../commerce/src/entities/order.entity';
 import { EventSettingEntity } from '../../event/src/entities/event-setting.entity';
 import { RegistrationQuestionEntity } from '../../event/src/entities/registration-question.entity';
 import { TicketEntity } from '../../ticketing/src/entities/ticket.entity';
+import { EventBusModule } from '../../shared/src/event-bus';
 import { RegistrationEntity } from './entities/registration.entity';
 import { RegistrantProfileEntity } from './entities/registrant-profile.entity';
 import { RegistrationController } from './registration.controller';
@@ -16,6 +17,7 @@ import { RegistrationEventsPublisher } from './registration-events.publisher';
 @Module({
   imports: [
     AuditModule,
+    EventBusModule.forRoot(),
     TypeOrmModule.forFeature([
       RegistrationEntity,
       RegistrantProfileEntity,

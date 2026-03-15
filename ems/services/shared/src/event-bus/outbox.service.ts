@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 import { DomainEvent } from './domain-event';
 import { EventPublisher } from './event-publisher';
@@ -13,9 +13,12 @@ export type PublishPendingEventsResult = {
 
 @Injectable()
 export class OutboxService {
+  private readonly logger = new Logger(OutboxService.name);
+
   constructor(
     @InjectRepository(OutboxEventEntity)
     private readonly outboxRepository: Repository<OutboxEventEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async enqueue<TPayload>(event: DomainEvent<TPayload>): Promise<OutboxEventEntity> {
@@ -55,13 +58,45 @@ export class OutboxService {
   }
 
   async reservePending(limit = 100): Promise<OutboxEventEntity[]> {
-    return this.outboxRepository
-      .createQueryBuilder('outbox_event')
-      .where('outbox_event.status = :status', { status: OutboxEventStatus.PENDING })
-      .andWhere('(outbox_event.nextAttemptAt IS NULL OR outbox_event.nextAttemptAt <= NOW())')
-      .orderBy('outbox_event.createdAt', 'ASC')
-      .limit(limit)
-      .getMany();
+    return this.dataSource.transaction(async (manager) => {
+      const candidates = await manager
+        .getRepository(OutboxEventEntity)
+        .createQueryBuilder('outbox_event')
+        .setLock('pessimistic_write')
+        .setOnLocked('skip_locked')
+        .where('outbox_event.status IN (:...statuses)', {
+          statuses: [OutboxEventStatus.PENDING, OutboxEventStatus.FAILED],
+        })
+        .andWhere('(outbox_event.nextAttemptAt IS NULL OR outbox_event.nextAttemptAt <= NOW())')
+        .orderBy('outbox_event.createdAt', 'ASC')
+        .limit(limit)
+        .getMany();
+
+      if (candidates.length === 0) {
+        return [];
+      }
+
+      const candidateIds = candidates.map((candidate) => candidate.id);
+
+      await manager.getRepository(OutboxEventEntity).update(
+        { id: In(candidateIds) },
+        {
+          status: OutboxEventStatus.PROCESSING,
+          attempts: () => 'attempts + 1',
+          nextAttemptAt: null,
+          lastError: null,
+        },
+      );
+
+      return manager.getRepository(OutboxEventEntity).find({
+        where: {
+          id: In(candidateIds),
+        },
+        order: {
+          createdAt: 'ASC',
+        },
+      });
+    });
   }
 
   async publishPending(
@@ -95,15 +130,43 @@ export class OutboxService {
         published += 1;
       } catch (error) {
         pendingEvent.status = OutboxEventStatus.FAILED;
-        pendingEvent.attempts += 1;
         pendingEvent.nextAttemptAt = new Date(Date.now() + retryDelayMs);
         pendingEvent.lastError = error instanceof Error ? error.message : 'Unknown publish error';
         await this.outboxRepository.save(pendingEvent);
+
+        this.logger.error(
+          JSON.stringify({
+            event: 'outbox.publish.failed',
+            outboxEventId: pendingEvent.id,
+            eventType: pendingEvent.eventType,
+            tenantId: pendingEvent.tenantId,
+            attempts: pendingEvent.attempts,
+            nextAttemptAt: pendingEvent.nextAttemptAt.toISOString(),
+            error: pendingEvent.lastError,
+          }),
+        );
         failed += 1;
       }
     }
 
     return { published, failed };
+  }
+
+  async requeueStaleProcessing(staleAfterMs = 60_000): Promise<number> {
+    const staleBefore = new Date(Date.now() - staleAfterMs);
+    const result = await this.outboxRepository
+      .createQueryBuilder()
+      .update(OutboxEventEntity)
+      .set({
+        status: OutboxEventStatus.PENDING,
+        nextAttemptAt: null,
+        lastError: 'processing_timeout_requeued',
+      })
+      .where('status = :status', { status: OutboxEventStatus.PROCESSING })
+      .andWhere('updatedAt < :staleBefore', { staleBefore })
+      .execute();
+
+    return result.affected ?? 0;
   }
 
   async requeueFailed(limit = 100): Promise<number> {
