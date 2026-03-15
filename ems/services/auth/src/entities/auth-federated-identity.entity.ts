@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { UserEntity } from '../../../user/src/entities/user.entity';
+import { UserEntity } from './user.entity';
 import { AuthSsoProviderEntity } from './auth-sso-provider.entity';
 
 @Entity({ name: 'auth_federated_identities' })

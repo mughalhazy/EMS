@@ -42,3 +42,29 @@ This catalog is the authoritative list of domain events used across EMS.
 | AttendeeCheckedIn | `attendee.checked_in` | Attendee is checked in at venue or gate. |
 | SessionAttendanceScanned | `session.attendance_scanned` | Session attendance scan is recorded. |
 | BadgePrinted | `badge.printed` | Badge print operation succeeds. |
+
+## Identity and Access
+
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| AuthUserCreated | `auth.user.created` | A new platform identity is provisioned. |
+| AuthUserUpdated | `auth.user.updated` | User identity attributes or status are updated. |
+| AuthRoleChanged | `auth.role.changed` | Role definitions or role assignments are changed. |
+| AuthSessionStarted | `auth.session.started` | A user authentication session is established. |
+| AuthSessionEnded | `auth.session.ended` | A user authentication session is terminated. |
+
+## Tenant Lifecycle
+
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| TenantProvisioned | `tenant.tenant.provisioned` | A new tenant is created and initialized. |
+| TenantUpdated | `tenant.tenant.updated` | Tenant metadata or settings are updated. |
+| TenantPlanChanged | `tenant.plan.changed` | A tenant plan entitlement changes. |
+| TenantMembershipChanged | `tenant.membership.changed` | Tenant membership assignments are modified. |
+
+## Audit
+
+| Event Name | Topic | Trigger |
+| --- | --- | --- |
+| AuditLogRecorded | `audit.log.recorded` | A compliance/security-relevant action is persisted. |
+| AuditRetentionExpired | `audit.retention.expired` | Retention policy removes or archives an audit record set. |

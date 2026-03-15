@@ -17,7 +17,7 @@ import {
 } from './entities/auth-sso-provider.entity';
 import { AuthTokenEntity, AuthTokenType } from './entities/auth-token.entity';
 import { AuthUserStateEntity } from './entities/auth-user-state.entity';
-import { UserEntity, UserStatus } from '../../user/src/entities/user.entity';
+import { UserEntity, UserStatus } from './entities/user.entity';
 import { TenantContext } from './tenant-context';
 
 const DEFAULT_BCRYPT_ROUNDS = 12;

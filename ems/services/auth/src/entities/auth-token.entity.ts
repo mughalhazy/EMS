@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { UserEntity } from '../../../user/src/entities/user.entity';
+import { UserEntity } from './user.entity';
 
 export enum AuthTokenType {
   PASSWORD_RESET = 'password_reset',
