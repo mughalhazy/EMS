@@ -16,6 +16,7 @@ import { RoomEntity } from '../../../event/src/entities/room.entity';
 import { AttendeeScheduleEntity } from './attendee-schedule.entity';
 import { SessionSpeakerEntity } from './session-speaker.entity';
 import { SessionQnaEntity } from './session-qna.entity';
+import { TrackEntity } from './track.entity';
 
 export enum SessionStatus {
   DRAFT = 'draft',
@@ -28,6 +29,7 @@ export enum SessionStatus {
 @Index('idx_sessions_tenant_id', ['tenantId'])
 @Index('idx_sessions_event_id', ['eventId'])
 @Index('idx_sessions_room_id', ['roomId'])
+@Index('idx_sessions_track_id', ['trackId'])
 @Index('idx_sessions_event_agenda_order', ['eventId', 'agendaOrder'])
 @Check('CK_sessions_capacity_non_negative', 'capacity >= 0')
 @Check('CK_sessions_remaining_seats_non_negative', 'remaining_seats >= 0')
@@ -54,6 +56,13 @@ export class SessionEntity {
   @ManyToOne(() => RoomEntity, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'room_id' })
   room!: RoomEntity;
+
+  @Column({ type: 'uuid', name: 'track_id', nullable: true })
+  trackId!: string | null;
+
+  @ManyToOne(() => TrackEntity, (track) => track.sessions, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'track_id' })
+  track!: TrackEntity | null;
 
   @Column({ type: 'varchar', length: 255 })
   title!: string;

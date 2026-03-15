@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 
 import { AssignSpeakerDto } from './dto/assign-speaker.dto';
 import { CreateSessionDto } from './dto/create-session.dto';
+import { QueryAgendaDto } from './dto/query-agenda.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { SessionEntity } from './entities/session.entity';
 import { SessionSpeakerEntity } from './entities/session-speaker.entity';
@@ -21,6 +22,7 @@ export class SessionController {
       tenantId,
       eventId,
       roomId: payload.roomId,
+      trackId: payload.trackId,
       title: payload.title,
       description: payload.description ?? null,
       startTime: new Date(payload.startTime),
@@ -35,8 +37,16 @@ export class SessionController {
   async list(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Query() query: QueryAgendaDto,
   ): Promise<SessionEntity[]> {
-    return this.sessionService.list(tenantId, eventId);
+    return this.sessionService.queryAgenda(tenantId, eventId, {
+      trackId: query.trackId,
+      speakerId: query.speakerId,
+      startsAfter: query.startsAfter ? new Date(query.startsAfter) : undefined,
+      endsBefore: query.endsBefore ? new Date(query.endsBefore) : undefined,
+      status: query.status,
+      search: query.search,
+    });
   }
 
   @Patch(':sessionId')
@@ -48,6 +58,7 @@ export class SessionController {
   ): Promise<SessionEntity | null> {
     return this.sessionService.update(tenantId, eventId, sessionId, {
       roomId: payload.roomId,
+      trackId: payload.trackId,
       title: payload.title,
       description: payload.description,
       startTime: payload.startTime ? new Date(payload.startTime) : undefined,
