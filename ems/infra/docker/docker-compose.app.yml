@@ -1,0 +1,33 @@
+version: '3.9'
+
+# Overlay compose file that adds the EMS API container to the local stack.
+# Usage: docker-compose -f infra/docker/docker-compose.yml -f infra/docker/docker-compose.app.yml up -d --build
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    container_name: ems-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      APP_PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ems}:${POSTGRES_PASSWORD:-ems_secret}@postgres:5432/${POSTGRES_DB:-ems}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-ems_redis_secret}
+      KAFKA_BROKERS: kafka:29092
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production_use_long_random_string}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3001}
