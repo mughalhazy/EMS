@@ -2,5 +2,4 @@ __pycache__/
 *.py[cod]
 
 # Retired build specs — archived in workspace, not tracked
-V1/
-V2/
+archive/
